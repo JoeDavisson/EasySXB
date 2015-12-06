@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 */
 
 #include <ctime>
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 
@@ -84,7 +85,7 @@ void Terminal::connect(const char *device)
 
   connected = true;
 
-  Gui::append("Connected, hit the reset button on the SXB to begin.");
+  Gui::append("(Connected, hit the reset button on the SXB to begin.)");
   Gui::append("\n");
 }
 
@@ -102,6 +103,9 @@ void Terminal::send(char c)
 {
   if(connected == true)
   {
+    // convert to uppercase so it looks nice then the SXB echos the character
+    c = toupper(c);
+
     // convert carriage return
     if(c == '\n')
       c = 13;
