@@ -3,7 +3,7 @@ EasySXB
 
 ![Screenshot](https://raw.githubusercontent.com/Mortis69/EasySXB/master/screenshots/screenshot.png)
 
-EasySXB is a terminal/program loader designed for use with Wester Design Center's SXB line of development boards.
+EasySXB is a terminal/program loader designed for use with Western Design Center's SXB line of development boards.
 
 It doesn't work yet. :)
 
