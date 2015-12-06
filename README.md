@@ -7,7 +7,7 @@ EasySXB is a terminal/program loader designed for use with Western Design Center
 
 Program files (in HEX format) can be uploaded through the terminal interface. (This is convenient, but can be slow for larger programs.)
 
-Must be run under Linux with the ```sudo``` command. Windows support is coming soon.
+Must be run under Linux with the ```sudo``` command, or the user must have serial port access rights. Windows support is coming soon.
 
 ## Build it from source
 ```$ git clone https://github.com/Mortis69/EasySXB.git```
