@@ -5,7 +5,7 @@ EasySXB
 
 EasySXB is a terminal/program loader designed for use with Western Design Center's SXB line of development boards.
 
-Program files (in HEX format) can be uploaded through the terminal interface.
+Program files (in HEX format) can be uploaded through the terminal interface. (This can be slow for larger programs.)
 
 Must be run under Linux with the ```sudo``` command. (Windows support coming soon.)
 
