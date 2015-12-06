@@ -1,7 +1,7 @@
 EasySXB
 =======
 
-![Screenshot](https://raw.githubusercontent.com/Mortis69/JoeClient/master/screenshots/screenshot.png)
+![Screenshot](https://raw.githubusercontent.com/Mortis69/EasySXB/master/screenshots/screenshot.png)
 
 EasySXB is a terminal/program loader designed for use with Wester Design Center's SXB line of development boards.
 
