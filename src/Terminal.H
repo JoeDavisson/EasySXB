@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 namespace Terminal
 {
-  void connect();
+  void connect(const char *);
   void disconnect();
   void send(char);
   void receive(void *);

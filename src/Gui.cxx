@@ -107,13 +107,11 @@ public:
         ctrl = Fl::event_ctrl() ? true : false;
 
         // misc keys
-        char c = Fl::event_key();
+        const char *s = Fl::event_text();
 
-        if(c != 0)
+        if(s[0] != 0)
         {
-//          sprintf(buf, "%c", c);
-//          Gui::append(buf);
-          Terminal::send(c);
+          Terminal::send(s[0]);
         }
 
         return 1;
@@ -136,8 +134,8 @@ void Gui::init()
   menubar = new Fl_Menu_Bar(0, 0, window->w(), 24);
   menubar->box(FL_THIN_UP_BOX);
 
-  menubar->add("&File/&Connect...", 0,
-    (Fl_Callback *)Terminal::connect, 0, 0);
+  menubar->add("&File/&Connect to SXB...", 0,
+    (Fl_Callback *)Dialog::connect, 0, 0);
   menubar->add("&File/&Load Program...", 0,
     (Fl_Callback *)Dialog::loadProgram, 0, FL_MENU_DIVIDER);
   menubar->add("&File/&Quit...", 0,

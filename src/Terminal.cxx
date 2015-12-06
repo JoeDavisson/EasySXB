@@ -56,7 +56,7 @@ namespace
   }
 }
 
-void Terminal::connect()
+void Terminal::connect(const char *device)
 {
   if(connected == true)
   {
@@ -64,7 +64,7 @@ void Terminal::connect()
     return;
   }
 
-  fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NONBLOCK);
+  fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
   if(fd == -1)
   {
@@ -83,12 +83,16 @@ void Terminal::connect()
   tcsetattr(fd, TCSANOW, &term);
 
   connected = true;
+
+  Gui::append("Connected, hit the reset button on the SXB to begin.");
+  Gui::append("\n");
 }
 
 void Terminal::disconnect()
 {
   if(connected == true)
   {
+    close(fd);
     connected = false;
     Dialog::message("Disconnected", "Connection Closed");
   }

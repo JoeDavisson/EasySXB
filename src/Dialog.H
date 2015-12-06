@@ -25,6 +25,7 @@ namespace Dialog
 {
   void init();
   void about();
+  void connect();
   void loadProgram();
   void message(const char *, const char *);
   bool choice(const char *, const char *);

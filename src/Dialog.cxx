@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include "Dialog.H"
 #include "DialogWindow.H"
 #include "Gui.H"
+#include "Terminal.H"
 
 namespace About
 {
@@ -72,6 +73,55 @@ namespace About
     y1 += 32;
     Items::dialog->addOkButton(&Items::ok, &y1);
     Items::ok->callback((Fl_Callback *)close);
+    Items::dialog->set_modal();
+    Items::dialog->end(); 
+  }
+}
+
+namespace Connect
+{
+  namespace Items
+  {
+    DialogWindow *dialog;
+    Fl_Box *box;
+    Fl_Input *device;
+    Fl_Button *ok;
+    Fl_Button *cancel;
+  }
+
+  void begin()
+  {
+    Items::dialog->show();
+  }
+
+  void close()
+  {
+    Items::dialog->hide();
+    Terminal::connect(Items::device->value());
+  }
+
+  void quit()
+  {
+    Items::dialog->hide();
+  }
+
+  void init()
+  {
+    int y1 = 8;
+    int ww = 0, hh = 0;
+
+    Items::dialog = new DialogWindow(384, 0, "Connect to SXB");
+    Items::device = new Fl_Input(128, y1, 192, 24, "Device: ");
+    Items::device->align(FL_ALIGN_LEFT);
+    Items::device->value("/dev/ttyUSB0");
+    y1 += 32;
+    Items::box = new Fl_Box(FL_FLAT_BOX, 8, y1, 368, 48, "Don't forget to hit the reset\nbutton on the SXB after connecting!");
+    Items::box->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
+    Items::box->labelsize(12);
+    y1 += 48;
+    Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
+    Items::ok->callback((Fl_Callback *)close);
+    Items::cancel->callback((Fl_Callback *)close);
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }
@@ -207,6 +257,7 @@ namespace Choice
 void Dialog::init()
 {
   About::init();
+  Connect::init();
   LoadProgram::init();
   Message::init();
   Choice::init();
@@ -215,6 +266,11 @@ void Dialog::init()
 void Dialog::about()
 {
   About::begin();
+}
+
+void Dialog::connect()
+{
+  Connect::begin();
 }
 
 void Dialog::loadProgram()
