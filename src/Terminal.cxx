@@ -36,11 +36,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 namespace
 {
-#ifdef WIN32
-  WSADATA wsa_data;
-#endif
-
-  char buf[1024];
   bool connected = false;
   struct termios term;
   int fd;
@@ -69,7 +64,7 @@ void Terminal::connect()
     return;
   }
 
-  fd = open("/dev/ttyUSB0", O_RDWR | O_NONBLOCK);
+  fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NONBLOCK);
 
   if(fd == -1)
   {
@@ -86,11 +81,8 @@ void Terminal::connect()
   term.c_cc[VMIN] = 5;
   tcflush(fd, TCIFLUSH);
   tcsetattr(fd, TCSANOW, &term);
-//  fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 
   connected = true;
-
-  usleep(100000);
 }
 
 void Terminal::disconnect()
@@ -106,10 +98,14 @@ void Terminal::send(char c)
 {
   if(connected == true)
   {
+    // convert carriage return
     if(c == '\n')
       c = 13;
 
     int temp = write(fd, &c, 1);
+
+    // pause a little so the SXB has time to process the character
+    usleep(100000);
   }
 }
 
@@ -117,38 +113,20 @@ void Terminal::receive(void *data)
 {
   if(connected == true)
   {
-    while(1)
+    char buf[8];
+
+    while(read(fd, buf, 1) > 0)
     {
-      memset(buf, 0, sizeof(buf));
+      // convert carriage return
+      if(buf[0] == 13)
+        buf[0] = '\n';
 
-      int size = read(fd, &buf, sizeof(buf));
+      buf[1] = '\0';
 
-      if(size < 1)
-        break;
-
-      for(int i = 0; i < sizeof(buf); i++)
-      {
-        if(buf[i] == 13)
-          buf[i] = '\n';
-      }
-
-      char *current = strtok(buf, "\n");
-
-      while(current != 0)
-      {
-        puts(current);
-//        int temp = write(STDOUT_FILENO, current, strlen(current));
-//        temp = write(STDOUT_FILENO, "\n", 1);
-        Gui::append(current);
-        Gui::append("\n");
-        current = strtok(0, "\n");
-
-        if(current == 0)
-          break;
-      }
+      Gui::append(buf);
     }
   }
 
-  Fl::repeat_timeout(.5, Terminal::receive, data);
+  Fl::repeat_timeout(.25, Terminal::receive, data);
 }
 
