@@ -25,8 +25,10 @@ namespace Terminal
 {
   void connect(const char *);
   void disconnect();
+  bool isConnected();
   void send(char);
   void receive(void *);
+  void loadProgram();
 }
 
 #endif

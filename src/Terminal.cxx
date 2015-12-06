@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <termios.h>
 
 #include <FL/Fl.H>
+#include <FL/Fl_Native_File_Chooser.H>
 
 #include "Dialog.H"
 #include "Gui.H"
@@ -41,9 +42,31 @@ namespace
   struct termios term;
   int fd;
 
-  void send(int fd, char *s)
+  // store previous directory paths
+  char load_dir[256];
+
+  // extract directory from a path/filename string
+  void getDirectory(char *dest, const char *src)
   {
-    struct timeval timeout;
+    strcpy(dest, src);
+
+    int len = strlen(dest);
+    if(len < 2)
+      return;
+
+    for(int i = len - 1; i > 0; i--)
+    {
+      if(dest[i - 1] == '/')
+      {
+        dest[i] = '\0';
+        break;
+      }
+    }
+  }
+
+  // used by program loader
+  void sendString(int fd, char *s)
+  {
     int len = strlen(s);
     int i = 0;
 
@@ -59,12 +82,6 @@ namespace
 
 void Terminal::connect(const char *device)
 {
-  if(connected == true)
-  {
-    Dialog::message("Error", "Already connected to a server.");
-    return;
-  }
-
   fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
   if(fd == -1)
@@ -85,8 +102,7 @@ void Terminal::connect(const char *device)
 
   connected = true;
 
-  Gui::append("(Connected, hit the reset button on the SXB to begin.)");
-  Gui::append("\n");
+  Gui::append("\n(Connected to SXB at 9600 baud.)\n");
 }
 
 void Terminal::disconnect()
@@ -95,8 +111,14 @@ void Terminal::disconnect()
   {
     close(fd);
     connected = false;
-    Dialog::message("Disconnected", "Connection Closed");
+    Gui::append("\n(Connection Closed.)\n");
+    Dialog::message("Disconnected", "Connection Closed.");
   }
+}
+
+bool Terminal::isConnected()
+{
+  return connected;
 }
 
 void Terminal::send(char c)
@@ -136,5 +158,116 @@ void Terminal::receive(void *data)
   }
 
   Fl::repeat_timeout(.25, Terminal::receive, data);
+}
+
+void Terminal::loadProgram()
+{
+  if(connected == false)
+  {
+    Dialog::message("Error", "Not Connected.");
+    return;
+  }
+
+  Fl_Native_File_Chooser fc;
+  fc.title("Load Program");
+  fc.filter("HEX File\t*.hex\n");
+  fc.options(Fl_Native_File_Chooser::PREVIEW);
+  fc.type(Fl_Native_File_Chooser::BROWSE_FILE);
+  fc.directory(load_dir);
+
+  switch(fc.show())
+  {
+    case -1:
+    case 1:
+      return;
+    default:
+      getDirectory(load_dir, fc.filename());
+      break;
+  }
+
+  int segment = 0;
+  int address = 0;
+  int code = 0;
+  int value = 0;
+  int count = 0;
+  int temp;
+  int ret;
+  int i;
+  char s[256];
+
+  FILE *fp = fopen(fc.filename(), "r");
+  if(!fp)
+    return;
+
+  usleep(100000);
+
+  while(1)
+  {
+    temp = fgetc(fp);
+    if(temp == EOF)
+      break;
+
+    // start of line
+    if(temp == ':')
+    {
+      segment = 0;
+      ret = fscanf(fp, "%02X", &count);
+
+      // last line
+      if(count == 0x00)
+      {
+        break;
+      }
+      else
+      {
+        ret = fscanf(fp, "%04X", &address);
+        ret = fscanf(fp, "%02X", &code);
+
+        // if segment exists
+        if(code == 0x04)
+        {
+          ret = segment = address;
+        }
+        else
+        {
+          // enter hex entry mode
+          sprintf(s, "M");
+          sendString(fd, s);
+          usleep(100000);
+
+          // input address
+          sprintf(s, "%06X", (segment << 16) | address);
+          //printf("%06X", (segment << 16) | address);
+          sendString(fd, s);
+          usleep(100000);
+
+          // input data
+          for(i = 0; i < count; i++)
+          {
+            ret = fscanf(fp, "%02X", &value);
+            sprintf(s, "%02X", value);
+            //printf("%02X", value);
+            sendString(fd, s);
+            usleep(10000);
+          }
+
+          sprintf(s, "%c", 13);
+          //printf("\n");
+          sendString(fd, s);
+          usleep(100000);
+        }
+      }
+
+      // skip to next line
+      while(1)
+      {
+        temp = fgetc(fp);
+        if(temp == '\n')
+          break;
+      }
+    }
+  }
+
+  fclose(fp);
 }
 

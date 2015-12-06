@@ -87,7 +87,6 @@ public:
   int handle(int event)
   {
     bool shift, ctrl;
-//    char buf[8];
 
     switch(event)
     {
@@ -136,8 +135,10 @@ void Gui::init()
 
   menubar->add("&File/&Connect to SXB...", 0,
     (Fl_Callback *)Dialog::connect, 0, 0);
+  menubar->add("&File/&Disconnect", 0,
+    (Fl_Callback *)Terminal::disconnect, 0, FL_MENU_DIVIDER);
   menubar->add("&File/&Load Program...", 0,
-    (Fl_Callback *)Dialog::loadProgram, 0, FL_MENU_DIVIDER);
+    (Fl_Callback *)Terminal::loadProgram, 0, FL_MENU_DIVIDER);
   menubar->add("&File/&Quit...", 0,
     (Fl_Callback *)quit, 0, 0);
 
