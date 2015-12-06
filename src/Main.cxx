@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   // delay showing main gui until after all arguments are checked
   Gui::show();
 
-  Fl::add_timeout(1, Terminal::read);
+  Fl::add_timeout(1, Terminal::receive);
   int ret = Fl::run();
   return ret;
 }

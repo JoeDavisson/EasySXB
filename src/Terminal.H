@@ -21,14 +21,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #ifndef TERMINAL_H
 #define TERMINAL_H
 
-#include <sys/types.h>
-
 namespace Terminal
 {
-  void connect(const char *, const int, const bool);
+  void connect();
   void disconnect();
-  void write(const char *);
-  void read(void *);
+  void send(const char *);
+  void receive(void *);
 }
 
 #endif

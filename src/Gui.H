@@ -33,13 +33,6 @@ namespace Gui
   Fl_Double_Window *getWindow();
   Fl_Menu_Bar *getMenuBar();
   void append(const char *);
-  void appendUser(int, const char *);
-  void appendURL(const char *);
-  void appendPM(const char *);
-  void clearUsers();
-  void clearURLs();
-  void clearPMs();
-  void sendMessage();
 }
 
 #endif

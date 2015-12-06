@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 #include "Dialog.H"
 #include "Gui.H"
+#include "Terminal.H"
 
 class MainWin;
 
@@ -129,8 +130,10 @@ void Gui::init()
   menubar = new Fl_Menu_Bar(0, 0, window->w(), 24);
   menubar->box(FL_THIN_UP_BOX);
 
+  menubar->add("&File/&Connect...", 0,
+    (Fl_Callback *)Terminal::connect, 0, 0);
   menubar->add("&File/&Load Program...", 0,
-    (Fl_Callback *)Dialog::loadProgram, 0, 0);
+    (Fl_Callback *)Dialog::loadProgram, 0, FL_MENU_DIVIDER);
   menubar->add("&File/&Quit...", 0,
     (Fl_Callback *)quit, 0, 0);
 
@@ -146,7 +149,8 @@ void Gui::init()
 
   //server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->box(FL_UP_BOX);
-  server_display->textsize(14);
+  server_display->textsize(16);
+  server_display->textfont(FL_COURIER);
   server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->buffer(server_text);
 
@@ -197,4 +201,24 @@ Fl_Menu_Bar *Gui::getMenuBar()
 {
   return menubar;
 }
+
+void Gui::append(const char *text)
+{
+  server_text->append(text);
+
+  int lines = server_text->count_lines(0, server_text->length());
+
+  // limit scrollback buffer to 1000 lines
+  while(lines > 1000)
+  {
+    server_text->remove(server_text->line_start(1),
+                        server_text->line_end(1) + 1);
+    lines--;
+  }
+
+  // scroll display to bottom
+  server_display->insert_position(server_text->length());
+  server_display->show_insert_position();
+}
+
 
