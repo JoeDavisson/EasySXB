@@ -43,7 +43,8 @@ OBJ= \
   $(SRC_DIR)/Dialog.o \
   $(SRC_DIR)/DialogWindow.o \
   $(SRC_DIR)/Gui.o \
-  $(SRC_DIR)/Separator.o
+  $(SRC_DIR)/Separator.o \
+  $(SRC_DIR)/Terminal.o
 
 default: $(OBJ)
 	$(CXX) -o ./$(EXE) $(SRC_DIR)/Main.cxx $(OBJ) $(CXXFLAGS) $(LIBS)
