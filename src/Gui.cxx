@@ -87,6 +87,7 @@ public:
   int handle(int event)
   {
     bool shift, ctrl;
+//    char buf[8];
 
     switch(event)
     {
@@ -106,9 +107,14 @@ public:
         ctrl = Fl::event_ctrl() ? true : false;
 
         // misc keys
-        //switch(Fl::event_key())
-        //{
-        //}
+        char c = Fl::event_key();
+
+        if(c != 0)
+        {
+//          sprintf(buf, "%c", c);
+//          Gui::append(buf);
+          Terminal::send(c);
+        }
 
         return 1;
     }
@@ -149,7 +155,7 @@ void Gui::init()
 
   //server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->box(FL_UP_BOX);
-  server_display->textsize(16);
+  server_display->textsize(14);
   server_display->textfont(FL_COURIER);
   server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->buffer(server_text);

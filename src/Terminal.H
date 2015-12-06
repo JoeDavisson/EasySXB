@@ -25,7 +25,7 @@ namespace Terminal
 {
   void connect();
   void disconnect();
-  void send(const char *);
+  void send(char);
   void receive(void *);
 }
 

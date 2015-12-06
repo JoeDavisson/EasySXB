@@ -59,20 +59,6 @@ namespace
       i += n;
     }
   }
-
-/*
-  void read(int fd)
-  {
-    struct timeval timeout;
-    char c = '\0';
-    int n;
-
-    while((n = read(fd, &c, 1)) > 0)
-    {
-      putchar(c);
-    }
-  }
-*/
 }
 
 void Terminal::connect()
@@ -83,30 +69,28 @@ void Terminal::connect()
     return;
   }
 
-//  FILE *fp = fopen(argv[1], "r");
-
   fd = open("/dev/ttyUSB0", O_RDWR | O_NONBLOCK);
+
   if(fd == -1)
   {
     puts("Couldn't open serial port.");
     return;
   }
 
-  memset(&term, 0, sizeof(struct termios));
-  term.c_cflag = B9600 | CS8 | CLOCAL;
+  memset(&term, 0, sizeof(term));
+  term.c_cflag = B9600 | CS8 | CREAD| CLOCAL;
   term.c_iflag = IGNPAR;
   term.c_oflag = 0;
   term.c_lflag = 0;
   term.c_cc[VTIME] = 0;
-  term.c_cc[VMIN] = 1;
+  term.c_cc[VMIN] = 5;
   tcflush(fd, TCIFLUSH);
   tcsetattr(fd, TCSANOW, &term);
-  fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+//  fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 
   connected = true;
 
   usleep(100000);
-puts("connected");
 }
 
 void Terminal::disconnect()
@@ -118,10 +102,14 @@ void Terminal::disconnect()
   }
 }
 
-void Terminal::send(const char *message)
+void Terminal::send(char c)
 {
   if(connected == true)
   {
+    if(c == '\n')
+      c = 13;
+
+    int temp = write(fd, &c, 1);
   }
 }
 
@@ -129,11 +117,15 @@ void Terminal::receive(void *data)
 {
   if(connected == true)
   {
-    char c = '\0';
-    int n;
-
-    while((n = read(fd, &buf, sizeof(buf))) > 0)
+    while(1)
     {
+      memset(buf, 0, sizeof(buf));
+
+      int size = read(fd, &buf, sizeof(buf));
+
+      if(size < 1)
+        break;
+
       for(int i = 0; i < sizeof(buf); i++)
       {
         if(buf[i] == 13)
@@ -144,6 +136,7 @@ void Terminal::receive(void *data)
 
       while(current != 0)
       {
+        puts(current);
 //        int temp = write(STDOUT_FILENO, current, strlen(current));
 //        temp = write(STDOUT_FILENO, "\n", 1);
         Gui::append(current);
