@@ -53,6 +53,7 @@ fltk:
 	@cd ./fltk-1.3.3; \
 	make clean; \
 	./configure --host=$(HOST) --enable-localjpeg --enable-localzlib --enable-localpng --disable-xdbe; \
+	make; \
 	cd ..
 	@echo "FLTK libs built!"
 
