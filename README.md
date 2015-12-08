@@ -3,7 +3,7 @@ EasySXB
 
 ![Screenshot](https://raw.githubusercontent.com/Mortis69/EasySXB/master/screenshots/screenshot.png)
 
-EasySXB is a terminal/program loader designed for use with Western Design Center's SXB line of development boards.
+EasySXB is a terminal/program loader designed for use with Western Design Center's SXB line of development boards. (So far it's only been tested with the W65C265SXB board.)
 
 Program files (in HEX format) can be uploaded through the terminal interface. (This is convenient, but can be slow for larger programs.)
 
