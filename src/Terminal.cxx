@@ -86,7 +86,7 @@ void Terminal::connect(const char *device)
 
   if(fd == -1)
   {
-    puts("Couldn't open serial port.");
+    Dialog::message("Error", "Could not open serial port.");
     return;
   }
 
