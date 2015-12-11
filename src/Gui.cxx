@@ -62,6 +62,10 @@ namespace
   Fl_Input *input_sr;
   Fl_Input *input_db;
 
+  Fl_Input *input_address;
+  Fl_Button *button_jml;
+  Fl_Button *button_jsl;
+
   // quit program
   void quit()
   {
@@ -165,52 +169,59 @@ void Gui::init()
                      window->w(), window->h() - menubar->h());
 
   side = new Fl_Group(0, menubar->h(), 128, window->h() - menubar->h());
-  pos = 8;
+  pos = side->y() + 8;
 
-  input_pc = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "PC:");
+  input_pc = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "PC:");
   input_pc->maximum_size(6);
   input_pc->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_pc->callback((Fl_Callback *)checkPC);
   pos += 24 + 8;
-  input_a = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "A:");
+  input_a = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "A:");
   input_a->maximum_size(4);
   input_a->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_a->callback((Fl_Callback *)checkA);
   pos += 24 + 8;
-  input_x = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "X:");
+  input_x = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "X:");
   input_x->maximum_size(4);
   input_x->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_x->callback((Fl_Callback *)checkX);
   pos += 24 + 8;
-  input_y = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "Y:");
+  input_y = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "Y:");
   input_y->maximum_size(4);
   input_y->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_y->callback((Fl_Callback *)checkY);
   pos += 24 + 8;
-  input_sp = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "SP:");
+  input_sp = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "SP:");
   input_sp->maximum_size(4);
   input_sp->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_sp->callback((Fl_Callback *)checkSP);
   pos += 24 + 8;
-  input_dp = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "DP:");
+  input_dp = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "DP:");
   input_dp->maximum_size(2);
   input_dp->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_dp->callback((Fl_Callback *)checkDP);
   pos += 24 + 8;
-  input_sr = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "SR:");
+  input_sr = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "SR:");
   input_sr->maximum_size(2);
   input_sr->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_sr->callback((Fl_Callback *)checkSR);
   pos += 24 + 8;
-
-  input_db = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "DB:");
+  input_db = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "DB:");
   input_db->maximum_size(2);
   input_db->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_db->callback((Fl_Callback *)checkDB);
   pos += 24 + 6;
 
-  new Separator(side, 2, pos, 124, 2, "");
+  new Separator(side, 2, pos - side->y(), 124, 2, "");
+  pos += 8;
 
+  input_address = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "ADR:");
+  input_address->maximum_size(6);
+  pos += 24 + 8;
+  button_jml = new Fl_Button(8, pos, 52, 24, "JML");
+  button_jsl = new Fl_Button(68, pos, 52, 24, "JSL");
+
+  side->resizable(0);
   side->end();
 
   server_display = new Fl_Text_Display(top->x() + side->w(), top->y(), top->w(), top->h());
@@ -222,6 +233,7 @@ void Gui::init()
   server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->buffer(server_text);
 
+  top->resizable(server_display);
   top->end();
 
   window->size_range(512, 384, 0, 0, 0, 0, 0);

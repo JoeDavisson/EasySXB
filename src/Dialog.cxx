@@ -122,7 +122,7 @@ namespace Connect
     y1 += 32;
     Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
     Items::ok->callback((Fl_Callback *)close);
-    Items::cancel->callback((Fl_Callback *)close);
+    Items::cancel->callback((Fl_Callback *)quit);
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }
