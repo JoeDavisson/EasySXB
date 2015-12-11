@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <termios.h>
 
@@ -41,6 +42,8 @@ namespace
   bool connected = false;
   struct termios term;
   int fd;
+  fd_set fs;
+  struct timeval tv;
 
   // store previous directory paths
   char load_dir[256];
@@ -80,15 +83,18 @@ void Terminal::connect(const char *device)
   term.c_iflag = IGNPAR;
   term.c_oflag = 0;
   term.c_lflag = 0;
-  term.c_cc[VTIME] = 0;
-  term.c_cc[VMIN] = 5;
-  tcflush(fd, TCIFLUSH);
+  term.c_cc[VTIME] = 2;
+  term.c_cc[VMIN] = 0;
   tcsetattr(fd, TCSANOW, &term);
 
+  tv.tv_sec = 0;
+  tv.tv_usec = 100000;
+    
   connected = true;
 
   Gui::append("\n(Connected to SXB at 9600 baud.)\n");
 
+  sleep(1);
   updateRegs();
 }
 
@@ -112,17 +118,21 @@ void Terminal::sendChar(char c)
 {
   if(connected == true)
   {
-    // convert to uppercase so it looks nice then the SXB echos the character
-    c = toupper(c);
+    FD_ZERO(&fs);
+    FD_SET(fd, &fs);
+    select(fd + 1, 0, &fs, 0, &tv);
 
-    // convert carriage return
-    if(c == '\n')
-      c = 13;
+    if(FD_ISSET(fd, &fs))
+    {
+      // convert to uppercase so it looks nice then the SXB echos the character
+      c = toupper(c);
 
-    int temp = write(fd, &c, 1);
+      // convert carriage return
+      if(c == '\n')
+        c = 13;
 
-    // pause a little so the SXB has time to process the character
-    usleep(50000);
+      int temp = write(fd, &c, 1);
+    }
   }
 }
 
@@ -132,8 +142,15 @@ int Terminal::getChar()
 
   if(connected == true)
   {
-    int temp = read(fd, &c, 1);
-    return c;
+    FD_ZERO(&fs);
+    FD_SET(fd, &fs);
+    select(fd + 1, &fs, 0, 0, &tv);
+
+    if(FD_ISSET(fd, &fs))
+    {
+      int temp = read(fd, &c, 1);
+      return c;
+    }
   }
 }
 
@@ -141,16 +158,22 @@ void Terminal::sendString(const char *s)
 {
   if(connected == true)
   {
-    for(int i = 0; i < strlen(s); i++)
+    FD_ZERO(&fs);
+    FD_SET(fd, &fs);
+    select(fd + 1, 0, &fs, 0, &tv);
+
+    if(FD_ISSET(fd, &fs))
     {
-      // convert to uppercase so it looks nice then the SXB echos the character
-      char c = toupper(s[i]);
+      for(int i = 0; i < strlen(s); i++)
+      {
+        char c = toupper(s[i]);
 
-      // convert carriage return
-      if(c == '\n')
-        c = 13;
+        // convert carriage return
+        if(c == '\n')
+          c = 13;
 
-      int temp = write(fd, &c, 1);
+        int temp = write(fd, &c, 1);
+      }
     }
   }
 }
@@ -163,29 +186,35 @@ void Terminal::getResult(char *s)
     char c;
     int tries = 0;
 
-    while(1)
+    FD_ZERO(&fs);
+    FD_SET(fd, &fs);
+    select(fd + 1, &fs, 0, 0, &tv);
+
+    if(FD_ISSET(fd, &fs))
     {
-      int temp = read(fd, &c, 1);
-//printf("temp = %d\n", temp);
+      while(1)
+      {
+        int temp = read(fd, &c, 1);
 
-      if(temp <= 0)
-      {
-        usleep(1000);
-        tries++;
-        if(tries > 100)
-          break;
+        if(temp <= 0)
+        {
+          usleep(1000);
+          tries++;
+          if(tries > 100)
+            break;
+        }
+        else
+        {
+          if(c >= '0' && c <= '9' || c >= 'A' && c <= 'F' || c == ' ')
+            s[j++] = c;
+          else if(c == 13)
+            break;
+        }
       }
-      else
-      {
-        if(c >= '0' && c <= '9' || c >= 'A' && c <= 'F' || c == ' ')
-          s[j++] = c;
-        else if(c == 13)
-          break;
-      }
+
+      s[j++] = '\n';
+      s[j++] = '\0';
     }
-
-    s[j++] = '\n';
-    s[j++] = '\0';
   }
 }
 
@@ -196,20 +225,27 @@ void Terminal::receive(void *data)
     char buf[8];
     int n;
 
-    while(1)
+    FD_ZERO(&fs);
+    FD_SET(fd, &fs);
+    select(fd + 1, &fs, 0, 0, &tv);
+
+    if(FD_ISSET(fd, &fs))
     {
-      int n = read(fd, buf, 1);
+      while(1)
+      {
+        int n = read(fd, buf, 1);
 
-      if(n <= 0)
-        break;
+        if(n <= 0)
+          break;
 
-      // convert carriage return
-      if(buf[0] == 13)
-        buf[0] = '\n';
+        // convert carriage return
+        if(buf[0] == 13)
+          buf[0] = '\n';
 
-      buf[1] = '\0';
+        buf[1] = '\0';
 
-      Gui::append(buf);
+        Gui::append(buf);
+      }
     }
   }
 
@@ -263,7 +299,6 @@ void Terminal::updateRegs()
 
   sendString("| ");
   getResult(s);
-  puts(s);
 
   Gui::updateRegs(s);
 }
@@ -272,7 +307,9 @@ void Terminal::jml(int address)
 {
   char s[256];
 
-  sprintf(s, "G%02X:%04X", address >> 24, address & 0xFFFF);
+  sendChar('G');
+  usleep(250000);
+  sprintf(s, "%02X%04X\n", address >> 24, address & 0xFFFF);
   sendString(s);
 }
 
@@ -280,7 +317,9 @@ void Terminal::jsl(int address)
 {
   char s[256];
 
-  sprintf(s, "J%02X:%04X", address >> 24, address & 0xFFFF);
+  sendChar('J');
+  usleep(250000);
+  sprintf(s, "%02X%04X\n", address >> 24, address & 0xFFFF);
   sendString(s);
 }
 

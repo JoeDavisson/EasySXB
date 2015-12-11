@@ -144,7 +144,7 @@ void Gui::init()
   int pos;
 
   // main window
-  window = new MainWin(512, 384, "EasySXB");
+  window = new MainWin(640, 480, "EasySXB");
   window->callback(closeCallback);
 
   // generate menu
@@ -217,14 +217,17 @@ void Gui::init()
 
   input_address = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "ADR:");
   input_address->maximum_size(6);
+  input_address->value("000000");
   pos += 24 + 8;
   button_jml = new Fl_Button(8, pos, 52, 24, "JML");
+  button_jml->callback((Fl_Callback *)checkJML);
   button_jsl = new Fl_Button(68, pos, 52, 24, "JSL");
+  button_jsl->callback((Fl_Callback *)checkJSL);
 
   side->resizable(0);
   side->end();
 
-  server_display = new Fl_Text_Display(top->x() + side->w(), top->y(), top->w(), top->h());
+  server_display = new Fl_Text_Display(top->x() + side->w(), top->y(), top->w() - side->w(), top->h());
 
   //server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->box(FL_UP_BOX);
@@ -339,6 +342,16 @@ void Gui::checkSR()
 void Gui::checkDB()
 {
   Terminal::changeReg(Terminal::REG_DB, atoi(input_pc->value()));
+}
+
+void Gui::checkJML()
+{
+  Terminal::jml(atoi(input_address->value()));
+}
+
+void Gui::checkJSL()
+{
+  Terminal::jsl(atoi(input_address->value()));
 }
 
 void Gui::updateRegs(char *s)
