@@ -39,7 +39,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 namespace
 {
   bool connected = false;
-//  bool busy = false;
   struct termios term;
   int fd;
 
@@ -192,7 +191,7 @@ void Terminal::getResult(char *s)
 
 void Terminal::receive(void *data)
 {
-  if(connected == true/* && busy == false*/)
+  if(connected == true)
   {
     char buf[8];
     int n;
@@ -247,6 +246,10 @@ void Terminal::changeReg(int reg, int num)
       sprintf(s, "|D%04X", num);
       sendString(s);
       break;
+    case REG_SR:
+      sprintf(s, "|F%02X", num);
+      sendString(s);
+      break;
     case REG_DB:
       sprintf(s, "|B%04X", num);
       sendString(s);
@@ -258,11 +261,11 @@ void Terminal::updateRegs()
 {
   char s[256];
 
-//  busy = true;
   sendString("| ");
   getResult(s);
   puts(s);
-//  busy = false;
+
+  Gui::updateRegs(s);
 }
 
 void Terminal::jml(int address)

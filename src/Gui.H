@@ -39,6 +39,7 @@ namespace Gui
   void checkY();
   void checkSP();
   void checkDP();
+  void checkSR();
   void checkDB();
   void updateRegs(char *);
 }

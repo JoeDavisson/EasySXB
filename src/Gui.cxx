@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 */
 
 #include <cmath>
+#include <cstdlib>
 #include <typeinfo>
 
 #include <FL/Fl_Box.H>
@@ -58,6 +59,7 @@ namespace
   Fl_Input *input_y;
   Fl_Input *input_sp;
   Fl_Input *input_dp;
+  Fl_Input *input_sr;
   Fl_Input *input_db;
 
   // quit program
@@ -195,6 +197,12 @@ void Gui::init()
   input_dp->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_dp->callback((Fl_Callback *)checkDP);
   pos += 24 + 8;
+  input_sr = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "SR:");
+  input_sr->maximum_size(2);
+  input_sr->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
+  input_sr->callback((Fl_Callback *)checkSR);
+  pos += 24 + 8;
+
   input_db = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "DB:");
   input_db->maximum_size(2);
   input_db->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
@@ -311,6 +319,11 @@ void Gui::checkDP()
   Terminal::changeReg(Terminal::REG_DP, atoi(input_pc->value()));
 }
 
+void Gui::checkSR()
+{
+  Terminal::changeReg(Terminal::REG_SR, atoi(input_pc->value()));
+}
+
 void Gui::checkDB()
 {
   Terminal::changeReg(Terminal::REG_DB, atoi(input_pc->value()));
@@ -318,5 +331,35 @@ void Gui::checkDB()
 
 void Gui::updateRegs(char *s)
 {
+  unsigned int pc, a, x, y, sp, dp, sr, db;
+
+  sscanf(s, "  %06X %04X %04X %04X %04X %04X %02X %02X",
+         &pc, &a, &x, &y, &sp, &dp, &sr, &db);
+
+  char buf[256];
+
+  snprintf(buf, sizeof(buf), "%06X", pc);
+  input_pc->value(buf);
+
+  snprintf(buf, sizeof(buf), "%04X", a);
+  input_a->value(buf);
+
+  snprintf(buf, sizeof(buf), "%04X", x);
+  input_x->value(buf);
+
+  snprintf(buf, sizeof(buf), "%04X", y);
+  input_y->value(buf);
+
+  snprintf(buf, sizeof(buf), "%04X", sp);
+  input_sp->value(buf);
+
+  snprintf(buf, sizeof(buf), "%02X", dp);
+  input_dp->value(buf);
+
+  snprintf(buf, sizeof(buf), "%02X", sr);
+  input_sr->value(buf);
+
+  snprintf(buf, sizeof(buf), "%02X", db);
+  input_db->value(buf);
 }
 

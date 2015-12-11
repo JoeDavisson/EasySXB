@@ -31,6 +31,7 @@ namespace Terminal
     REG_Y,
     REG_SP,
     REG_DP,
+    REG_SR,
     REG_DB
   };
 
