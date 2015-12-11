@@ -138,7 +138,7 @@ void Gui::init()
   menubar->add("&File/&Disconnect", 0,
     (Fl_Callback *)Terminal::disconnect, 0, FL_MENU_DIVIDER);
   menubar->add("&File/&Load Program...", 0,
-    (Fl_Callback *)Terminal::loadProgram, 0, FL_MENU_DIVIDER);
+    (Fl_Callback *)Terminal::upload, 0, FL_MENU_DIVIDER);
   menubar->add("&File/&Quit...", 0,
     (Fl_Callback *)quit, 0, 0);
 

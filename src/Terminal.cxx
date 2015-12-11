@@ -63,21 +63,6 @@ namespace
       }
     }
   }
-
-  // used by program loader
-  void sendString(int fd, char *s)
-  {
-    int len = strlen(s);
-    int i = 0;
-
-    while(i < len)
-    {
-      int n = write(fd, s + i, len - i);
-      if(n < 0)
-        break;
-      i += n;
-    }
-  }
 }
 
 void Terminal::connect(const char *device)
@@ -135,7 +120,28 @@ void Terminal::send(char c)
     int temp = write(fd, &c, 1);
 
     // pause a little so the SXB has time to process the character
-    usleep(100000);
+    usleep(50000);
+  }
+}
+
+void Terminal::sendString(char *s)
+{
+  if(connected == true)
+  {
+    for(int i = 0; i < strlen(s); i++)
+    {
+      // convert to uppercase so it looks nice then the SXB echos the character
+      char c = toupper(s[i]);
+
+      // convert carriage return
+      if(c == '\n')
+        c = 13;
+
+      int temp = write(fd, &c, 1);
+
+      // pause a little so the SXB has time to process the character
+//      usleep(100000);
+    }
   }
 }
 
@@ -157,10 +163,10 @@ void Terminal::receive(void *data)
     }
   }
 
-  Fl::repeat_timeout(.25, Terminal::receive, data);
+  Fl::repeat_timeout(.1, Terminal::receive, data);
 }
 
-void Terminal::loadProgram()
+void Terminal::upload()
 {
   if(connected == false)
   {
@@ -169,7 +175,7 @@ void Terminal::loadProgram()
   }
 
   Fl_Native_File_Chooser fc;
-  fc.title("Load Program");
+  fc.title("Upload");
   fc.filter("HEX File\t*.hex\n");
   fc.options(Fl_Native_File_Chooser::PREVIEW);
   fc.type(Fl_Native_File_Chooser::BROWSE_FILE);
@@ -198,8 +204,6 @@ void Terminal::loadProgram()
   FILE *fp = fopen(fc.filename(), "r");
   if(!fp)
     return;
-
-  usleep(100000);
 
   while(1)
   {
@@ -230,31 +234,29 @@ void Terminal::loadProgram()
         }
         else
         {
-          // enter hex entry mode
-          sprintf(s, "M");
-          sendString(fd, s);
-          usleep(100000);
+          int checksum = 0;
 
-          // input address
-          sprintf(s, "%06X", (segment << 16) | address);
-          //printf("%06X", (segment << 16) | address);
-          sendString(fd, s);
-          usleep(100000);
+          // address
+          sprintf(s, "S2%02X%02X%02X%02X",
+                  count + 4, segment, address >> 8, address & 0xFF);
+          sendString(s);
 
-          // input data
+          checksum += count + 4;
+          checksum += address >> 8;
+          checksum += address & 0xFF;
+
+          // data
           for(i = 0; i < count; i++)
           {
             ret = fscanf(fp, "%02X", &value);
             sprintf(s, "%02X", value);
-            //printf("%02X", value);
-            sendString(fd, s);
-            usleep(10000);
+            sendString(s);
+            checksum += value;
           }
 
-          sprintf(s, "%c", 13);
-          //printf("\n");
-          sendString(fd, s);
-          usleep(100000);
+          // checksum
+          sprintf(s, "%02X\n", 0xFF - (checksum & 0xFF));
+          sendString(s);
         }
       }
 
@@ -268,6 +270,9 @@ void Terminal::loadProgram()
     }
   }
 
+  sprintf(s, "S804000000FB\n");
+  sendString(s);
   fclose(fp);
+  Gui::append("\n(Upload Complete.)\n");
 }
 

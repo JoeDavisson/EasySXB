@@ -27,8 +27,9 @@ namespace Terminal
   void disconnect();
   bool isConnected();
   void send(char);
+  void sendString(char *);
   void receive(void *);
-  void loadProgram();
+  void upload();
 }
 
 #endif
