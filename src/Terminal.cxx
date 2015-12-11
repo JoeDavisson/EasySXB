@@ -307,9 +307,7 @@ void Terminal::jml(int address)
 {
   char s[256];
 
-  sendChar('G');
-  usleep(250000);
-  sprintf(s, "%02X%04X\n", address >> 24, address & 0xFFFF);
+  sprintf(s, "G%02X%04X", address >> 16, address & 0xFFFF);
   sendString(s);
 }
 
@@ -317,9 +315,7 @@ void Terminal::jsl(int address)
 {
   char s[256];
 
-  sendChar('J');
-  usleep(250000);
-  sprintf(s, "%02X%04X\n", address >> 24, address & 0xFFFF);
+  sprintf(s, "J%02X%04X", address >> 16, address & 0xFFFF);
   sendString(s);
 }
 

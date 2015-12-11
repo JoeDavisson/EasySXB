@@ -346,12 +346,16 @@ void Gui::checkDB()
 
 void Gui::checkJML()
 {
-  Terminal::jml(atoi(input_address->value()));
+  int address;
+  sscanf(input_address->value(), "%06X", &address);
+  Terminal::jml(address);
 }
 
 void Gui::checkJSL()
 {
-  Terminal::jsl(atoi(input_address->value()));
+  int address;
+  sscanf(input_address->value(), "%06X", &address);
+  Terminal::jsl(address);
 }
 
 void Gui::updateRegs(char *s)
