@@ -41,6 +41,7 @@ namespace Gui
   void checkDP();
   void checkSR();
   void checkDB();
+  void checkGet();
   void checkJML();
   void checkJSL();
   void updateRegs(char *);

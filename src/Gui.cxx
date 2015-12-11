@@ -61,6 +61,7 @@ namespace
   Fl_Input *input_dp;
   Fl_Input *input_sr;
   Fl_Input *input_db;
+  Fl_Button *button_get;
 
   Fl_Input *input_address;
   Fl_Button *button_jml;
@@ -197,7 +198,7 @@ void Gui::init()
   input_sp->callback((Fl_Callback *)checkSP);
   pos += 24 + 8;
   input_dp = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "DP:");
-  input_dp->maximum_size(2);
+  input_dp->maximum_size(4);
   input_dp->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_dp->callback((Fl_Callback *)checkDP);
   pos += 24 + 8;
@@ -211,6 +212,9 @@ void Gui::init()
   input_db->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_db->callback((Fl_Callback *)checkDB);
   pos += 24 + 6;
+  button_get = new Fl_Button(8, pos, 112, 24, "Get");
+  button_get->callback((Fl_Callback *)checkGet);
+  pos += 24 + 8;
 
   new Separator(side, 2, pos - side->y(), 124, 2, "");
   pos += 8;
@@ -306,42 +310,63 @@ void Gui::append(const char *text)
 
 void Gui::checkPC()
 {
-  Terminal::changeReg(Terminal::REG_PC, atoi(input_pc->value()));
+  int num;
+  sscanf(input_pc->value(), "%06X", &num);
+  Terminal::changeReg(Terminal::REG_PC, num);
 }
 
 void Gui::checkA()
 {
-  Terminal::changeReg(Terminal::REG_A, atoi(input_pc->value()));
+  int num;
+  sscanf(input_a->value(), "%04X", &num);
+  Terminal::changeReg(Terminal::REG_A, num);
 }
 
 void Gui::checkX()
 {
-  Terminal::changeReg(Terminal::REG_X, atoi(input_pc->value()));
+  int num;
+  sscanf(input_x->value(), "%04X", &num);
+  Terminal::changeReg(Terminal::REG_X, num);
 }
 
 void Gui::checkY()
 {
-  Terminal::changeReg(Terminal::REG_Y, atoi(input_pc->value()));
+  int num;
+  sscanf(input_y->value(), "%04X", &num);
+  Terminal::changeReg(Terminal::REG_Y, num);
 }
 
 void Gui::checkSP()
 {
-  Terminal::changeReg(Terminal::REG_SP, atoi(input_pc->value()));
+  int num;
+  sscanf(input_sp->value(), "%04X", &num);
+  Terminal::changeReg(Terminal::REG_SP, num);
 }
 
 void Gui::checkDP()
 {
-  Terminal::changeReg(Terminal::REG_DP, atoi(input_pc->value()));
+  int num;
+  sscanf(input_dp->value(), "%04X", &num);
+  Terminal::changeReg(Terminal::REG_DP, num);
 }
 
 void Gui::checkSR()
 {
-  Terminal::changeReg(Terminal::REG_SR, atoi(input_pc->value()));
+  int num;
+  sscanf(input_sr->value(), "%02X", &num);
+  Terminal::changeReg(Terminal::REG_SR, num);
 }
 
 void Gui::checkDB()
 {
-  Terminal::changeReg(Terminal::REG_DB, atoi(input_pc->value()));
+  int num;
+  sscanf(input_db->value(), "%02X", &num);
+  Terminal::changeReg(Terminal::REG_DB, num);
+}
+
+void Gui::checkGet()
+{
+  Terminal::updateRegs();
 }
 
 void Gui::checkJML()

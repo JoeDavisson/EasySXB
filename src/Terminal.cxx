@@ -136,56 +136,13 @@ void Terminal::sendChar(char c)
   }
 }
 
-int Terminal::getChar()
+char Terminal::getChar()
 {
   char c;
+  int tries = 0;
 
   if(connected == true)
   {
-    FD_ZERO(&fs);
-    FD_SET(fd, &fs);
-    select(fd + 1, &fs, 0, 0, &tv);
-
-    if(FD_ISSET(fd, &fs))
-    {
-      int temp = read(fd, &c, 1);
-      return c;
-    }
-  }
-}
-
-void Terminal::sendString(const char *s)
-{
-  if(connected == true)
-  {
-    FD_ZERO(&fs);
-    FD_SET(fd, &fs);
-    select(fd + 1, 0, &fs, 0, &tv);
-
-    if(FD_ISSET(fd, &fs))
-    {
-      for(int i = 0; i < strlen(s); i++)
-      {
-        char c = toupper(s[i]);
-
-        // convert carriage return
-        if(c == '\n')
-          c = 13;
-
-        int temp = write(fd, &c, 1);
-      }
-    }
-  }
-}
-
-void Terminal::getResult(char *s)
-{
-  if(connected == true)
-  {
-    int j = 0;
-    char c;
-    int tries = 0;
-
     FD_ZERO(&fs);
     FD_SET(fd, &fs);
     select(fd + 1, &fs, 0, 0, &tv);
@@ -201,20 +158,52 @@ void Terminal::getResult(char *s)
           usleep(1000);
           tries++;
           if(tries > 100)
-            break;
+            return -1;
         }
         else
         {
-          if(c >= '0' && c <= '9' || c >= 'A' && c <= 'F' || c == ' ')
-            s[j++] = c;
-          else if(c == 13)
-            break;
+          return c;
         }
       }
-
-      s[j++] = '\n';
-      s[j++] = '\0';
     }
+  }
+}
+
+void Terminal::sendString(const char *s)
+{
+  if(connected == true)
+  {
+    for(int i = 0; i < strlen(s); i++)
+    {
+      char c = toupper(s[i]);
+
+      // convert carriage return
+      if(c == '\n')
+        c = 13;
+
+      sendChar(c);
+    }
+  }
+}
+
+void Terminal::getResult(char *s)
+{
+  if(connected == true)
+  {
+    int j = 0;
+
+    while(1)
+    {
+      char c = getChar();
+
+      if(c >= '0' && c <= '9' || c >= 'A' && c <= 'F' || c == ' ')
+        s[j++] = c;
+      else if(c == 13)
+        break;
+    }
+
+    s[j++] = '\n';
+    s[j++] = '\0';
   }
 }
 
@@ -254,6 +243,9 @@ void Terminal::receive(void *data)
 
 void Terminal::changeReg(int reg, int num)
 {
+  if(connected == false)
+    return;
+
   char s[256];
 
   switch(reg)
@@ -295,6 +287,9 @@ void Terminal::changeReg(int reg, int num)
 
 void Terminal::updateRegs()
 {
+  if(connected == false)
+    return;
+
   char s[256];
 
   sendString("| ");
@@ -305,6 +300,9 @@ void Terminal::updateRegs()
 
 void Terminal::jml(int address)
 {
+  if(connected == false)
+    return;
+
   char s[256];
 
   sprintf(s, "G%02X%04X", address >> 16, address & 0xFFFF);
@@ -313,6 +311,9 @@ void Terminal::jml(int address)
 
 void Terminal::jsl(int address)
 {
+  if(connected == false)
+    return;
+
   char s[256];
 
   sprintf(s, "J%02X%04X", address >> 16, address & 0xFFFF);

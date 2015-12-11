@@ -39,7 +39,7 @@ namespace Terminal
   void disconnect();
   bool isConnected();
   void sendChar(char);
-  int getChar();
+  char getChar();
   void sendString(const char *);
   void getResult(char *);
   void receive(void *);
