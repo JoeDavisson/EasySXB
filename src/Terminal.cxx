@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 namespace
 {
   bool connected = false;
+//  bool busy = false;
   struct termios term;
   int fd;
 
@@ -88,6 +89,8 @@ void Terminal::connect(const char *device)
   connected = true;
 
   Gui::append("\n(Connected to SXB at 9600 baud.)\n");
+
+  updateRegs();
 }
 
 void Terminal::disconnect()
@@ -106,7 +109,7 @@ bool Terminal::isConnected()
   return connected;
 }
 
-void Terminal::send(char c)
+void Terminal::sendChar(char c)
 {
   if(connected == true)
   {
@@ -124,7 +127,18 @@ void Terminal::send(char c)
   }
 }
 
-void Terminal::sendString(char *s)
+int Terminal::getChar()
+{
+  char c;
+
+  if(connected == true)
+  {
+    int temp = read(fd, &c, 1);
+    return c;
+  }
+}
+
+void Terminal::sendString(const char *s)
 {
   if(connected == true)
   {
@@ -138,21 +152,58 @@ void Terminal::sendString(char *s)
         c = 13;
 
       int temp = write(fd, &c, 1);
-
-      // pause a little so the SXB has time to process the character
-//      usleep(100000);
     }
+  }
+}
+
+void Terminal::getResult(char *s)
+{
+  if(connected == true)
+  {
+    int j = 0;
+    char c;
+    int tries = 0;
+
+    while(1)
+    {
+      int temp = read(fd, &c, 1);
+//printf("temp = %d\n", temp);
+
+      if(temp <= 0)
+      {
+        usleep(1000);
+        tries++;
+        if(tries > 100)
+          break;
+      }
+      else
+      {
+        if(c >= '0' && c <= '9' || c >= 'A' && c <= 'F' || c == ' ')
+          s[j++] = c;
+        else if(c == 13)
+          break;
+      }
+    }
+
+    s[j++] = '\n';
+    s[j++] = '\0';
   }
 }
 
 void Terminal::receive(void *data)
 {
-  if(connected == true)
+  if(connected == true/* && busy == false*/)
   {
     char buf[8];
+    int n;
 
-    while(read(fd, buf, 1) > 0)
+    while(1)
     {
+      int n = read(fd, buf, 1);
+
+      if(n <= 0)
+        break;
+
       // convert carriage return
       if(buf[0] == 13)
         buf[0] = '\n';
@@ -164,6 +215,70 @@ void Terminal::receive(void *data)
   }
 
   Fl::repeat_timeout(.1, Terminal::receive, data);
+}
+
+void Terminal::changeReg(int reg, int num)
+{
+  char s[256];
+
+  switch(reg)
+  {
+    case REG_PC:
+      sprintf(s, "|P%02X:%04X", num >> 24, num & 0xFFFF);
+      sendString(s);
+      break;
+    case REG_A:
+      sprintf(s, "|A%04X", num);
+      sendString(s);
+      break;
+    case REG_X:
+      sprintf(s, "|X%04X", num);
+      sendString(s);
+      break;
+    case REG_Y:
+      sprintf(s, "|Y%04X", num);
+      sendString(s);
+      break;
+    case REG_SP:
+      sprintf(s, "|S%04X", num);
+      sendString(s);
+      break;
+    case REG_DP:
+      sprintf(s, "|D%04X", num);
+      sendString(s);
+      break;
+    case REG_DB:
+      sprintf(s, "|B%04X", num);
+      sendString(s);
+      break;
+  }
+}
+
+void Terminal::updateRegs()
+{
+  char s[256];
+
+//  busy = true;
+  sendString("| ");
+  getResult(s);
+  puts(s);
+//  busy = false;
+}
+
+void Terminal::jml(int address)
+{
+  char s[256];
+
+  sprintf(s, "G%02X:%04X", address >> 24, address & 0xFFFF);
+  sendString(s);
+}
+
+void Terminal::jsl(int address)
+{
+  char s[256];
+
+  sprintf(s, "J%02X:%04X", address >> 24, address & 0xFFFF);
+  sendString(s);
 }
 
 void Terminal::upload()

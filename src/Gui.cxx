@@ -22,15 +22,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <typeinfo>
 
 #include <FL/Fl_Box.H>
+#include <FL/Fl_Button.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Tooltip.H>
+#include <FL/Fl_Widget.H>
 
 #include "Dialog.H"
 #include "Gui.H"
+#include "Separator.H"
 #include "Terminal.H"
 
 class MainWin;
@@ -44,9 +47,18 @@ namespace
   Fl_Menu_Bar *menubar;
 
   Fl_Group *top;
+  Fl_Group *side;
 
   Fl_Text_Buffer *server_text;
   Fl_Text_Display *server_display;
+
+  Fl_Input *input_pc;
+  Fl_Input *input_a;
+  Fl_Input *input_x;
+  Fl_Input *input_y;
+  Fl_Input *input_sp;
+  Fl_Input *input_dp;
+  Fl_Input *input_db;
 
   // quit program
   void quit()
@@ -110,7 +122,7 @@ public:
 
         if(s[0] != 0)
         {
-          Terminal::send(s[0]);
+          Terminal::sendChar(s[0]);
         }
 
         return 1;
@@ -150,7 +162,50 @@ void Gui::init()
   top = new Fl_Group(0, menubar->h(),
                      window->w(), window->h() - menubar->h());
 
-  server_display = new Fl_Text_Display(top->x(), top->y(), top->w(), top->h());
+  side = new Fl_Group(0, menubar->h(), 128, window->h() - menubar->h());
+  pos = 8;
+
+  input_pc = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "PC:");
+  input_pc->maximum_size(6);
+  input_pc->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
+  input_pc->callback((Fl_Callback *)checkPC);
+  pos += 24 + 8;
+  input_a = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "A:");
+  input_a->maximum_size(4);
+  input_a->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
+  input_a->callback((Fl_Callback *)checkA);
+  pos += 24 + 8;
+  input_x = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "X:");
+  input_x->maximum_size(4);
+  input_x->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
+  input_x->callback((Fl_Callback *)checkX);
+  pos += 24 + 8;
+  input_y = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "Y:");
+  input_y->maximum_size(4);
+  input_y->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
+  input_y->callback((Fl_Callback *)checkY);
+  pos += 24 + 8;
+  input_sp = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "SP:");
+  input_sp->maximum_size(4);
+  input_sp->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
+  input_sp->callback((Fl_Callback *)checkSP);
+  pos += 24 + 8;
+  input_dp = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "DP:");
+  input_dp->maximum_size(2);
+  input_dp->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
+  input_dp->callback((Fl_Callback *)checkDP);
+  pos += 24 + 8;
+  input_db = new Fl_Input(side->w() - 72 - 8, side->y() + pos, 72, 24, "DB:");
+  input_db->maximum_size(2);
+  input_db->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
+  input_db->callback((Fl_Callback *)checkDB);
+  pos += 24 + 6;
+
+  new Separator(side, 2, pos, 124, 2, "");
+
+  side->end();
+
+  server_display = new Fl_Text_Display(top->x() + side->w(), top->y(), top->w(), top->h());
 
   //server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->box(FL_UP_BOX);
@@ -226,4 +281,42 @@ void Gui::append(const char *text)
   server_display->show_insert_position();
 }
 
+void Gui::checkPC()
+{
+  Terminal::changeReg(Terminal::REG_PC, atoi(input_pc->value()));
+}
+
+void Gui::checkA()
+{
+  Terminal::changeReg(Terminal::REG_A, atoi(input_pc->value()));
+}
+
+void Gui::checkX()
+{
+  Terminal::changeReg(Terminal::REG_X, atoi(input_pc->value()));
+}
+
+void Gui::checkY()
+{
+  Terminal::changeReg(Terminal::REG_Y, atoi(input_pc->value()));
+}
+
+void Gui::checkSP()
+{
+  Terminal::changeReg(Terminal::REG_SP, atoi(input_pc->value()));
+}
+
+void Gui::checkDP()
+{
+  Terminal::changeReg(Terminal::REG_DP, atoi(input_pc->value()));
+}
+
+void Gui::checkDB()
+{
+  Terminal::changeReg(Terminal::REG_DB, atoi(input_pc->value()));
+}
+
+void Gui::updateRegs(char *s)
+{
+}
 

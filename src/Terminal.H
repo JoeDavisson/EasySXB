@@ -23,12 +23,29 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 namespace Terminal
 {
+  enum
+  {
+    REG_PC,
+    REG_A,
+    REG_X,
+    REG_Y,
+    REG_SP,
+    REG_DP,
+    REG_DB
+  };
+
   void connect(const char *);
   void disconnect();
   bool isConnected();
-  void send(char);
-  void sendString(char *);
+  void sendChar(char);
+  int getChar();
+  void sendString(const char *);
+  void getResult(char *);
   void receive(void *);
+  void changeReg(int, int);
+  void updateRegs();
+  void jml(int);
+  void jsl(int);
   void upload();
 }
 

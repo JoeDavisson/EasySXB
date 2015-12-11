@@ -33,6 +33,14 @@ namespace Gui
   Fl_Double_Window *getWindow();
   Fl_Menu_Bar *getMenuBar();
   void append(const char *);
+  void checkPC();
+  void checkA();
+  void checkX();
+  void checkY();
+  void checkSP();
+  void checkDP();
+  void checkDB();
+  void updateRegs(char *);
 }
 
 #endif
