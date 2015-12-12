@@ -239,11 +239,13 @@ void Gui::init()
   server_display->textfont(FL_COURIER);
   server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->buffer(server_text);
+  server_display->cursor_style(Fl_Text_Display::BLOCK_CURSOR);
+  server_display->show_cursor();
 
   top->resizable(server_display);
   top->end();
 
-  window->size_range(512, 384, 0, 0, 0, 0, 0);
+  window->size_range(640, 480, 0, 0, 0, 0, 0);
   window->resizable(top);
   window->end();
 
@@ -417,3 +419,10 @@ void Gui::updateRegs(char *s)
   input_db->value(buf);
 }
 
+void Gui::flashCursor(bool show)
+{
+  if(show == true)
+    server_display->show_cursor();
+  else
+    server_display->hide_cursor();
+}

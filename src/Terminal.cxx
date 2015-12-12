@@ -44,6 +44,7 @@ namespace
   int fd;
   fd_set fs;
   struct timeval tv;
+  int flash;
 
   // store previous directory paths
   char load_dir[256];
@@ -89,7 +90,8 @@ void Terminal::connect(const char *device)
 
   tv.tv_sec = 0;
   tv.tv_usec = 100000;
-    
+
+  flash = 0;
   connected = true;
 
   Gui::append("\n(Connected to SXB at 9600 baud.)\n");
@@ -237,6 +239,14 @@ void Terminal::receive(void *data)
       }
     }
   }
+
+  // cause cursor to flash
+  flash++;
+
+  if(flash > 64)
+    flash = 0;
+
+  Gui::flashCursor((((flash >> 2) & 1) == 1) ? true : false);
 
   Fl::repeat_timeout(.1, Terminal::receive, data);
 }
