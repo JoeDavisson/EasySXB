@@ -44,6 +44,8 @@ namespace Gui
   void checkGet();
   void checkJML();
   void checkJSL();
+  void checkToggles();
+  void setToggles(int);
   void updateRegs(char *);
   void flashCursor(bool);
 }

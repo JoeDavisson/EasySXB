@@ -270,20 +270,23 @@ void Gui::init()
   light_n->box(FL_NO_BOX);
   light_n->down_box(FL_OVAL_BOX);
   light_n->down_color(fl_rgb_color(0, 192, 0));
+  light_n->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
   light_v = new Fl_Light_Button(8, pos, 112, 14, "(V) Overflow");
   light_v->labelfont(FL_COURIER);
+  light_v->labelsize(10);
   light_v->box(FL_NO_BOX);
   light_v->down_box(FL_OVAL_BOX);
   light_v->down_color(fl_rgb_color(0, 192, 0));
-  light_v->labelsize(10);
+  light_v->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
   light_m = new Fl_Light_Button(8, pos, 112, 14, "(M) A = 8-bit");
   light_m->labelfont(FL_COURIER);
+  light_m->labelsize(10);
   light_m->box(FL_NO_BOX);
   light_m->down_box(FL_OVAL_BOX);
   light_m->down_color(fl_rgb_color(0, 192, 0));
-  light_m->labelsize(10);
+  light_m->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
   light_x = new Fl_Light_Button(8, pos, 112, 14, "(X) X/Y = 8-bit");
   light_x->labelfont(FL_COURIER);
@@ -291,34 +294,39 @@ void Gui::init()
   light_x->box(FL_NO_BOX);
   light_x->down_box(FL_OVAL_BOX);
   light_x->down_color(fl_rgb_color(0, 192, 0));
+  light_x->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
   light_d = new Fl_Light_Button(8, pos, 112, 14, "(D) Decimal Mode");
   light_d->labelfont(FL_COURIER);
+  light_d->labelsize(10);
   light_d->box(FL_NO_BOX);
   light_d->down_box(FL_OVAL_BOX);
   light_d->down_color(fl_rgb_color(0, 192, 0));
-  light_d->labelsize(10);
+  light_d->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
   light_i = new Fl_Light_Button(8, pos, 112, 14, "(I) IRQ Disable");
   light_i->labelfont(FL_COURIER);
+  light_i->labelsize(10);
   light_i->box(FL_NO_BOX);
   light_i->down_box(FL_OVAL_BOX);
   light_i->down_color(fl_rgb_color(0, 192, 0));
-  light_i->labelsize(10);
+  light_i->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
   light_z = new Fl_Light_Button(8, pos, 112, 14, "(Z) Zero");
   light_z->labelfont(FL_COURIER);
+  light_z->labelsize(10);
   light_z->box(FL_NO_BOX);
   light_z->down_box(FL_OVAL_BOX);
   light_z->down_color(fl_rgb_color(0, 192, 0));
-  light_z->labelsize(10);
+  light_z->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
   light_c = new Fl_Light_Button(8, pos, 112, 14, "(C) Carry");
   light_c->labelfont(FL_COURIER);
+  light_c->labelsize(10);
   light_c->box(FL_NO_BOX);
   light_c->down_box(FL_OVAL_BOX);
   light_c->down_color(fl_rgb_color(0, 192, 0));
-  light_c->labelsize(10);
+  light_c->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
 
   side->resizable(0);
@@ -479,9 +487,44 @@ void Gui::checkJSL()
   Terminal::jsl(address);
 }
 
+void Gui::checkToggles()
+{
+  int num = 0;
+
+  num |= light_n->value();
+  num <<= 1;
+  num |= light_v->value();
+  num <<= 1;
+  num |= light_m->value();
+  num <<= 1;
+  num |= light_x->value();
+  num <<= 1;
+  num |= light_d->value();
+  num <<= 1;
+  num |= light_i->value();
+  num <<= 1;
+  num |= light_z->value();
+  num <<= 1;
+  num |= light_c->value();
+
+  Terminal::changeReg(Terminal::REG_SR, num);
+}
+
+void Gui::setToggles(int num)
+{
+  light_n->value((num >> 7) & 1);
+  light_v->value((num >> 6) & 1);
+  light_m->value((num >> 5) & 1);
+  light_x->value((num >> 4) & 1);
+  light_d->value((num >> 3) & 1);
+  light_i->value((num >> 2) & 1);
+  light_z->value((num >> 1) & 1);
+  light_c->value((num >> 0) & 1);
+}
+
 void Gui::updateRegs(char *s)
 {
-  unsigned int pc, a, x, y, sp, dp, sr, db;
+  int pc, a, x, y, sp, dp, sr, db;
 
   sscanf(s, "  %06X %04X %04X %04X %04X %04X %02X %02X",
          &pc, &a, &x, &y, &sp, &dp, &sr, &db);
@@ -511,6 +554,8 @@ void Gui::updateRegs(char *s)
 
   snprintf(buf, sizeof(buf), "%02X", db);
   input_db->value(buf);
+
+  setToggles(sr);
 }
 
 void Gui::flashCursor(bool show)
@@ -520,3 +565,4 @@ void Gui::flashCursor(bool show)
   else
     server_display->hide_cursor();
 }
+

@@ -263,44 +263,39 @@ void Terminal::changeReg(int reg, int num)
     case REG_PC:
       sprintf(s, "|P%02X:%04X", num >> 16, num & 0xFFFF);
       sendString(s);
-      sendString("R");
       break;
     case REG_A:
       sprintf(s, "|A%04X", num);
       sendString(s);
-      sendString("R");
       break;
     case REG_X:
       sprintf(s, "|X%04X", num);
       sendString(s);
-      sendString("R");
       break;
     case REG_Y:
       sprintf(s, "|Y%04X", num);
       sendString(s);
-      sendString("R");
       break;
     case REG_SP:
       sprintf(s, "|S%04X", num);
       sendString(s);
-      sendString("R");
       break;
     case REG_DP:
       sprintf(s, "|D%04X", num);
       sendString(s);
-      sendString("R");
       break;
     case REG_SR:
       sprintf(s, "|F%02X", num);
       sendString(s);
-      sendString("R");
+      Gui::setToggles(num);
       break;
     case REG_DB:
       sprintf(s, "|B%02X", num);
       sendString(s);
-      sendString("R");
       break;
   }
+
+  sendString("R");
 }
 
 void Terminal::updateRegs()
