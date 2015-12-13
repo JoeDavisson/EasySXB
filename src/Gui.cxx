@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Input.H>
+#include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Tooltip.H>
@@ -66,6 +67,15 @@ namespace
   Fl_Input *input_address;
   Fl_Button *button_jml;
   Fl_Button *button_jsl;
+
+  Fl_Light_Button *light_n;
+  Fl_Light_Button *light_v;
+  Fl_Light_Button *light_m;
+  Fl_Light_Button *light_x;
+  Fl_Light_Button *light_d;
+  Fl_Light_Button *light_i;
+  Fl_Light_Button *light_z;
+  Fl_Light_Button *light_c;
 
   // quit program
   void quit()
@@ -172,66 +182,150 @@ void Gui::init()
   side = new Fl_Group(0, menubar->h(), 128, window->h() - menubar->h());
   pos = side->y() + 8;
 
-  input_pc = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "PC:");
+  input_pc = new Fl_Input(side->w() - 72 - 8, pos, 72, 20, "PC:");
+  input_pc->textfont(FL_COURIER);
+  input_pc->labelfont(FL_COURIER);
   input_pc->maximum_size(6);
   input_pc->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_pc->callback((Fl_Callback *)checkPC);
-  pos += 24 + 8;
-  input_a = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "A:");
+  pos += 20 + 4;
+  input_a = new Fl_Input(side->w() - 72 - 8, pos, 72, 20, "A:");
+  input_a->textfont(FL_COURIER);
+  input_a->labelfont(FL_COURIER);
   input_a->maximum_size(4);
   input_a->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_a->callback((Fl_Callback *)checkA);
-  pos += 24 + 8;
-  input_x = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "X:");
+  pos += 20 + 4;
+  input_x = new Fl_Input(side->w() - 72 - 8, pos, 72, 20, "X:");
+  input_x->textfont(FL_COURIER);
+  input_x->labelfont(FL_COURIER);
   input_x->maximum_size(4);
   input_x->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_x->callback((Fl_Callback *)checkX);
-  pos += 24 + 8;
-  input_y = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "Y:");
+  pos += 20 + 4;
+  input_y = new Fl_Input(side->w() - 72 - 8, pos, 72, 20, "Y:");
+  input_y->textfont(FL_COURIER);
+  input_y->labelfont(FL_COURIER);
   input_y->maximum_size(4);
   input_y->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_y->callback((Fl_Callback *)checkY);
-  pos += 24 + 8;
-  input_sp = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "SP:");
+  pos += 20 + 4;
+  input_sp = new Fl_Input(side->w() - 72 - 8, pos, 72, 20, "SP:");
+  input_sp->textfont(FL_COURIER);
+  input_sp->labelfont(FL_COURIER);
   input_sp->maximum_size(4);
   input_sp->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_sp->callback((Fl_Callback *)checkSP);
-  pos += 24 + 8;
-  input_dp = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "DP:");
+  pos += 20 + 4;
+  input_dp = new Fl_Input(side->w() - 72 - 8, pos, 72, 20, "DP:");
+  input_dp->textfont(FL_COURIER);
+  input_dp->labelfont(FL_COURIER);
   input_dp->maximum_size(4);
   input_dp->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_dp->callback((Fl_Callback *)checkDP);
-  pos += 24 + 8;
-  input_sr = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "SR:");
+  pos += 20 + 4;
+  input_sr = new Fl_Input(side->w() - 72 - 8, pos, 72, 20, "SR:");
+  input_sr->textfont(FL_COURIER);
+  input_sr->labelfont(FL_COURIER);
   input_sr->maximum_size(2);
   input_sr->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_sr->callback((Fl_Callback *)checkSR);
-  pos += 24 + 8;
-  input_db = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "DB:");
+  pos += 20 + 4;
+  input_db = new Fl_Input(side->w() - 72 - 8, pos, 72, 20, "DB:");
+  input_db->textfont(FL_COURIER);
+  input_db->labelfont(FL_COURIER);
   input_db->maximum_size(2);
   input_db->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_db->callback((Fl_Callback *)checkDB);
-  pos += 24 + 6;
-  button_get = new Fl_Button(8, pos, 112, 24, "Get");
+  pos += 20 + 4;
+  button_get = new Fl_Button(16, pos, 96, 24, "Get");
+  button_get->labelfont(FL_COURIER);
   button_get->callback((Fl_Callback *)checkGet);
-  pos += 24 + 8;
+  pos += 24 + 6;
 
   new Separator(side, 2, pos - side->y(), 124, 2, "");
   pos += 8;
 
-  input_address = new Fl_Input(side->w() - 72 - 8, pos, 72, 24, "ADR:");
+  input_address = new Fl_Input(side->w() - 72 - 4, pos, 68, 20, "Address:");
+  input_address->textfont(FL_COURIER);
+  input_address->labelfont(FL_COURIER);
+  input_address->labelsize(10);
   input_address->maximum_size(6);
   input_address->value("000000");
   pos += 24 + 8;
   button_jml = new Fl_Button(8, pos, 52, 24, "JML");
+  button_jml->labelfont(FL_COURIER);
   button_jml->callback((Fl_Callback *)checkJML);
   button_jsl = new Fl_Button(68, pos, 52, 24, "JSL");
+  button_jsl->labelfont(FL_COURIER);
   button_jsl->callback((Fl_Callback *)checkJSL);
+  pos += 24 + 6;
+
+  new Separator(side, 2, pos - side->y(), 124, 2, "");
+  pos += 8;
+
+  light_n = new Fl_Light_Button(8, pos, 112, 14, "(N) Negative");
+  light_n->labelfont(FL_COURIER);
+  light_n->labelsize(10);
+  light_n->box(FL_NO_BOX);
+  light_n->down_box(FL_OVAL_BOX);
+  light_n->down_color(fl_rgb_color(0, 192, 0));
+  pos += 14 + 2;
+  light_v = new Fl_Light_Button(8, pos, 112, 14, "(V) Overflow");
+  light_v->labelfont(FL_COURIER);
+  light_v->box(FL_NO_BOX);
+  light_v->down_box(FL_OVAL_BOX);
+  light_v->down_color(fl_rgb_color(0, 192, 0));
+  light_v->labelsize(10);
+  pos += 14 + 2;
+  light_m = new Fl_Light_Button(8, pos, 112, 14, "(M) A = 8-bit");
+  light_m->labelfont(FL_COURIER);
+  light_m->box(FL_NO_BOX);
+  light_m->down_box(FL_OVAL_BOX);
+  light_m->down_color(fl_rgb_color(0, 192, 0));
+  light_m->labelsize(10);
+  pos += 14 + 2;
+  light_x = new Fl_Light_Button(8, pos, 112, 14, "(X) X/Y = 8-bit");
+  light_x->labelfont(FL_COURIER);
+  light_x->labelsize(10);
+  light_x->box(FL_NO_BOX);
+  light_x->down_box(FL_OVAL_BOX);
+  light_x->down_color(fl_rgb_color(0, 192, 0));
+  pos += 14 + 2;
+  light_d = new Fl_Light_Button(8, pos, 112, 14, "(D) Decimal Mode");
+  light_d->labelfont(FL_COURIER);
+  light_d->box(FL_NO_BOX);
+  light_d->down_box(FL_OVAL_BOX);
+  light_d->down_color(fl_rgb_color(0, 192, 0));
+  light_d->labelsize(10);
+  pos += 14 + 2;
+  light_i = new Fl_Light_Button(8, pos, 112, 14, "(I) IRQ Disable");
+  light_i->labelfont(FL_COURIER);
+  light_i->box(FL_NO_BOX);
+  light_i->down_box(FL_OVAL_BOX);
+  light_i->down_color(fl_rgb_color(0, 192, 0));
+  light_i->labelsize(10);
+  pos += 14 + 2;
+  light_z = new Fl_Light_Button(8, pos, 112, 14, "(Z) Zero");
+  light_z->labelfont(FL_COURIER);
+  light_z->box(FL_NO_BOX);
+  light_z->down_box(FL_OVAL_BOX);
+  light_z->down_color(fl_rgb_color(0, 192, 0));
+  light_z->labelsize(10);
+  pos += 14 + 2;
+  light_c = new Fl_Light_Button(8, pos, 112, 14, "(C) Carry");
+  light_c->labelfont(FL_COURIER);
+  light_c->box(FL_NO_BOX);
+  light_c->down_box(FL_OVAL_BOX);
+  light_c->down_color(fl_rgb_color(0, 192, 0));
+  light_c->labelsize(10);
+  pos += 14 + 2;
 
   side->resizable(0);
   side->end();
 
-  server_display = new Fl_Text_Display(top->x() + side->w(), top->y(), top->w() - side->w(), top->h());
+  server_display = new Fl_Text_Display(top->x() + side->w(), top->y(),
+                                       top->w() - side->w(), top->h());
 
   //server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->box(FL_UP_BOX);
