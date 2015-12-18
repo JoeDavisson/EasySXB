@@ -438,146 +438,71 @@ void Terminal::upload()
   if(!fp)
     return;
 
-  if(Gui::getMode() == Gui::MODE_265)
+  while(1)
   {
-    while(1)
+    temp = fgetc(fp);
+    if(temp == EOF)
+      break;
+
+    // start of line
+    if(temp == ':')
     {
-      temp = fgetc(fp);
-      if(temp == EOF)
-        break;
+      segment = 0;
+      ret = fscanf(fp, "%02X", &count);
 
-      // start of line
-      if(temp == ':')
+      // last line
+      if(count == 0x00)
       {
-        segment = 0;
-        ret = fscanf(fp, "%02X", &count);
+        break;
+      }
+      else
+      {
+        ret = fscanf(fp, "%04X", &address);
+        ret = fscanf(fp, "%02X", &code);
 
-        // last line
-        if(count == 0x00)
+        if(code == 0x04)
         {
-          break;
+          ret = segment = address;
         }
-        else
+        else if(code = 0x00)
         {
-          ret = fscanf(fp, "%04X", &address);
-          ret = fscanf(fp, "%02X", &code);
+          int checksum = 0;
 
-          // if segment exists
-          if(code == 0x04)
+          // address
+          sprintf(s, "S2%02X%02X%02X%02X",
+                  count + 4, segment, address >> 8, address & 0xFF);
+          sendString(s);
+          checksum += count + 4;
+          checksum += address >> 8;
+          checksum += address & 0xFF;
+
+          // data
+          for(i = 0; i < count; i++)
           {
-            ret = segment = address;
-          }
-          else
-          {
-            int checksum = 0;
-
-            // address
-            sprintf(s, "S2%02X%02X%02X%02X",
-                    count + 4, segment, address >> 8, address & 0xFF);
+            ret = fscanf(fp, "%02X", &value);
+            sprintf(s, "%02X", value);
             sendString(s);
-
-            checksum += count + 4;
-            checksum += address >> 8;
-            checksum += address & 0xFF;
-
-            // data
-            for(i = 0; i < count; i++)
-            {
-              ret = fscanf(fp, "%02X", &value);
-              sprintf(s, "%02X", value);
-              sendString(s);
-              checksum += value;
-            }
-
-            // checksum
-            sprintf(s, "%02X\n", 0xFF - (checksum & 0xFF));
-            sendString(s);
+            checksum += value;
           }
-        }
 
-        // skip to next line
-        while(1)
-        {
-          temp = fgetc(fp);
-          if(temp == '\n')
-            break;
+          // checksum
+          sprintf(s, "%02X\n", 0xFF - (checksum & 0xFF));
+          sendString(s);
         }
       }
-    }
 
-    sprintf(s, "S804000000FB\n");
-    sendString(s);
-  }
-  else if(Gui::getMode() == Gui::MODE_134)
-  {
-    while(1)
-    {
-      temp = fgetc(fp);
-      if(temp == EOF)
-        break;
-
-      // start of line
-      if(temp == ':')
+      // skip to next line
+      while(1)
       {
-        segment = 0;
-        ret = fscanf(fp, "%02X", &count);
-
-        // last line
-        if(count == 0x00)
-        {
+        temp = fgetc(fp);
+        if(temp == '\n')
           break;
-        }
-        else
-        {
-          ret = fscanf(fp, "%04X", &address);
-          ret = fscanf(fp, "%02X", &code);
-
-          // if segment exists
-          if(code == 0x04)
-          {
-            ret = segment = address;
-          }
-          else
-          {
-            int checksum = 0;
-
-            // address
-            sprintf(s, "S1%02X%02X%02X",
-                    count + 3, address >> 8, address & 0xFF);
-            sendString(s);
-
-            checksum += count + 3;
-            checksum += address >> 8;
-            checksum += address & 0xFF;
-
-            // data
-            for(i = 0; i < count; i++)
-            {
-              ret = fscanf(fp, "%02X", &value);
-              sprintf(s, "%02X", value);
-              sendString(s);
-              checksum += value;
-            }
-
-            // checksum
-            sprintf(s, "%02X\n", 0xFF - (checksum & 0xFF));
-            sendString(s);
-          }
-        }
-
-        // skip to next line
-        while(1)
-        {
-          temp = fgetc(fp);
-          if(temp == '\n')
-            break;
-        }
       }
     }
-
-    sprintf(s, "\n");
-    sendString(s);
   }
+
+  sprintf(s, "S804000000FB\n");
+  sendString(s);
 
   fclose(fp);
   Gui::append("\n(Upload Complete.)\n");
