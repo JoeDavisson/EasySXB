@@ -23,12 +23,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <cstdio>
 #include <cstdlib>
 
-#include <unistd.h>
-#include <string.h>
-#include <sys/socket.h>
+#ifdef WIN32
+//  #include <winsock2.h>
+//  #include <ws2tcpip.h>
+#else
+  #include <unistd.h>
+  #include <string.h>
+  #include <sys/socket.h>
+  #include <fcntl.h>
+  #include <termios.h>
+#endif
+
 #include <sys/time.h>
-#include <fcntl.h>
-#include <termios.h>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Native_File_Chooser.H>
@@ -40,11 +46,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 namespace
 {
   bool connected = false;
+  int flash;
+
+#ifdef WIN32
+  HANDLE hserial;
+  DCB dcb_params;
+  COMMTIMEOUTS timeouts;
+#else
   struct termios term;
   int fd;
   fd_set fs;
   struct timeval tv;
-  int flash;
+#endif
 
   // store previous directory paths
   char load_dir[256];
@@ -71,6 +84,43 @@ namespace
 
 void Terminal::connect(const char *device)
 {
+#ifdef WIN32
+  hserial = CreateFile(device, GENERIC_READ | GENERIC_WRITE,
+                       0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+//  hserial = CreateFile("\\\\.\\COM22", GENERIC_READ | GENERIC_WRITE,
+//                       0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+  if(hserial == INVALID_HANDLE_VALUE)
+  {
+    Dialog::message("Error", "Could not open serial port.");
+    return;
+  }
+
+  dcb_params.BaudRate = CBR_9600;
+  dcb_params.ByteSize = 8;
+  dcb_params.StopBits = ONESTOPBIT;
+  dcb_params.Parity = NOPARITY;
+
+  if(SetCommState(hserial, &dcb_params) == 0)
+  {
+    CloseHandle(hserial);
+    Dialog::message("Error", "Could not open serial port.");
+    return;
+  }
+
+  timeouts.ReadIntervalTimeout = 50;
+  timeouts.ReadTotalTimeoutConstant = 50;
+  timeouts.ReadTotalTimeoutMultiplier = 10;
+  timeouts.WriteTotalTimeoutConstant = 50;
+  timeouts.WriteTotalTimeoutMultiplier = 10;
+
+  if(SetCommState(hserial, (LPDCB)&timeouts) == 0)
+  {
+    CloseHandle(hserial);
+    Dialog::message("Error", "Could not open serial port.");
+    return;
+  }
+
+#else
   fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
   if(fd == -1)
@@ -90,13 +140,19 @@ void Terminal::connect(const char *device)
 
   tv.tv_sec = 0;
   tv.tv_usec = 100000;
+#endif
 
   flash = 0;
   connected = true;
 
   Gui::append("\n(Connected to SXB at 9600 baud.)\n");
 
+#ifdef WIN32
+  Sleep(1000);
+#else
   sleep(1);
+#endif
+
   updateRegs();
 }
 
@@ -104,7 +160,11 @@ void Terminal::disconnect()
 {
   if(connected == true)
   {
+#ifdef WIN32
+    CloseHandle(hserial);
+#else
     close(fd);
+#endif
     connected = false;
     Gui::append("\n(Connection Closed.)\n");
     Dialog::message("Disconnected", "Connection Closed.");
@@ -118,6 +178,21 @@ bool Terminal::isConnected()
 
 void Terminal::sendChar(char c)
 {
+#ifdef WIN32
+  DWORD bytes;
+
+  if(connected == true)
+  {
+    // convert to uppercase so it looks nice then the SXB echos the character
+    c = toupper(c);
+
+    // convert carriage return
+    if(c == '\n')
+      c = 13;
+
+    WriteFile(hserial, &c, 1, &bytes, 0);
+  }
+#else
   if(connected == true)
   {
     FD_ZERO(&fs);
@@ -136,6 +211,7 @@ void Terminal::sendChar(char c)
       int temp = write(fd, &c, 1);
     }
   }
+#endif
 }
 
 char Terminal::getChar()
@@ -143,6 +219,33 @@ char Terminal::getChar()
   char c;
   int tries = 0;
 
+#ifdef WIN32
+  DWORD bytes;
+
+  if(connected == true)
+  {
+    while(1)
+    {
+      BOOL temp = ReadFile(hserial, &c, 1, &bytes, 0);
+
+      if(temp == false)
+      {
+#ifdef WIN32
+        Sleep(1);
+#else
+        usleep(1000);
+#endif
+        tries++;
+        if(tries > 100)
+          return -1;
+      }
+      else
+      {
+        return c;
+      }
+    }
+  }
+#else
   if(connected == true)
   {
     FD_ZERO(&fs);
@@ -157,7 +260,11 @@ char Terminal::getChar()
 
         if(temp <= 0)
         {
+#ifdef WIN32
+          Sleep(1);
+#else
           usleep(1000);
+#endif
           tries++;
           if(tries > 100)
             return -1;
@@ -169,6 +276,7 @@ char Terminal::getChar()
       }
     }
   }
+#endif
 }
 
 void Terminal::sendString(const char *s)
@@ -211,9 +319,33 @@ void Terminal::getResult(char *s)
 
 void Terminal::receive(void *data)
 {
+  char buf[8];
+
+#ifdef WIN32
+  DWORD bytes;
+
   if(connected == true)
   {
-    char buf[8];
+
+    while(1)
+    {
+      BOOL n = ReadFile(hserial, buf, 1, &bytes, 0);
+
+      if(n == false || bytes == 0)
+        break;
+
+      // convert carriage return
+      if(buf[0] == 13)
+        buf[0] = '\n';
+
+      buf[1] = '\0';
+
+      Gui::append(buf);
+    }
+  }
+#else
+  if(connected == true)
+  {
     int n;
 
     FD_ZERO(&fs);
@@ -239,6 +371,7 @@ void Terminal::receive(void *data)
       }
     }
   }
+#endif
 
   // cause cursor to flash
   flash++;

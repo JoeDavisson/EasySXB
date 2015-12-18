@@ -5,8 +5,8 @@
 
 # you MUST have libxft-dev installed before compiling FLTK on linux
 # (otherwise you'll have ugly, non-resizable fonts)
-PLATFORM=linux
-#PLATFORM=mingw32
+#PLATFORM=linux
+PLATFORM=mingw32
 #PLATFORM=mingw64
 
 NAME="EasySXB "
@@ -53,7 +53,7 @@ fltk:
 	@cd ./fltk-1.3.3; \
 	make clean; \
 	./configure --host=$(HOST) --enable-localjpeg --enable-localzlib --enable-localpng --disable-xdbe; \
-	make; \
+	make -j20; \
 	cd ..
 	@echo "FLTK libs built!"
 
