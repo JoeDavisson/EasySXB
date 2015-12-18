@@ -198,7 +198,7 @@ void Terminal::getResult(char *s)
     {
       char c = getChar();
 
-      if(c >= '0' && c <= '9' || c >= 'A' && c <= 'F' || c == ' ')
+      if(c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c == ' ')
         s[j++] = c;
       else if(c == 13)
         break;
@@ -258,44 +258,84 @@ void Terminal::changeReg(int reg, int num)
 
   char s[256];
 
-  switch(reg)
+  if(Gui::getMode() == Gui::MODE_265)
   {
-    case REG_PC:
-      sprintf(s, "|P%02X:%04X", num >> 16, num & 0xFFFF);
-      sendString(s);
-      break;
-    case REG_A:
-      sprintf(s, "|A%04X", num);
-      sendString(s);
-      break;
-    case REG_X:
-      sprintf(s, "|X%04X", num);
-      sendString(s);
-      break;
-    case REG_Y:
-      sprintf(s, "|Y%04X", num);
-      sendString(s);
-      break;
-    case REG_SP:
-      sprintf(s, "|S%04X", num);
-      sendString(s);
-      break;
-    case REG_DP:
-      sprintf(s, "|D%04X", num);
-      sendString(s);
-      break;
-    case REG_SR:
-      sprintf(s, "|F%02X", num);
-      sendString(s);
-      Gui::setToggles(num);
-      break;
-    case REG_DB:
-      sprintf(s, "|B%02X", num);
-      sendString(s);
-      break;
-  }
+    switch(reg)
+    {
+      case REG_PC:
+        sprintf(s, "|P%02X:%04X", num >> 16, num & 0xFFFF);
+        sendString(s);
+        break;
+      case REG_A:
+        sprintf(s, "|A%04X", num);
+        sendString(s);
+        break;
+      case REG_X:
+        sprintf(s, "|X%04X", num);
+        sendString(s);
+        break;
+      case REG_Y:
+        sprintf(s, "|Y%04X", num);
+        sendString(s);
+        break;
+      case REG_SP:
+        sprintf(s, "|S%04X", num);
+        sendString(s);
+        break;
+      case REG_DP:
+        sprintf(s, "|D%04X", num);
+        sendString(s);
+        break;
+      case REG_SR:
+        sprintf(s, "|F%02X", num);
+        sendString(s);
+        break;
+      case REG_DB:
+        sprintf(s, "|B%02X", num);
+        sendString(s);
+        break;
+    }
 
-  sendString("R");
+    sendString("R");
+
+    if(reg == REG_SR)
+      Gui::setToggles(num);
+  }
+  else if(Gui::getMode() == Gui::MODE_134)
+  {
+    switch(reg)
+    {
+      case REG_PC:
+        sprintf(s, "A%04X     ", num & 0xFFFF);
+        sendString(s);
+        break;
+      case REG_SR:
+        sprintf(s, "A %02X    ", num & 0xFF);
+        sendString(s);
+        break;
+      case REG_A:
+        sprintf(s, "A  %02X   ", num);
+        sendString(s);
+        break;
+      case REG_X:
+        sprintf(s, "A   %02X  ", num);
+        sendString(s);
+        break;
+      case REG_Y:
+        sprintf(s, "A    %02X ", num);
+        sendString(s);
+        break;
+      case REG_SP:
+        sprintf(s, "A     %02X", num);
+        sendString(s);
+        break;
+    }
+
+    sendString("R");
+
+    if(reg == REG_SR)
+      Gui::setToggles(num);
+  }
 }
 
 void Terminal::updateRegs()
@@ -305,10 +345,20 @@ void Terminal::updateRegs()
 
   char s[256];
 
-  sendString("| ");
-  getResult(s);
-
-  Gui::updateRegs(s);
+  if(Gui::getMode() == Gui::MODE_265)
+  {
+    sendString("| ");
+    getResult(s);
+    Gui::updateRegs(s);
+  }
+  else if(Gui::getMode() == Gui::MODE_134)
+  {
+    sendString("R");
+    getResult(s);
+    getResult(s);
+    getResult(s);
+    Gui::updateRegs(s);
+  }
 }
 
 void Terminal::jml(int address)
@@ -318,8 +368,16 @@ void Terminal::jml(int address)
 
   char s[256];
 
-  sprintf(s, "G%02X%04X", address >> 16, address & 0xFFFF);
-  sendString(s);
+  if(Gui::getMode() == Gui::MODE_265)
+  {
+    sprintf(s, "G%02X%04X", address >> 16, address & 0xFFFF);
+    sendString(s);
+  }
+  else if(Gui::getMode() == Gui::MODE_134)
+  {
+    sprintf(s, "G%04X", address & 0xFFFF);
+    sendString(s);
+  }
 }
 
 void Terminal::jsl(int address)
@@ -329,8 +387,16 @@ void Terminal::jsl(int address)
 
   char s[256];
 
-  sprintf(s, "J%02X%04X", address >> 16, address & 0xFFFF);
-  sendString(s);
+  if(Gui::getMode() == Gui::MODE_265)
+  {
+    sprintf(s, "J%02X%04X", address >> 16, address & 0xFFFF);
+    sendString(s);
+  }
+  else if(Gui::getMode() == Gui::MODE_134)
+  {
+    sprintf(s, "J%04X", address & 0xFFFF);
+    sendString(s);
+  }
 }
 
 void Terminal::upload()
@@ -372,73 +438,147 @@ void Terminal::upload()
   if(!fp)
     return;
 
-  while(1)
+  if(Gui::getMode() == Gui::MODE_265)
   {
-    temp = fgetc(fp);
-    if(temp == EOF)
-      break;
-
-    // start of line
-    if(temp == ':')
+    while(1)
     {
-      segment = 0;
-      ret = fscanf(fp, "%02X", &count);
-
-      // last line
-      if(count == 0x00)
-      {
+      temp = fgetc(fp);
+      if(temp == EOF)
         break;
-      }
-      else
-      {
-        ret = fscanf(fp, "%04X", &address);
-        ret = fscanf(fp, "%02X", &code);
 
-        // if segment exists
-        if(code == 0x04)
+      // start of line
+      if(temp == ':')
+      {
+        segment = 0;
+        ret = fscanf(fp, "%02X", &count);
+
+        // last line
+        if(count == 0x00)
         {
-          ret = segment = address;
+          break;
         }
         else
         {
-          int checksum = 0;
+          ret = fscanf(fp, "%04X", &address);
+          ret = fscanf(fp, "%02X", &code);
 
-          // address
-          sprintf(s, "S2%02X%02X%02X%02X",
-                  count + 4, segment, address >> 8, address & 0xFF);
-          sendString(s);
-
-          checksum += count + 4;
-          checksum += address >> 8;
-          checksum += address & 0xFF;
-
-          // data
-          for(i = 0; i < count; i++)
+          // if segment exists
+          if(code == 0x04)
           {
-            ret = fscanf(fp, "%02X", &value);
-            sprintf(s, "%02X", value);
-            sendString(s);
-            checksum += value;
+            ret = segment = address;
           }
+          else
+          {
+            int checksum = 0;
 
-          // checksum
-          sprintf(s, "%02X\n", 0xFF - (checksum & 0xFF));
-          sendString(s);
+            // address
+            sprintf(s, "S2%02X%02X%02X%02X",
+                    count + 4, segment, address >> 8, address & 0xFF);
+            sendString(s);
+
+            checksum += count + 4;
+            checksum += address >> 8;
+            checksum += address & 0xFF;
+
+            // data
+            for(i = 0; i < count; i++)
+            {
+              ret = fscanf(fp, "%02X", &value);
+              sprintf(s, "%02X", value);
+              sendString(s);
+              checksum += value;
+            }
+
+            // checksum
+            sprintf(s, "%02X\n", 0xFF - (checksum & 0xFF));
+            sendString(s);
+          }
+        }
+
+        // skip to next line
+        while(1)
+        {
+          temp = fgetc(fp);
+          if(temp == '\n')
+            break;
         }
       }
+    }
 
-      // skip to next line
-      while(1)
+    sprintf(s, "S804000000FB\n");
+    sendString(s);
+  }
+  else if(Gui::getMode() == Gui::MODE_134)
+  {
+    while(1)
+    {
+      temp = fgetc(fp);
+      if(temp == EOF)
+        break;
+
+      // start of line
+      if(temp == ':')
       {
-        temp = fgetc(fp);
-        if(temp == '\n')
+        segment = 0;
+        ret = fscanf(fp, "%02X", &count);
+
+        // last line
+        if(count == 0x00)
+        {
           break;
+        }
+        else
+        {
+          ret = fscanf(fp, "%04X", &address);
+          ret = fscanf(fp, "%02X", &code);
+
+          // if segment exists
+          if(code == 0x04)
+          {
+            ret = segment = address;
+          }
+          else
+          {
+            int checksum = 0;
+
+            // address
+            sprintf(s, "S1%02X%02X%02X",
+                    count + 3, address >> 8, address & 0xFF);
+            sendString(s);
+
+            checksum += count + 3;
+            checksum += address >> 8;
+            checksum += address & 0xFF;
+
+            // data
+            for(i = 0; i < count; i++)
+            {
+              ret = fscanf(fp, "%02X", &value);
+              sprintf(s, "%02X", value);
+              sendString(s);
+              checksum += value;
+            }
+
+            // checksum
+            sprintf(s, "%02X\n", 0xFF - (checksum & 0xFF));
+            sendString(s);
+          }
+        }
+
+        // skip to next line
+        while(1)
+        {
+          temp = fgetc(fp);
+          if(temp == '\n')
+            break;
+        }
       }
     }
+
+    sprintf(s, "\n");
+    sendString(s);
   }
 
-  sprintf(s, "S804000000FB\n");
-  sendString(s);
   fclose(fp);
   Gui::append("\n(Upload Complete.)\n");
 }

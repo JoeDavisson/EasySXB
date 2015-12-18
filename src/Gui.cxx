@@ -534,37 +534,64 @@ void Gui::setToggles(int num)
 void Gui::updateRegs(char *s)
 {
   int pc, a, x, y, sp, dp, sr, db;
-
-  sscanf(s, "  %06X %04X %04X %04X %04X %04X %02X %02X",
-         &pc, &a, &x, &y, &sp, &dp, &sr, &db);
-
   char buf[256];
 
-  snprintf(buf, sizeof(buf), "%06X", pc);
-  input_pc->value(buf);
+  if(mode == MODE_265)
+  {
+    sscanf(s, "  %06X %04X %04X %04X %04X %04X %02X %02X",
+           &pc, &a, &x, &y, &sp, &dp, &sr, &db);
 
-  snprintf(buf, sizeof(buf), "%04X", a);
-  input_a->value(buf);
+    snprintf(buf, sizeof(buf), "%06X", pc);
+    input_pc->value(buf);
 
-  snprintf(buf, sizeof(buf), "%04X", x);
-  input_x->value(buf);
+    snprintf(buf, sizeof(buf), "%04X", a);
+    input_a->value(buf);
 
-  snprintf(buf, sizeof(buf), "%04X", y);
-  input_y->value(buf);
+    snprintf(buf, sizeof(buf), "%04X", x);
+    input_x->value(buf);
 
-  snprintf(buf, sizeof(buf), "%04X", sp);
-  input_sp->value(buf);
+    snprintf(buf, sizeof(buf), "%04X", y);
+    input_y->value(buf);
 
-  snprintf(buf, sizeof(buf), "%02X", dp);
-  input_dp->value(buf);
+    snprintf(buf, sizeof(buf), "%04X", sp);
+    input_sp->value(buf);
 
-  snprintf(buf, sizeof(buf), "%02X", sr);
-  input_sr->value(buf);
+    snprintf(buf, sizeof(buf), "%02X", dp);
+    input_dp->value(buf);
 
-  snprintf(buf, sizeof(buf), "%02X", db);
-  input_db->value(buf);
+    snprintf(buf, sizeof(buf), "%02X", sr);
+    input_sr->value(buf);
 
-  setToggles(sr);
+    snprintf(buf, sizeof(buf), "%02X", db);
+    input_db->value(buf);
+
+    setToggles(sr);
+  }
+  else if(mode == MODE_134)
+  {
+    sscanf(s, "%04X %02X %02X %02X %02X %02X",
+           &pc, &sr, &a, &x, &y, &sp);
+
+    snprintf(buf, sizeof(buf), "%04X", pc);
+    input_pc->value(buf);
+
+    snprintf(buf, sizeof(buf), "%02X", sr);
+    input_sr->value(buf);
+
+    snprintf(buf, sizeof(buf), "%02X", a);
+    input_a->value(buf);
+
+    snprintf(buf, sizeof(buf), "%02X", x);
+    input_x->value(buf);
+
+    snprintf(buf, sizeof(buf), "%02X", y);
+    input_y->value(buf);
+
+    snprintf(buf, sizeof(buf), "%02X", sp);
+    input_sp->value(buf);
+
+    setToggles(sr);
+  }
 }
 
 void Gui::flashCursor(bool show)
@@ -663,7 +690,7 @@ void Gui::setMode134()
   window->redraw();
 }
 
-int getMode()
+int Gui::getMode()
 {
   return mode;
 }
