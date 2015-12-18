@@ -464,7 +464,7 @@ void Terminal::upload()
         {
           ret = segment = address;
         }
-        else if(code = 0x00)
+        else if(code == 0x00)
         {
           int checksum = 0;
 
