@@ -118,7 +118,11 @@ namespace Connect
     Items::dialog = new DialogWindow(384, 0, "Connect to SXB");
     Items::device = new Fl_Input(128, y1, 192, 24, "Device: ");
     Items::device->align(FL_ALIGN_LEFT);
+#ifdef WIN32
+    Items::device->value("COM1");
+#else
     Items::device->value("/dev/ttyUSB0");
+#endif
     y1 += 32;
     Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
     Items::ok->callback((Fl_Callback *)close);

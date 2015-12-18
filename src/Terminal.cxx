@@ -50,7 +50,7 @@ namespace
 
 #ifdef WIN32
   HANDLE hserial;
-  DCB dcb_params;
+  DCB dcb;
   COMMTIMEOUTS timeouts;
 #else
   struct termios term;
@@ -87,38 +87,48 @@ void Terminal::connect(const char *device)
 #ifdef WIN32
   hserial = CreateFile(device, GENERIC_READ | GENERIC_WRITE,
                        0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+//  hserial = CreateFile(device, GENERIC_READ | GENERIC_WRITE,
+//                       0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
+//  hserial = CreateFile(device, GENERIC_READ | GENERIC_WRITE,
+//                       0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 //  hserial = CreateFile("\\\\.\\COM22", GENERIC_READ | GENERIC_WRITE,
 //                       0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
   if(hserial == INVALID_HANDLE_VALUE)
   {
-    Dialog::message("Error", "Could not open serial port.");
+    Dialog::message("1 Error", "1 Could not open serial port.");
     return;
   }
 
-  dcb_params.BaudRate = CBR_9600;
-  dcb_params.ByteSize = 8;
-  dcb_params.StopBits = ONESTOPBIT;
-  dcb_params.Parity = NOPARITY;
+  memset(&dcb, 0, sizeof(dcb));
+  dcb.DCBlength = sizeof(DCB);
+  dcb.BaudRate = CBR_9600;
+  dcb.ByteSize = 8;
+  dcb.StopBits = ONESTOPBIT;
+  dcb.Parity = NOPARITY;
 
-  if(SetCommState(hserial, &dcb_params) == 0)
+  if(SetCommState(hserial, &dcb) == 0)
   {
     CloseHandle(hserial);
-    Dialog::message("Error", "Could not open serial port.");
+    Dialog::message("2 Error", "2 Could not open serial port.");
     return;
   }
 
+  memset(&timeouts, 0, sizeof(timeouts));
   timeouts.ReadIntervalTimeout = 50;
   timeouts.ReadTotalTimeoutConstant = 50;
   timeouts.ReadTotalTimeoutMultiplier = 10;
   timeouts.WriteTotalTimeoutConstant = 50;
   timeouts.WriteTotalTimeoutMultiplier = 10;
 
-  if(SetCommState(hserial, (LPDCB)&timeouts) == 0)
+  if(SetCommTimeouts(hserial, &timeouts) == 0)
   {
     CloseHandle(hserial);
-    Dialog::message("Error", "Could not open serial port.");
+    Dialog::message("3 Error", "3 Could not open serial port.");
     return;
   }
+
+  PurgeComm(hserial, PURGE_RXCLEAR);
+  PurgeComm(hserial, PURGE_TXCLEAR);
 
 #else
   fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -153,7 +163,7 @@ void Terminal::connect(const char *device)
   sleep(1);
 #endif
 
-  updateRegs();
+//  updateRegs();
 }
 
 void Terminal::disconnect()
@@ -226,15 +236,11 @@ char Terminal::getChar()
   {
     while(1)
     {
-      BOOL temp = ReadFile(hserial, &c, 1, &bytes, 0);
+      ReadFile(hserial, &c, 1, &bytes, 0);
 
-      if(temp == false)
+      if(bytes == 0)
       {
-#ifdef WIN32
         Sleep(1);
-#else
-        usleep(1000);
-#endif
         tries++;
         if(tries > 100)
           return -1;
@@ -260,11 +266,7 @@ char Terminal::getChar()
 
         if(temp <= 0)
         {
-#ifdef WIN32
-          Sleep(1);
-#else
           usleep(1000);
-#endif
           tries++;
           if(tries > 100)
             return -1;
@@ -329,9 +331,9 @@ void Terminal::receive(void *data)
 
     while(1)
     {
-      BOOL n = ReadFile(hserial, buf, 1, &bytes, 0);
+      ReadFile(hserial, &buf, 1, &bytes, 0);
 
-      if(n == false || bytes == 0)
+      if(bytes == 0)
         break;
 
       // convert carriage return
