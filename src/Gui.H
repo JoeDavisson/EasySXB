@@ -26,6 +26,12 @@ class Fl_Menu_Bar;
 
 namespace Gui
 {
+  enum
+  {
+    MODE_265,
+    MODE_134
+  };
+
   void init();
   void show();
   void setMenuItem(const char *);
@@ -48,6 +54,9 @@ namespace Gui
   void setToggles(int);
   void updateRegs(char *);
   void flashCursor(bool);
+  void setMode265();
+  void setMode134();
+  int getMode();
 }
 
 #endif

@@ -42,6 +42,9 @@ class MainWin;
 
 namespace
 {
+  // current mode
+  int mode = Gui::MODE_265;
+
   // window
   MainWin *window;
 
@@ -171,6 +174,13 @@ void Gui::init()
   menubar->add("&File/&Quit...", 0,
     (Fl_Callback *)quit, 0, 0);
 
+  menubar->add("&Mode/W65C265SXB", 0,
+    (Fl_Callback *)setMode265, 0, FL_MENU_RADIO);
+  menubar->add("&Mode/W65C134SXB", 0,
+    (Fl_Callback *)setMode134, 0, FL_MENU_RADIO);
+
+  setMenuItem("&Mode/W65C265SXB");
+
   menubar->add("&Help/&About...", 0,
     (Fl_Callback *)Dialog::about, 0, 0);
 
@@ -251,7 +261,6 @@ void Gui::init()
   input_address->labelfont(FL_COURIER);
   input_address->labelsize(10);
   input_address->maximum_size(6);
-  input_address->value("000000");
   pos += 24 + 8;
   button_jml = new Fl_Button(8, pos, 52, 24, "JML");
   button_jml->labelfont(FL_COURIER);
@@ -565,4 +574,98 @@ void Gui::flashCursor(bool show)
   else
     server_display->hide_cursor();
 }
+
+void Gui::setMode265()
+{
+  button_jml->label("JML");
+  button_jsl->label("JSL");
+  light_x->label("(X) X/Y = 8-bit");
+  light_m->label("(M) A = 8-bit");
+  light_m->activate();
+  input_pc->resize(input_pc->x(), input_pc->y(), 72, 20);
+  input_a->resize(input_a->x(), input_a->y(), 48, 20);
+  input_x->resize(input_x->x(), input_x->y(), 48, 20);
+  input_y->resize(input_y->x(), input_y->y(), 48, 20);
+  input_sp->resize(input_sp->x(), input_sp->y(), 48, 20);
+  input_dp->resize(input_dp->x(), input_dp->y(), 48, 20);
+  input_sr->resize(input_sr->x(), input_sr->y(), 24, 20);
+  input_db->resize(input_db->x(), input_db->y(), 24, 20);
+  input_address->resize(input_address->x(), input_address->y(), 60, 20);
+
+  input_pc->maximum_size(6);
+  input_a->maximum_size(4);
+  input_x->maximum_size(4);
+  input_y->maximum_size(4);
+  input_sp->maximum_size(4);
+  input_dp->maximum_size(4);
+  input_sr->maximum_size(2);
+  input_db->maximum_size(2);
+  input_address->maximum_size(6);
+
+  input_pc->value("");
+  input_a->value("");
+  input_x->value("");
+  input_y->value("");
+  input_sp->value("");
+  input_dp->value("");
+  input_sr->value("");
+  input_db->value("");
+  input_address->value("");
+
+  input_dp->activate();
+  input_db->activate();
+
+  mode = MODE_265;
+  window->redraw();
+}
+
+void Gui::setMode134()
+{
+  button_jml->label("JMP");
+  button_jsl->label("JSR");
+  light_x->label("(B) Break");
+  light_m->label("    Unused");
+  light_m->deactivate();
+  input_pc->resize(input_pc->x(), input_pc->y(), 48, 20);
+  input_a->resize(input_a->x(), input_a->y(), 24, 20);
+  input_x->resize(input_x->x(), input_x->y(), 24, 20);
+  input_y->resize(input_y->x(), input_y->y(), 24, 20);
+  input_sp->resize(input_sp->x(), input_sp->y(), 24, 20);
+  input_dp->resize(input_dp->x(), input_dp->y(), 24, 20);
+  input_sr->resize(input_sr->x(), input_sr->y(), 24, 20);
+  input_db->resize(input_db->x(), input_db->y(), 24, 20);
+  input_address->resize(input_address->x(), input_address->y(), 48, 20);
+
+  input_pc->maximum_size(4);
+  input_a->maximum_size(2);
+  input_x->maximum_size(2);
+  input_y->maximum_size(2);
+  input_sp->maximum_size(2);
+  input_dp->maximum_size(2);
+  input_sr->maximum_size(2);
+  input_db->maximum_size(2);
+  input_address->maximum_size(4);
+
+  input_pc->value("");
+  input_a->value("");
+  input_x->value("");
+  input_y->value("");
+  input_sp->value("");
+  input_dp->value("");
+  input_sr->value("");
+  input_db->value("");
+  input_address->value("");
+
+  input_dp->deactivate();
+  input_db->deactivate();
+
+  mode = MODE_134;
+  window->redraw();
+}
+
+int getMode()
+{
+  return mode;
+}
+
 

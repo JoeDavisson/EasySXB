@@ -49,8 +49,8 @@ namespace
 int main(int argc, char *argv[])
 {
   // default to a nice dark theme
-//  setLightTheme();
-  setDarkTheme();
+  setLightTheme();
+//  setDarkTheme();
 
   // fltk related inits
   Fl::visual(FL_DOUBLE | FL_RGB);
