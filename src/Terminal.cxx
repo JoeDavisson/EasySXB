@@ -87,12 +87,7 @@ void Terminal::connect(const char *device)
 #ifdef WIN32
   hserial = CreateFile(device, GENERIC_READ | GENERIC_WRITE,
                        0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-//  hserial = CreateFile(device, GENERIC_READ | GENERIC_WRITE,
-//                       0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
-//  hserial = CreateFile(device, GENERIC_READ | GENERIC_WRITE,
-//                       0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-//  hserial = CreateFile("\\\\.\\COM22", GENERIC_READ | GENERIC_WRITE,
-//                       0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+
   if(hserial == INVALID_HANDLE_VALUE)
   {
     Dialog::message("1 Error", "1 Could not open serial port.");
@@ -100,11 +95,12 @@ void Terminal::connect(const char *device)
   }
 
   memset(&dcb, 0, sizeof(dcb));
-  dcb.DCBlength = sizeof(DCB);
+  dcb.DCBlength = sizeof(dcb);
   dcb.BaudRate = CBR_9600;
   dcb.ByteSize = 8;
   dcb.StopBits = ONESTOPBIT;
   dcb.Parity = NOPARITY;
+  dcb.fBinary = 1;
 
   if(SetCommState(hserial, &dcb) == 0)
   {
@@ -114,11 +110,11 @@ void Terminal::connect(const char *device)
   }
 
   memset(&timeouts, 0, sizeof(timeouts));
-  timeouts.ReadIntervalTimeout = 50;
-  timeouts.ReadTotalTimeoutConstant = 50;
-  timeouts.ReadTotalTimeoutMultiplier = 10;
-  timeouts.WriteTotalTimeoutConstant = 50;
-  timeouts.WriteTotalTimeoutMultiplier = 10;
+  timeouts.ReadIntervalTimeout = MAXDWORD;
+  timeouts.ReadTotalTimeoutConstant = 0;
+  timeouts.ReadTotalTimeoutMultiplier = 0;
+  timeouts.WriteTotalTimeoutConstant = 0;
+  timeouts.WriteTotalTimeoutMultiplier = 0;
 
   if(SetCommTimeouts(hserial, &timeouts) == 0)
   {
@@ -126,10 +122,6 @@ void Terminal::connect(const char *device)
     Dialog::message("3 Error", "3 Could not open serial port.");
     return;
   }
-
-  PurgeComm(hserial, PURGE_RXCLEAR);
-  PurgeComm(hserial, PURGE_TXCLEAR);
-
 #else
   fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
@@ -236,9 +228,9 @@ char Terminal::getChar()
   {
     while(1)
     {
-      ReadFile(hserial, &c, 1, &bytes, 0);
+      BOOL temp = ReadFile(hserial, &c, 1, &bytes, 0);
 
-      if(bytes == 0)
+      if(temp == true && bytes == 0)
       {
         Sleep(1);
         tries++;
@@ -331,9 +323,9 @@ void Terminal::receive(void *data)
 
     while(1)
     {
-      ReadFile(hserial, &buf, 1, &bytes, 0);
+      BOOL temp = ReadFile(hserial, &buf, 1, &bytes, 0);
 
-      if(bytes == 0)
+      if(temp == true && bytes == 0)
         break;
 
       // convert carriage return
