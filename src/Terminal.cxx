@@ -30,11 +30,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
   #include <unistd.h>
   #include <string.h>
   #include <sys/socket.h>
+  #include <sys/time.h>
   #include <fcntl.h>
   #include <termios.h>
 #endif
-
-#include <sys/time.h>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Native_File_Chooser.H>
