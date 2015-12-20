@@ -102,7 +102,14 @@ namespace Connect
   void close()
   {
     Items::dialog->hide();
+#ifdef WIN32
+    // correct port name
+    char buf[256];
+    sprintf(buf, "\\\\.\\%s", Items::device->value());
+    Terminal::connect(buf);
+#else
     Terminal::connect(Items::device->value());
+#endif
   }
 
   void quit()
