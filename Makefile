@@ -5,12 +5,13 @@
 
 # you MUST have libxft-dev installed before compiling FLTK on linux
 # (otherwise you'll have ugly, non-resizable fonts)
-PLATFORM=linux
-#PLATFORM=mingw32
+#PLATFORM=linux
+PLATFORM=mingw32
 #PLATFORM=mingw64
 
 NAME="EasySXB "
-VERSION=$(shell git describe --always --dirty)
+#VERSION=$(shell git describe --always --dirty)
+VERSION=$(shell git describe)
 
 SRC_DIR=src
 INCLUDE=-I$(SRC_DIR) -Ifltk-1.3.3

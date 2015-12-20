@@ -60,17 +60,16 @@ namespace About
   {
     int y1 = 8;
     int ww = 0, hh = 0;
-    const char *credits = "Copyright (c) 2015 Joe Davisson.\n";
 
-    Items::dialog = new DialogWindow(256, 0, "About");
-    Items::copyright = new Fl_Box(FL_FLAT_BOX, 8, y1, 256, 32, credits);
+    Items::dialog = new DialogWindow(384, 0, "About");
+    Items::version = new Fl_Box(FL_FLAT_BOX, 8, y1, 384, 32, PACKAGE_STRING);
+    Items::version->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
+    Items::version->labelsize(16);
+    y1 += 32;
+    Items::copyright = new Fl_Box(FL_FLAT_BOX, 8, y1, 384, 32, "Copyright (c) 2015 Joe Davisson.\n");
     Items::copyright->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::copyright->labelsize(14);
     y1 += 48;
-    Items::version = new Fl_Box(FL_FLAT_BOX, 8, y1, 256, 32, PACKAGE_STRING);
-    Items::version->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
-    Items::version->labelsize(14);
-    y1 += 32;
     Items::dialog->addOkButton(&Items::ok, &y1);
     Items::ok->callback((Fl_Callback *)close);
     Items::dialog->set_modal();

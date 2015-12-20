@@ -23,10 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <cstdio>
 #include <cstdlib>
 
-#ifdef WIN32
-//  #include <winsock2.h>
-//  #include <ws2tcpip.h>
-#else
+#ifndef WIN32
   #include <unistd.h>
   #include <string.h>
   #include <sys/socket.h>
@@ -85,7 +82,7 @@ void Terminal::connect(const char *device)
 {
 #ifdef WIN32
   hserial = CreateFile(device, GENERIC_READ | GENERIC_WRITE,
-                       0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+                       0, NULL, OPEN_EXISTING, 0, NULL);
 
   if(hserial == INVALID_HANDLE_VALUE)
   {
@@ -93,13 +90,11 @@ void Terminal::connect(const char *device)
     return;
   }
 
-  memset(&dcb, 0, sizeof(dcb));
-  dcb.DCBlength = sizeof(dcb);
+  GetCommState(hserial, &dcb);
   dcb.BaudRate = CBR_9600;
   dcb.ByteSize = 8;
   dcb.StopBits = ONESTOPBIT;
   dcb.Parity = NOPARITY;
-  dcb.fBinary = 1;
 
   if(SetCommState(hserial, &dcb) == 0)
   {
@@ -191,7 +186,7 @@ void Terminal::sendChar(char c)
     if(c == '\n')
       c = 13;
 
-    WriteFile(hserial, &c, 1, &bytes, 0);
+    WriteFile(hserial, &c, 1, &bytes, NULL);
   }
 #else
   if(connected == true)
@@ -227,9 +222,9 @@ char Terminal::getChar()
   {
     while(1)
     {
-      BOOL temp = ReadFile(hserial, &c, 1, &bytes, 0);
+      BOOL temp = ReadFile(hserial, &c, 1, &bytes, NULL);
 
-      if(temp == true && bytes == 0)
+      if(temp == 0 || bytes == 0)
       {
         Sleep(1);
         tries++;
@@ -322,9 +317,9 @@ void Terminal::receive(void *data)
 
     while(1)
     {
-      BOOL temp = ReadFile(hserial, &buf, 1, &bytes, 0);
+      BOOL temp = ReadFile(hserial, &buf, 1, &bytes, NULL);
 
-      if(temp == true && bytes == 0)
+      if(temp == 0 || bytes == 0)
         break;
 
       // convert carriage return
@@ -534,7 +529,7 @@ void Terminal::upload()
   }
 
   Fl_Native_File_Chooser fc;
-  fc.title("Upload");
+  fc.title("Upload Program");
   fc.filter("HEX File\t*.hex\n");
   fc.options(Fl_Native_File_Chooser::PREVIEW);
   fc.type(Fl_Native_File_Chooser::BROWSE_FILE);
