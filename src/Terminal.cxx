@@ -187,6 +187,7 @@ void Terminal::sendChar(char c)
       c = 13;
 
     WriteFile(hserial, &c, 1, &bytes, NULL);
+    Sleep(1);
   }
 #else
   if(connected == true)
@@ -205,6 +206,7 @@ void Terminal::sendChar(char c)
         c = 13;
 
       int temp = write(fd, &c, 1);
+      usleep(1000);
     }
   }
 #endif
