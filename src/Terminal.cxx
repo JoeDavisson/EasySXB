@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 Joe Davisson.
+Copyright (c) 2016 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -96,7 +96,7 @@ void Terminal::connect(const char *device)
 
   if(hserial == INVALID_HANDLE_VALUE)
   {
-    Dialog::message("1 Error", "1 Could not open serial port.");
+    Dialog::message("Error", "Could not open serial port.");
     return;
   }
 
@@ -109,7 +109,7 @@ void Terminal::connect(const char *device)
   if(SetCommState(hserial, &dcb) == 0)
   {
     CloseHandle(hserial);
-    Dialog::message("2 Error", "2 Could not open serial port.");
+    Dialog::message("Error", "Could not open serial port.");
     return;
   }
 
@@ -123,7 +123,7 @@ void Terminal::connect(const char *device)
   if(SetCommTimeouts(hserial, &timeouts) == 0)
   {
     CloseHandle(hserial);
-    Dialog::message("3 Error", "3 Could not open serial port.");
+    Dialog::message("Error", "Could not open serial port.");
     return;
   }
 #else
@@ -267,8 +267,8 @@ void Terminal::sendString(const char *s)
 #else
     int temp = write(fd, buf, strlen(buf));
     delay(16);
-  }
 #endif
+  }
 }
 
 void Terminal::getResult(char *s)

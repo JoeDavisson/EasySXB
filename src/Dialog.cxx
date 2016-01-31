@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 Joe Davisson.
+Copyright (c) 2016 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -66,7 +66,7 @@ namespace About
     Items::version->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::version->labelsize(16);
     y1 += 32;
-    Items::copyright = new Fl_Box(FL_FLAT_BOX, 8, y1, 384, 32, "Copyright (c) 2015 Joe Davisson.\n");
+    Items::copyright = new Fl_Box(FL_FLAT_BOX, 8, y1, 384, 32, "Copyright (c) 2016 Joe Davisson.\n");
     Items::copyright->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::copyright->labelsize(14);
     y1 += 48;
