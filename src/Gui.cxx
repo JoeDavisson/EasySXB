@@ -138,11 +138,9 @@ public:
         ctrl = Fl::event_ctrl() ? true : false;
 
         // misc keys
-        const char *s = Fl::event_text();
-
-        if(s[0] != 0)
+        if(Fl::event_length > 0)
         {
-          Terminal::sendChar(s[0]);
+          Terminal::sendString(Fl::event_text());
         }
 
         return 1;
@@ -402,8 +400,24 @@ Fl_Menu_Bar *Gui::getMenuBar()
   return menubar;
 }
 
-void Gui::append(const char *text)
+void Gui::append(const char *buf)
 {
+  if(strlen(buf) < 1)
+    return;
+
+  char text[4096];
+  memcpy(text, buf, sizeof(text));
+  
+  // convert carriage returns
+  for(int i = 0; i < sizeof(text); i++)
+  {
+    if(text[i] == '\0')
+      break;
+
+    if(text[i] == 13)
+      text[i] = '\n';
+  }
+
   server_text->append(text);
 
   int lines = server_text->count_lines(0, server_text->length());
@@ -538,6 +552,9 @@ void Gui::updateRegs(char *s)
 
   if(mode == MODE_265)
   {
+    if(strlen(s) < 32)
+      return;
+
     sscanf(s, "  %06X %04X %04X %04X %04X %04X %02X %02X",
            &pc, &a, &x, &y, &sp, &dp, &sr, &db);
 
@@ -569,6 +586,9 @@ void Gui::updateRegs(char *s)
   }
   else if(mode == MODE_134)
   {
+    if(strlen(s) < 14)
+      return;
+
     sscanf(s, "%04X %02X %02X %02X %02X %02X",
            &pc, &sr, &a, &x, &y, &sp);
 

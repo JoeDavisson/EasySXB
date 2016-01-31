@@ -43,6 +43,8 @@ namespace
 {
   bool connected = false;
   int flash;
+  char buf[4096];
+  int buf_pos;
 
 #ifdef WIN32
   HANDLE hserial;
@@ -75,6 +77,15 @@ namespace
         break;
       }
     }
+  }
+
+  void delay(int ms)
+  {
+#ifdef WIN32
+    Sleep(ms);
+#else
+    usleep(ms * 1000);
+#endif
   }
 }
 
@@ -142,14 +153,7 @@ void Terminal::connect(const char *device)
   connected = true;
 
   Gui::append("\n(Connected to SXB at 9600 baud.)\n");
-
-#ifdef WIN32
-  Sleep(1000);
-#else
-  sleep(1);
-#endif
-
-//  updateRegs();
+  delay(500);
 }
 
 void Terminal::disconnect()
@@ -187,7 +191,7 @@ void Terminal::sendChar(char c)
       c = 13;
 
     WriteFile(hserial, &c, 1, &bytes, NULL);
-    Sleep(1);
+    delay(16);
   }
 #else
   if(connected == true)
@@ -206,7 +210,7 @@ void Terminal::sendChar(char c)
         c = 13;
 
       int temp = write(fd, &c, 1);
-      usleep(1000);
+      delay(16);
     }
   }
 #endif
@@ -228,9 +232,9 @@ char Terminal::getChar()
 
       if(temp == 0 || bytes == 0)
       {
-        Sleep(1);
-        tries++;
-        if(tries > 100)
+//        delay(16);
+//        tries++;
+//        if(tries > 100)
           return -1;
       }
       else
@@ -254,9 +258,9 @@ char Terminal::getChar()
 
         if(temp <= 0)
         {
-          usleep(1000);
-          tries++;
-          if(tries > 100)
+//          delay(16);
+//          tries++;
+//          if(tries > 100)
             return -1;
         }
         else
@@ -273,71 +277,85 @@ void Terminal::sendString(const char *s)
 {
   if(connected == true)
   {
-    for(int i = 0; i < strlen(s); i++)
+    memset(buf, 0, sizeof(buf));
+    strncpy(buf, s, strlen(s));
+
+    for(int i = 0; i < strlen(buf); i++)
     {
-      char c = toupper(s[i]);
+      buf[i] = toupper(buf[i]);
 
-      // convert carriage return
-      if(c == '\n')
-        c = 13;
+      if(buf[i] == '\n')
+        buf[i] = 13;
+    }
 
-      sendChar(c);
+#ifdef WIN32
+    DWORD bytes;
+
+    WriteFile(hserial, buf, strlen(buf), &bytes, NULL);
+    delay(16);
+#else
+    FD_ZERO(&fs);
+    FD_SET(fd, &fs);
+    select(fd + 1, 0, &fs, 0, &tv);
+
+    if(FD_ISSET(fd, &fs))
+    {
+      int temp = write(fd, buf, strlen(buf));
+      delay(16);
     }
   }
+#endif
 }
 
 void Terminal::getResult(char *s)
 {
   if(connected == true)
   {
+    getData();
     int j = 0;
 
-    while(1)
+    for(int i = 0; i < strlen(buf); i++)
     {
-      char c = getChar();
+      char c = buf[i];
 
       if(c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c == ' ')
         s[j++] = c;
-      else if(c == 13)
-        break;
     }
 
-    s[j++] = '\n';
-    s[j++] = '\0';
+    s[j] = '\0';
   }
 }
 
-void Terminal::receive(void *data)
+void Terminal::getData()
 {
-  char buf[8];
+  memset(buf, 0, sizeof(buf));
+  buf_pos = 0;
 
 #ifdef WIN32
   DWORD bytes;
 
   if(connected == true)
   {
-
     while(1)
     {
-      BOOL temp = ReadFile(hserial, &buf, 1, &bytes, NULL);
+      BOOL temp = ReadFile(hserial, buf + buf_pos, 56, &bytes, NULL);
+      delay(16);
 
       if(temp == 0 || bytes == 0)
         break;
 
-      // convert carriage return
-      if(buf[0] == 13)
-        buf[0] = '\n';
-
-      buf[1] = '\0';
-
-      Gui::append(buf);
+      buf_pos += bytes;
+      if(buf_pos > 4000)
+        break;
     }
+
+    buf[buf_pos] = '\0';
   }
 #else
+  int bytes;
+
   if(connected == true)
   {
-    int n;
-
     FD_ZERO(&fs);
     FD_SET(fd, &fs);
     select(fd + 1, &fs, 0, 0, &tv);
@@ -346,22 +364,29 @@ void Terminal::receive(void *data)
     {
       while(1)
       {
-        int n = read(fd, buf, 1);
+        bytes = read(fd, buf + buf_pos, 56);
+        delay(16);
 
-        if(n <= 0)
+        if(bytes <= 0)
           break;
 
-        // convert carriage return
-        if(buf[0] == 13)
-          buf[0] = '\n';
-
-        buf[1] = '\0';
-
-        Gui::append(buf);
+        buf_pos += bytes;
+        if(buf_pos > 4000)
+          break;
       }
     }
   }
 #endif
+
+  for(int i = 0; i < sizeof(buf); i++)
+    if(buf[i] == 13)
+      buf[i] = '\n';
+}
+
+void Terminal::receive(void *data)
+{
+  getData();
+  Gui::append(buf);
 
   // cause cursor to flash
   flash++;
@@ -466,7 +491,9 @@ void Terminal::updateRegs()
   if(connected == false)
     return;
 
-  char s[256];
+  char s[64];
+  memset(s, 0, sizeof(s));
+  delay(1000);
 
   if(Gui::getMode() == Gui::MODE_265)
   {

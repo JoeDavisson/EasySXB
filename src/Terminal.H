@@ -42,6 +42,7 @@ namespace Terminal
   char getChar();
   void sendString(const char *);
   void getResult(char *);
+  void getData();
   void receive(void *);
   void changeReg(int, int);
   void updateRegs();
