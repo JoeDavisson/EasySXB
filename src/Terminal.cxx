@@ -53,7 +53,6 @@ namespace
 #else
   struct termios term;
   int fd;
-  fd_set fs;
   struct timeval tv;
 #endif
 
@@ -196,22 +195,15 @@ void Terminal::sendChar(char c)
 #else
   if(connected == true)
   {
-    FD_ZERO(&fs);
-    FD_SET(fd, &fs);
-    select(fd + 1, 0, &fs, 0, &tv);
+    // convert to uppercase so it looks nice then the SXB echos the character
+    c = toupper(c);
 
-    if(FD_ISSET(fd, &fs))
-    {
-      // convert to uppercase so it looks nice then the SXB echos the character
-      c = toupper(c);
+    // convert carriage return
+    if(c == '\n')
+      c = 13;
 
-      // convert carriage return
-      if(c == '\n')
-        c = 13;
-
-      int temp = write(fd, &c, 1);
-      delay(16);
-    }
+    int temp = write(fd, &c, 1);
+    delay(16);
   }
 #endif
 }
@@ -231,43 +223,22 @@ char Terminal::getChar()
       BOOL temp = ReadFile(hserial, &c, 1, &bytes, NULL);
 
       if(temp == 0 || bytes == 0)
-      {
-//        delay(16);
-//        tries++;
-//        if(tries > 100)
-          return -1;
-      }
+        return -1;
       else
-      {
         return c;
-      }
     }
   }
 #else
   if(connected == true)
   {
-    FD_ZERO(&fs);
-    FD_SET(fd, &fs);
-    select(fd + 1, &fs, 0, 0, &tv);
-
-    if(FD_ISSET(fd, &fs))
+    while(1)
     {
-      while(1)
-      {
-        int temp = read(fd, &c, 1);
+      int temp = read(fd, &c, 1);
 
-        if(temp <= 0)
-        {
-//          delay(16);
-//          tries++;
-//          if(tries > 100)
-            return -1;
-        }
-        else
-        {
-          return c;
-        }
-      }
+      if(temp <= 0)
+        return -1;
+      else
+        return c;
     }
   }
 #endif
@@ -294,15 +265,8 @@ void Terminal::sendString(const char *s)
     WriteFile(hserial, buf, strlen(buf), &bytes, NULL);
     delay(16);
 #else
-    FD_ZERO(&fs);
-    FD_SET(fd, &fs);
-    select(fd + 1, 0, &fs, 0, &tv);
-
-    if(FD_ISSET(fd, &fs))
-    {
-      int temp = write(fd, buf, strlen(buf));
-      delay(16);
-    }
+    int temp = write(fd, buf, strlen(buf));
+    delay(16);
   }
 #endif
 }
@@ -341,39 +305,30 @@ void Terminal::getData()
       BOOL temp = ReadFile(hserial, buf + buf_pos, 56, &bytes, NULL);
       delay(16);
 
-      if(temp == 0 || bytes == 0)
+      if(temp == 0 || bytes == 0 || bytes > 32)
         break;
 
       buf_pos += bytes;
       if(buf_pos > 4000)
         break;
     }
-
-    buf[buf_pos] = '\0';
   }
 #else
   int bytes;
 
   if(connected == true)
   {
-    FD_ZERO(&fs);
-    FD_SET(fd, &fs);
-    select(fd + 1, &fs, 0, 0, &tv);
-
-    if(FD_ISSET(fd, &fs))
+    while(1)
     {
-      while(1)
-      {
-        bytes = read(fd, buf + buf_pos, 56);
-        delay(16);
+      bytes = read(fd, buf + buf_pos, 56);
+      delay(16);
 
-        if(bytes <= 0)
-          break;
+      if(bytes <= 0 || bytes > 32)
+        break;
 
-        buf_pos += bytes;
-        if(buf_pos > 4000)
-          break;
-      }
+      buf_pos += bytes;
+      if(buf_pos > 4000)
+        break;
     }
   }
 #endif
@@ -581,7 +536,6 @@ void Terminal::upload()
   int count = 0;
   int temp;
   int ret;
-  int i;
   char s[256];
 
   FILE *fp = fopen(fc.filename(), "r");
@@ -627,17 +581,24 @@ void Terminal::upload()
           checksum += address & 0xFF;
 
           // data
-          for(i = 0; i < count; i++)
+          int index = 0;
+          for(int i = 0; i < count; i++)
           {
             ret = fscanf(fp, "%02X", &value);
-            sprintf(s, "%02X", value);
-            sendString(s);
+            sprintf(s + index, "%02X", value);
+            index += 2;
             checksum += value;
           }
+
+          sendString(s);
 
           // checksum
           sprintf(s, "%02X\n", 0xFF - (checksum & 0xFF));
           sendString(s);
+
+          // update terminal
+          getData();
+          Gui::append(buf);
         }
       }
 
@@ -655,6 +616,5 @@ void Terminal::upload()
   sendString(s);
 
   fclose(fp);
-  Gui::append("\n(Upload Complete.)\n");
 }
 

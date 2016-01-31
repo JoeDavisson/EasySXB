@@ -433,6 +433,7 @@ void Gui::append(const char *buf)
   // scroll display to bottom
   server_display->insert_position(server_text->length());
   server_display->show_insert_position();
+  Fl::flush();
 }
 
 void Gui::checkPC()
