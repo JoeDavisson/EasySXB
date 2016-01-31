@@ -553,9 +553,6 @@ void Gui::updateRegs(char *s)
 
   if(mode == MODE_265)
   {
-    if(strlen(s) < 32)
-      return;
-
     sscanf(s, "  %06X %04X %04X %04X %04X %04X %02X %02X",
            &pc, &a, &x, &y, &sp, &dp, &sr, &db);
 
@@ -587,10 +584,7 @@ void Gui::updateRegs(char *s)
   }
   else if(mode == MODE_134)
   {
-    if(strlen(s) < 14)
-      return;
-
-    sscanf(s, "%04X %02X %02X %02X %02X %02X",
+    sscanf(s + 20, "%04X %02X %02X %02X %02X %02X",
            &pc, &sr, &a, &x, &y, &sp);
 
     snprintf(buf, sizeof(buf), "%04X", pc);

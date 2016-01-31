@@ -460,8 +460,6 @@ void Terminal::updateRegs()
   {
     sendString("R");
     getResult(s);
-    getResult(s);
-    getResult(s);
     Gui::updateRegs(s);
   }
 }
