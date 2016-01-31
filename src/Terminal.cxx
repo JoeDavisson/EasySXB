@@ -302,14 +302,14 @@ void Terminal::getData()
   {
     while(1)
     {
-      BOOL temp = ReadFile(hserial, buf + buf_pos, 56, &bytes, NULL);
+      BOOL temp = ReadFile(hserial, buf + buf_pos, 256, &bytes, NULL);
       delay(16);
 
       if(temp == 0 || bytes == 0 || bytes > 32)
         break;
 
       buf_pos += bytes;
-      if(buf_pos > 4000)
+      if(buf_pos > 3500)
         break;
     }
   }
@@ -320,14 +320,14 @@ void Terminal::getData()
   {
     while(1)
     {
-      bytes = read(fd, buf + buf_pos, 56);
+      bytes = read(fd, buf + buf_pos, 256);
       delay(16);
 
       if(bytes <= 0 || bytes > 32)
         break;
 
       buf_pos += bytes;
-      if(buf_pos > 4000)
+      if(buf_pos > 3500)
         break;
     }
   }
