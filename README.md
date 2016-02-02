@@ -3,11 +3,13 @@ EasySXB
 
 ![Screenshot](https://raw.githubusercontent.com/Mortis69/EasySXB/master/screenshots/screenshot.png)
 
-EasySXB is a terminal/program loader designed for use with Western Design Center's SXB line of development boards. (So far it's only been tested with the W65C265SXB board.)
+EasySXB is a terminal/program loader designed for use with Western Design Center's SXB line of development boards. Currently the W65C265SXB and W65C134SXB products are supported.
 
-Program files (in HEX format) can be uploaded through the terminal interface. (This is convenient, but can be slow for larger programs.)
+An interactive interface is provided for commonly-used options. Programs (in HEX format) may also be uploaded to the boards.
 
-Must be run under Linux with the ```sudo``` command, or the user must have serial port access rights. Windows support is coming soon.
+The user must have serial port access rights. Windows and Linux binaries are available here:
+
+http://sourceforge.net/projects/easysxb/
 
 ## Build it from source
 ```$ git clone https://github.com/Mortis69/EasySXB.git```
