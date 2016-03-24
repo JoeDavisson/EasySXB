@@ -11,22 +11,21 @@ start:
 
 main:
   ;; LED off
-  ;lda #0x04
-  lda #0xff
+  lda.b #0xff
   sta 0xdf23
   jsr delay
  
   ;; LED on
-  lda #0x00
+  lda.b #0x00
   sta 0xdf23
   jsr delay
 
   jmp main
 
 delay:
-  ldy #10
+  ldy.b #0
 delay_outer:
-  ldx #0
+  ldx.b #0
 delay_inner:
   dex
   bne delay_inner
