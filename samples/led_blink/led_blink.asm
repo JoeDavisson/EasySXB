@@ -6,8 +6,11 @@ start:
   clc
   xce
 
-  ; set A/X/Y to 8-bit
-  sep #0x30
+  ; set A to 8-bit
+  sep #0x20
+
+  ; set X/Y to 16-bit
+  rep #0x10
 
 main:
   ;; LED off
@@ -23,9 +26,9 @@ main:
   jmp main
 
 delay:
-  ldy.b #0
+  ldy #0xff
 delay_outer:
-  ldx.b #0
+  ldx #0x1000
 delay_inner:
   dex
   bne delay_inner
