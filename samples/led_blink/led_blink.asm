@@ -1,11 +1,13 @@
-;.65816
-.65xx
-
+.65816
 .org 0x1000
+
 start:
-  ;sec
-  ;xce
-  ;rts
+  ; set native mode
+  clc
+  xce
+
+  ; set A/X/Y to 8-bit
+  sep #0x30
 
 main:
   ;; LED off
@@ -22,15 +24,13 @@ main:
   jmp main
 
 delay:
-  ;ldy #10
+  ldy #10
 delay_outer:
   ldx #0
 delay_inner:
   dex
   bne delay_inner
-
-  ;dey
-  ;bne delay_outer
+  dey
+  bne delay_outer
   rts
-
 
