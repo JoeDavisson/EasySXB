@@ -14,9 +14,6 @@ start:
   ;; Turn off interrupts to protect from ROM routines running
   sei
 
-  ;lda #0x00
-  ;sta 0xdf23
-
 main:
   ;; LED off
   lda #0xff
