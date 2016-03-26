@@ -21,7 +21,7 @@ start:
   ;; P40: /CS = 1
   ;; P41: CLK = 0
   ;; P44: DATA = 0
-  lda #0x07
+  lda #0x01
   sta 0xdf20
 
 main:
@@ -52,19 +52,19 @@ spi_write:
 spi_write_next_bit:
   rol
   tay
-  bcs spi_write_clock_1
-  lda #0x05
+  bcc spi_write_clock_0
+  lda #0x04
   sta 0xdf20
-  lda #0x02
-  ora 0xdf20
+  lda #0x06
+  sta 0xdf20
   jmp spi_write_clock_off
-spi_write_clock_1:
-  lda #0x01
+spi_write_clock_0:
+  lda #0x00
   sta 0xdf20
   lda #0x02
-  ora 0xdf20
+  sta 0xdf20
 spi_write_clock_off:
-  lda #0x05
+  lda #0x04
   and 0xdf20
   tya
   dex
