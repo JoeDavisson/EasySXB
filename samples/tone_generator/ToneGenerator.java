@@ -10,23 +10,34 @@ public class ToneGenerator
     int volume;
     int channel;
 
-    W65C265SXB.controlTones(508, 508, true, true);
+    //W65C265SXB.controlTones(508, 508, true, true);
 
     while(true)
     {
       data = W65C265SXB.getChar();
-      //W65C265SXB.putChar((char)data);
+      W65C265SXB.putChar((char)data);
 
       if ((data & 0x80) == 0) { continue; }
 
-      note = W65C265SXB.getChar();
-
       volume = data & 0xf;
-      channel = (data >> 4) & 0x1;
+      channel = (data >> 4) & 0x7;
+
+      if (volume != 0xf)
+      {
+        note = W65C265SXB.getChar() & 0x7f;
+        W65C265SXB.putChar((char)note);
+      }
+        else
+      {
+        note = 0;
+      }
+
+      if (channel > 1) { continue; }
+      if (note > 127) { note = 0; }
 
       if (channel == 0)
       {
-        if (volume == 0)
+        if (volume == 0xf)
         {
           tg0 = 0;
         }
@@ -37,7 +48,7 @@ public class ToneGenerator
       }
         else
       {
-        if (volume == 0)
+        if (volume == 0xf)
         {
           tg1 = 0;
         }
