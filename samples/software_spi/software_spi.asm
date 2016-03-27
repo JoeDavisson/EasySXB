@@ -26,11 +26,40 @@ start:
 
 main:
   jsr spi_enable
-  lda #0x30
+low_byte:
+  lda data
+  cmp #0
+  beq main_sound_done
   jsr spi_write
-  lda #0xff
+high_byte:
+  lda data + 1
   jsr spi_write
   jsr spi_disable
+
+  ;; Increment pointer to low DAC byte
+  lda #2
+  clc
+  adc low_byte + 1
+  lda #0
+  adc low_byte + 2
+
+  ;; Increment pointer to high DAC byte
+  lda #2
+  clc
+  adc high_byte + 1
+  lda #0
+  adc high_byte + 2
+
+  ;; Delay
+  ldx #0x00
+delay:
+  dex
+  bne delay
+
+  jmp main
+
+main_sound_done:
+
 while_1:
   jmp while_1
 
@@ -71,4 +100,6 @@ spi_write_clock_off:
   bne spi_write_next_bit
   rts
 
+data:
+.binfile "sound.img"
 
