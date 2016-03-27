@@ -81,9 +81,9 @@ namespace
   void delay(int ms)
   {
 #ifdef WIN32
-    Sleep(ms);
+//    Sleep(ms);
 #else
-    usleep(ms * 1000);
+//    usleep(ms * 1000);
 #endif
   }
 }
