@@ -5,7 +5,8 @@
 
 # you MUST have libxft-dev installed before compiling FLTK on linux
 # (otherwise you'll have ugly, non-resizable fonts)
-PLATFORM=linux
+PLATFORM=linux_static
+#PLATFORM=linux_dynamic
 #PLATFORM=mingw32
 #PLATFORM=mingw64
 
@@ -15,9 +16,17 @@ VERSION=$(shell git describe)
 
 SRC_DIR=src
 INCLUDE=-I$(SRC_DIR) -Ifltk-1.3.3
-LIBS=$(shell fltk-config --use-images --ldstaticflags)
 
-ifeq ($(PLATFORM),linux)
+ifeq ($(PLATFORM),linux_static)
+  LIBS=$(shell ./fltk-1.3.3/fltk-config --use-images --ldstaticflags)
+  HOST=
+  CXX=g++
+  CXXFLAGS=-O3 -DPACKAGE_STRING=\"$(NAME)$(VERSION)\" $(INCLUDE)
+  EXE=easysxb
+endif
+
+ifeq ($(PLATFORM),linux_dynamic)
+  LIBS=$(shell fltk-config --use-images --ldstaticflags)
   HOST=
   CXX=g++
   CXXFLAGS=-O3 -DPACKAGE_STRING=\"$(NAME)$(VERSION)\" $(INCLUDE)
@@ -25,6 +34,7 @@ ifeq ($(PLATFORM),linux)
 endif
 
 ifeq ($(PLATFORM),mingw32)
+  LIBS=$(shell ./fltk-1.3.3/fltk-config --use-images --ldstaticflags)
   HOST=i686-w64-mingw32
   CXX=$(HOST)-g++
   CXXFLAGS=-O3 -static-libgcc -static-libstdc++ -DPACKAGE_STRING=\"$(NAME)$(VERSION)\" $(INCLUDE)
@@ -33,6 +43,7 @@ ifeq ($(PLATFORM),mingw32)
 endif
 
 ifeq ($(PLATFORM),mingw64)
+  LIBS=$(shell ./fltk-1.3.3/fltk-config --use-images --ldstaticflags)
   HOST=x86_64-w64-mingw32
   CXX=$(HOST)-g++
   CXXFLAGS=-O3 -static-libgcc -static-libstdc++ -DPACKAGE_STRING=\"$(NAME)$(VERSION)\" $(INCLUDE)
