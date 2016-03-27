@@ -15,7 +15,7 @@ VERSION=$(shell git describe)
 
 SRC_DIR=src
 INCLUDE=-I$(SRC_DIR) -Ifltk-1.3.3
-LIBS=$(shell ./fltk-1.3.3/fltk-config --use-images --ldstaticflags)
+LIBS=$(shell fltk-config --use-images --ldstaticflags)
 
 ifeq ($(PLATFORM),linux)
   HOST=
