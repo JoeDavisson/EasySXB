@@ -1,12 +1,14 @@
 # EasySXB Makefile
 #
-# The fltk-1.3.3 source tree must be available in this directory.
-# Please run "make fltk" first to build the library before running "make".
+# Static builds require that the fltk-1.3.3 source
+# tree is local to this directory. Please run "make fltk"
+# first to build the library before running "make".
 
 # you MUST have libxft-dev installed before compiling FLTK on linux
 # (otherwise you'll have ugly, non-resizable fonts)
-PLATFORM=linux_static
-#PLATFORM=linux_dynamic
+
+PLATFORM=linux_dynamic
+#PLATFORM=linux_static
 #PLATFORM=mingw32
 #PLATFORM=mingw64
 
@@ -17,16 +19,16 @@ VERSION=$(shell git describe)
 SRC_DIR=src
 INCLUDE=-I$(SRC_DIR) -Ifltk-1.3.3
 
-ifeq ($(PLATFORM),linux_static)
-  LIBS=$(shell ./fltk-1.3.3/fltk-config --use-images --ldstaticflags)
+ifeq ($(PLATFORM),linux_dynamic)
+  LIBS=$(shell fltk-config --ldflags)
   HOST=
   CXX=g++
   CXXFLAGS=-O3 -DPACKAGE_STRING=\"$(NAME)$(VERSION)\" $(INCLUDE)
   EXE=easysxb
 endif
 
-ifeq ($(PLATFORM),linux_dynamic)
-  LIBS=$(shell fltk-config --use-images --ldstaticflags)
+ifeq ($(PLATFORM),linux_static)
+  LIBS=$(shell ./fltk-1.3.3/fltk-config --use-images --ldstaticflags)
   HOST=
   CXX=g++
   CXXFLAGS=-O3 -DPACKAGE_STRING=\"$(NAME)$(VERSION)\" $(INCLUDE)
