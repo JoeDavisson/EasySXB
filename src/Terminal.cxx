@@ -534,7 +534,7 @@ void Terminal::upload()
   int count = 0;
   int temp;
   int ret;
-  char s[256];
+  char s[1024];
 
   FILE *fp = fopen(fc.filename(), "r");
   if(!fp)
@@ -573,13 +573,12 @@ void Terminal::upload()
           // address
           sprintf(s, "S2%02X%02X%02X%02X",
                   count + 4, segment, address >> 8, address & 0xFF);
-          sendString(s);
           checksum += count + 4;
           checksum += address >> 8;
           checksum += address & 0xFF;
 
           // data
-          int index = 0;
+          int index = 10;
           for(int i = 0; i < count; i++)
           {
             ret = fscanf(fp, "%02X", &value);
@@ -588,10 +587,8 @@ void Terminal::upload()
             checksum += value;
           }
 
-          sendString(s);
-
           // checksum
-          sprintf(s, "%02X\n", 0xFF - (checksum & 0xFF));
+          sprintf(s + index, "%02X\n", 0xFF - (checksum & 0xFF));
           sendString(s);
 
           // update terminal
