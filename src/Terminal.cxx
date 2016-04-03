@@ -183,7 +183,7 @@ void Terminal::sendChar(char c)
   if(connected == true)
   {
     // convert to uppercase so it looks nice then the SXB echos the character
-    c = toupper(c);
+//    c = toupper(c);
 
     // convert carriage return
     if(c == '\n')
@@ -196,7 +196,7 @@ void Terminal::sendChar(char c)
   if(connected == true)
   {
     // convert to uppercase so it looks nice then the SXB echos the character
-    c = toupper(c);
+//    c = toupper(c);
 
     // convert carriage return
     if(c == '\n')
@@ -253,7 +253,7 @@ void Terminal::sendString(const char *s)
 
     for(int i = 0; i < strlen(buf); i++)
     {
-      buf[i] = toupper(buf[i]);
+//      buf[i] = toupper(buf[i]);
 
       if(buf[i] == '\n')
         buf[i] = 13;
