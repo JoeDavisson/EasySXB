@@ -344,6 +344,7 @@ void Gui::init()
 
   //server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->box(FL_UP_BOX);
+  server_display->scrollbar_width(18);
   server_display->textsize(14);
   server_display->textfont(FL_COURIER);
   server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
