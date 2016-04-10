@@ -182,9 +182,6 @@ void Terminal::sendChar(char c)
 
   if(connected == true)
   {
-    // convert to uppercase so it looks nice then the SXB echos the character
-//    c = toupper(c);
-
     // convert carriage return
     if(c == '\n')
       c = 13;
@@ -195,9 +192,6 @@ void Terminal::sendChar(char c)
 #else
   if(connected == true)
   {
-    // convert to uppercase so it looks nice then the SXB echos the character
-//    c = toupper(c);
-
     // convert carriage return
     if(c == '\n')
       c = 13;
@@ -221,6 +215,7 @@ char Terminal::getChar()
     while(1)
     {
       BOOL temp = ReadFile(hserial, &c, 1, &bytes, NULL);
+      delay(16);
 
       if(temp == 0 || bytes == 0)
         return -1;
@@ -234,6 +229,7 @@ char Terminal::getChar()
     while(1)
     {
       int temp = read(fd, &c, 1);
+      delay(16);
 
       if(temp <= 0)
         return -1;
@@ -253,8 +249,6 @@ void Terminal::sendString(const char *s)
 
     for(int i = 0; i < strlen(buf); i++)
     {
-//      buf[i] = toupper(buf[i]);
-
       if(buf[i] == '\n')
         buf[i] = 13;
     }
@@ -446,19 +440,21 @@ void Terminal::updateRegs()
   if(connected == false)
     return;
 
-  char s[64];
+  char s[256];
   memset(s, 0, sizeof(s));
   delay(1000);
 
   if(Gui::getMode() == Gui::MODE_265)
   {
     sendString("| ");
+    delay(16);
     getResult(s);
     Gui::updateRegs(s);
   }
   else if(Gui::getMode() == Gui::MODE_134)
   {
     sendString("R");
+    delay(16);
     getResult(s);
     Gui::updateRegs(s);
   }
@@ -534,7 +530,7 @@ void Terminal::upload()
   int count = 0;
   int temp;
   int ret;
-  char s[1024];
+  char s[256];
 
   FILE *fp = fopen(fc.filename(), "r");
   if(!fp)
