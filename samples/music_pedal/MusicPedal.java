@@ -21,37 +21,39 @@ public class MusicPedal
       input = IOPort4.getPortInputValue();
       //input = 1;
 
-      if ((input & 0x1) != 0)
+      if ((input & 0x1) == 0)
       {
         tg0 = 65;
         tg1 = 69;
       }
         else
-      if ((input & 0x2) != 0)
+      if ((input & 0x2) == 0)
       {
         tg0 = 59;
         tg1 = 62;
       }
         else
-      if ((input & 0x4) != 0)
+      if ((input & 0x4) == 0)
       {
         tg0 = 67;
         tg1 = 71;
       }
+/*
         else
-      if ((input & 0x8) != 0)
+      if ((input & 0x8) == 0)
       {
         tg0 = 64;
         tg1 = 67;
       }
+*/
         else
       {
         tg0 = 0;
         tg1 = 0;
       }
 
-      //tg0 = notes[tg0];
-      //tg1 = notes[tg1];
+      tg0 = notes[tg0];
+      tg1 = notes[tg1];
       //tg0 = 800;
       //tg1 = 900;
       on0 = tg0 != 0;
