@@ -105,6 +105,12 @@ void Terminal::connect(const char *device)
   dcb.ByteSize = 8;
   dcb.StopBits = ONESTOPBIT;
   dcb.Parity = NOPARITY;
+  dcb.fOutX = FALSE;
+  dcb.fInX = FALSE;
+  dcb.fOutxCtsFlow = TRUE;
+  dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
+  dcb.fOutxDsrFlow = FALSE;
+  dcb.fDtrControl = DTR_CONTROL_DISABLE;
 
   if(SetCommState(hserial, &dcb) == 0)
   {
