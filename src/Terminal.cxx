@@ -136,12 +136,13 @@ void Terminal::connect(const char *device)
   }
 
   memset(&term, 0, sizeof(term));
-  term.c_cflag = B9600 | CS8 | CREAD| CLOCAL;
+  term.c_cflag = B9600 | CRTSCTS | CS8 | CREAD| CLOCAL;
   term.c_iflag = IGNPAR;
   term.c_oflag = 0;
   term.c_lflag = 0;
-  term.c_cc[VTIME] = 2;
-  term.c_cc[VMIN] = 0;
+  term.c_cc[VTIME] = 0;
+  term.c_cc[VMIN] = 1;
+  tcflush(fd, TCIFLUSH);
   tcsetattr(fd, TCSANOW, &term);
 
   tv.tv_sec = 0;
