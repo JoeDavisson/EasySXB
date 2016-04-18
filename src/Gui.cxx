@@ -355,7 +355,7 @@ void Gui::init()
   top->resizable(server_display);
   top->end();
 
-  window->size_range(768, 480, 0, 0, 0, 0, 0);
+  window->size_range(512, 384, 0, 0, 0, 0, 0);
   window->resizable(top);
   window->end();
 
