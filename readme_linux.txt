@@ -1,4 +1,4 @@
-EasySXB v0.1.2 for Linux
+EasySXB for Linux
 by Joe Davisson
 
 

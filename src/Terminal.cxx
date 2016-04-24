@@ -101,6 +101,7 @@ void Terminal::connect(const char *device)
   }
 
   GetCommState(hserial, &dcb);
+
   dcb.BaudRate = CBR_9600;
   dcb.ByteSize = 8;
   dcb.StopBits = ONESTOPBIT;
@@ -120,6 +121,7 @@ void Terminal::connect(const char *device)
   }
 
   memset(&timeouts, 0, sizeof(timeouts));
+
   timeouts.ReadIntervalTimeout = MAXDWORD;
   timeouts.ReadTotalTimeoutConstant = 0;
   timeouts.ReadTotalTimeoutMultiplier = 0;
@@ -142,6 +144,7 @@ void Terminal::connect(const char *device)
   }
 
   memset(&term, 0, sizeof(term));
+
   term.c_cflag = B9600 | CRTSCTS | CS8 | CREAD| CLOCAL;
   term.c_iflag = IGNPAR;
   term.c_oflag = 0;
@@ -306,11 +309,11 @@ void Terminal::getData()
       BOOL temp = ReadFile(hserial, buf + buf_pos, 256, &bytes, NULL);
       delay(16);
 
-      if(temp == 0 || bytes == 0 || bytes > 32)
+      if(temp == 0 || bytes == 0)
         break;
 
       buf_pos += bytes;
-      if(buf_pos > 3500)
+      if(buf_pos > 2048)
         break;
     }
   }
@@ -324,11 +327,11 @@ void Terminal::getData()
       bytes = read(fd, buf + buf_pos, 256);
       delay(16);
 
-      if(bytes <= 0 || bytes > 32)
+      if(bytes <= 0)
         break;
 
       buf_pos += bytes;
-      if(buf_pos > 3500)
+      if(buf_pos > 2048)
         break;
     }
   }

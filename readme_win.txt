@@ -1,4 +1,4 @@
-EasySXB v0.1.2 for Windows
+EasySXB for Windows
 by Joe Davisson
 
 
