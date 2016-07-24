@@ -46,7 +46,7 @@ namespace
   };
 
   const char *help_string =
-    "\nUsage: rendera [OPTIONS] filename\n\n"
+    "\nUsage: easysxb [OPTIONS] filename\n\n"
     "Options:\n"
     " --theme=dark\t\t use dark theme\n"
     " --theme=light\t\t use light theme\n"
