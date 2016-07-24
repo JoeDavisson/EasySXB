@@ -80,6 +80,7 @@ namespace About
     y1 += 32;
     Items::dialog->addOkButton(&Items::ok, &y1);
     Items::ok->callback((Fl_Callback *)close);
+    Items::ok->shortcut(FL_Enter);
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }
@@ -139,8 +140,9 @@ namespace Connect
 #endif
     y1 += 48;
     Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
-    Items::ok->callback((Fl_Callback *)close);
     Items::cancel->callback((Fl_Callback *)quit);
+    Items::ok->callback((Fl_Callback *)close);
+    Items::ok->shortcut(FL_Enter);
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }
@@ -178,6 +180,7 @@ namespace Message
     y1 += 64;
     Items::dialog->addOkButton(&Items::ok, &y1);
     Items::ok->callback((Fl_Callback *)quit);
+    Items::ok->shortcut(FL_Enter);
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }
@@ -225,10 +228,11 @@ namespace Choice
     Items::box->labelsize(14); 
     y1 += 64;
     Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
-    Items::ok->copy_label("Yes");
     Items::cancel->copy_label("No");
-    Items::ok->callback((Fl_Callback *)close);
     Items::cancel->callback((Fl_Callback *)quit);
+    Items::ok->copy_label("Yes");
+    Items::ok->callback((Fl_Callback *)close);
+    Items::ok->shortcut(FL_Enter);
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }

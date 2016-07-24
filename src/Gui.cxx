@@ -85,7 +85,10 @@ namespace
   void quit()
   {
     if(Dialog::choice("Quit", "Are You Sure?"))
+    {
+      Gui::setCancelled(true);
       exit(0);
+    }
   }
 
   // prevent escape from closing main window
