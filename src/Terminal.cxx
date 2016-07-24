@@ -518,7 +518,7 @@ void Terminal::upload()
 
   Fl_Native_File_Chooser fc;
   fc.title("Upload Program");
-  fc.filter("HEX File\t*.hex\n");
+  fc.filter("HEX File\t*.hex\nSREC File\t*.srec\n");
   fc.options(Fl_Native_File_Chooser::PREVIEW);
   fc.type(Fl_Native_File_Chooser::BROWSE_FILE);
   fc.directory(load_dir);
@@ -533,6 +533,17 @@ void Terminal::upload()
       break;
   }
 
+  const char *ext = fl_filename_ext(fc.filename());
+
+  if(strcasecmp(ext, ".hex") == 0)
+    Terminal::uploadHex(fc.filename());
+  else if(strcasecmp(ext, ".srec") == 0)
+    Terminal::uploadSrec(fc.filename());
+}
+
+//FIXME fscanf return value should be checked
+void Terminal::uploadHex(const char *filename)
+{
   int segment = 0;
   int address = 0;
   int code = 0;
@@ -542,7 +553,7 @@ void Terminal::upload()
   int ret;
   char s[256];
 
-  FILE *fp = fopen(fc.filename(), "r");
+  FILE *fp = fopen(filename, "r");
   if(!fp)
     return;
 
@@ -561,7 +572,7 @@ void Terminal::upload()
       ret = fscanf(fp, "%02X", &count);
 
       // last line
-      if(count == 0x00)
+      if(count == 0)
       {
         break;
       }
@@ -572,15 +583,15 @@ void Terminal::upload()
 
         if(code == 0x04)
         {
-          ret = segment = address;
+          segment = address;
         }
         else if(code == 0x00)
         {
           int checksum = 0;
 
           // address
-          sprintf(s, "S2%02X%02X%02X%02X",
-                  count + 4, segment, address >> 8, address & 0xFF);
+          sprintf(s, "S2%02X%02X%02X%02X", count + 4,
+                  segment, (address >> 8) & 0xFF, address & 0xFF);
           checksum += count + 4;
           checksum += address >> 8;
           checksum += address & 0xFF;
@@ -620,6 +631,111 @@ void Terminal::upload()
         Gui::setCancelled(false);
         break;
       }
+    }
+  }
+
+  sprintf(s, "S804000000FB\n");
+  sendString(s);
+
+  fclose(fp);
+}
+
+//FIXME fscanf return value should be checked
+void Terminal::uploadSrec(const char *filename)
+{
+  int address = 0;
+  int code = 0;
+  int value = 0;
+  int count = 0;
+  int temp;
+  char prefix[8];
+  int ret;
+  char s[256];
+
+  FILE *fp = fopen(filename, "r");
+  if(!fp)
+    return;
+
+  Gui::append("\nUploading Program, ESC to cancel.\n");
+
+  while(1)
+  {
+    // get code from prefix
+    prefix[0] = fgetc(fp);
+    if(prefix[0] == EOF)
+      break;
+
+    prefix[1] = fgetc(fp);
+    if(prefix[1] == EOF)
+      break;
+
+    code = prefix[1] - '0';
+    if(code < 0 || code > 2)
+      break;
+
+    ret = fscanf(fp, "%02X", &count);
+
+    if(code == 1)
+      count -= 3;
+    else if(code == 2)
+      count -= 4;
+
+    // last line
+    if(count == 0)
+    {
+      break;
+    }
+    else if(code > 0)
+    {
+      if(code == 1)
+        ret = fscanf(fp, "%04X", &address);
+      else if(code == 2)
+        ret = fscanf(fp, "%06X", &address);
+      else
+        break;
+
+      int checksum = 0;
+
+      // address
+      sprintf(s, "S2%02X%02X%02X%02X", count + 4,
+              (address >> 16) & 0xFF, (address >> 8) & 0xFF, address & 0xFF);
+      checksum += count + 4;
+      checksum += address >> 8;
+      checksum += address & 0xFF;
+
+      // data
+      int index = 10;
+      for(int i = 0; i < count; i++)
+      {
+        ret = fscanf(fp, "%02X", &value);
+        sprintf(s + index, "%02X", value);
+        index += 2;
+        checksum += value;
+      }
+
+      // checksum
+      sprintf(s + index, "%02X\n", 0xFF - (checksum & 0xFF));
+      sendString(s);
+
+      // update terminal
+      getData();
+      Gui::append(buf);
+    }
+
+    // skip to next line
+    while(1)
+    {
+      temp = fgetc(fp);
+      if(temp == '\n')
+        break;
+    }
+
+    // cancel operation with escape key
+    Fl::check();
+    if(Gui::getCancelled() == true)
+    {
+      Gui::setCancelled(false);
+      break;
     }
   }
 
