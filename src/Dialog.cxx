@@ -137,7 +137,7 @@ namespace Connect
 #else
     Items::device->value("/dev/ttyUSB0");
 #endif
-    y1 += 32;
+    y1 += 48;
     Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
     Items::ok->callback((Fl_Callback *)close);
     Items::cancel->callback((Fl_Callback *)quit);
