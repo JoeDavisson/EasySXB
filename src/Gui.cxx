@@ -44,6 +44,7 @@ namespace
 {
   // current mode
   int mode = Gui::MODE_265;
+  bool cancelled = false;
 
   // window
   MainWin *window;
@@ -127,6 +128,12 @@ public:
       case FL_UNFOCUS:
         return 1;
       case FL_KEYBOARD:
+        if(Fl::event_key() == FL_Escape)
+        {
+          Gui::setCancelled(true);
+          return 1;
+        }
+
         // give focus to the main menu
         if(Fl::event_alt() > 0)
         {
@@ -734,6 +741,16 @@ void Gui::setFontLarge()
   server_display->buffer(0);
   server_display->buffer(server_text);
   server_display->redraw();
+}
+
+void Gui::setCancelled(bool value)
+{
+  cancelled = value;
+}
+
+bool Gui::getCancelled()
+{
+  return cancelled;
 }
 
 int Gui::getMode()

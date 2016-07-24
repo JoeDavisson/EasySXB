@@ -59,6 +59,8 @@ namespace Gui
   void setFontSmall();
   void setFontMedium();
   void setFontLarge();
+  void setCancelled(bool);
+  bool getCancelled();
   int getMode();
 }
 

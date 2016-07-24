@@ -161,7 +161,7 @@ void Terminal::connect(const char *device)
   flash = 0;
   connected = true;
 
-  Gui::append("\n(Connected to SXB at 9600 baud.)\n");
+  Gui::append("\nConnected to SXB at 9600 baud.\n");
   delay(500);
 }
 
@@ -175,7 +175,7 @@ void Terminal::disconnect()
     close(fd);
 #endif
     connected = false;
-    Gui::append("\n(Connection Closed.)\n");
+    Gui::append("\nConnection Closed.\n");
     Dialog::message("Disconnected", "Connection Closed.");
   }
 }
@@ -546,6 +546,8 @@ void Terminal::upload()
   if(!fp)
     return;
 
+  Gui::append("\nUploading Program, ESC to cancel.\n");
+
   while(1)
   {
     temp = fgetc(fp);
@@ -609,6 +611,14 @@ void Terminal::upload()
         temp = fgetc(fp);
         if(temp == '\n')
           break;
+      }
+
+      // cancel operation with escape key
+      Fl::check();
+      if(Gui::getCancelled() == true)
+      {
+        Gui::setCancelled(false);
+        break;
       }
     }
   }
