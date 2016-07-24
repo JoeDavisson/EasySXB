@@ -56,6 +56,9 @@ namespace Gui
   void flashCursor(bool);
   void setMode265();
   void setMode134();
+  void setFontSmall();
+  void setFontMedium();
+  void setFontLarge();
   int getMode();
 }
 
