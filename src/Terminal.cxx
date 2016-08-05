@@ -554,8 +554,12 @@ void Terminal::uploadHex(const char *filename)
   char s[256];
 
   FILE *fp = fopen(filename, "r");
-  if(!fp)
+
+  if(fp == NULL)
+  {
+    Dialog::message("Error", "Could not open file.\n");
     return;
+  }
 
   Gui::append("\nUploading Program, ESC to cancel.\n");
 
@@ -653,8 +657,12 @@ void Terminal::uploadSrec(const char *filename)
   char s[256];
 
   FILE *fp = fopen(filename, "r");
-  if(!fp)
+
+  if(fp == NULL)
+  {
+    Dialog::message("Error", "Could not open file.\n");
     return;
+  }
 
   Gui::append("\nUploading Program, ESC to cancel.\n");
 

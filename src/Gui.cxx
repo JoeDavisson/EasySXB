@@ -42,14 +42,10 @@ class MainWin;
 
 namespace
 {
-  // current mode
   int mode = Gui::MODE_265;
   bool cancelled = false;
 
-  // window
   MainWin *window;
-
-  // main menu
   Fl_Menu_Bar *menubar;
 
   Fl_Group *top;
@@ -760,5 +756,4 @@ int Gui::getMode()
 {
   return mode;
 }
-
 

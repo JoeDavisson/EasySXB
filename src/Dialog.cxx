@@ -74,7 +74,8 @@ namespace About
     Items::info->labelfont(FL_HELVETICA_ITALIC);
     Items::info->labelsize(12);
     y1 += 48;
-    Items::copyright = new Fl_Box(FL_FLAT_BOX, 0, y1, 384, 32, "Copyright (c) 2016 Joe Davisson.\n");
+    Items::copyright = new Fl_Box(FL_FLAT_BOX, 0, y1, 384, 32,
+      "Copyright (c) 2016 Joe Davisson.\n");
     Items::copyright->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::copyright->labelsize(12);
     y1 += 32;
@@ -264,8 +265,10 @@ void Dialog::message(const char *title, const char *message)
 bool Dialog::choice(const char *title, const char *message)
 {
   Choice::begin(title, message);
+
   while(Choice::Items::dialog->shown())
     Fl::wait();
+
   return Choice::yes;
 }
 
