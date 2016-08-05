@@ -1,3 +1,6 @@
+; Software SPI - by Michael Kohn
+; http://www.mikekohn.net/micro/modern_6502.php
+
 .org 0x1000
   ;; These are some generic SPI routines.  To move to different ports or
   ;; pins, the AND/OR instructions need to be changed and the output

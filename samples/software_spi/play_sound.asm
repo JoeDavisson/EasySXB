@@ -1,3 +1,6 @@
+; Play Sound - by Michael Kohn
+; http://www.mikekohn.net/micro/modern_6502.php
+
 .org 0x1000
 
 start:

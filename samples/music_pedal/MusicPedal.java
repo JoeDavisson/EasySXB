@@ -1,3 +1,5 @@
+// Music Pedal - by Michael Kohn
+// http://www.mikekohn.net/micro/modern_6502.php
 
 import net.mikekohn.java_grinder.W65C265SXB;
 import net.mikekohn.java_grinder.IOPort4;

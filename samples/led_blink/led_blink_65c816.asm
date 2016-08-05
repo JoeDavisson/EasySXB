@@ -1,3 +1,6 @@
+; LED Blink - by Michael Kohn
+; http://www.mikekohn.net/micro/modern_6502.php
+
 .65816
 .org 0x1000
 
