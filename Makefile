@@ -7,8 +7,12 @@
 # you MUST have libxft-dev installed before compiling FLTK on linux
 # (otherwise you'll have ugly, non-resizable fonts)
 
-#PLATFORM=linux_dynamic
-PLATFORM=linux_static
+ifeq ($(wildcard ./fltk-1.3.3),)
+  PLATFORM=linux_dynamic
+else
+  PLATFORM=linux_static
+endif
+
 #PLATFORM=mingw32
 #PLATFORM=mingw64
 
