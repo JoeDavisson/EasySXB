@@ -253,7 +253,7 @@ read_from_port_5:
   ; Read start header
   WHILE_MARKER_ON
 
-  COMPARE_TIMER(START - 200, start_reading)
+  COMPARE_TIMER(START - 400, start_reading)
   ;DEBUG_LED_OFF
   jmp main
 
@@ -289,7 +289,7 @@ retry_bit:
 
   WHILE_MARKER_ON
 
-  COMPARE_TIMER(SHORT+200, read_1)
+  COMPARE_TIMER(SHORT+150, read_1)
 
   ;; Ignore noise
   cpx #100

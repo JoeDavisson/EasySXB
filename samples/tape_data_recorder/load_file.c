@@ -38,6 +38,8 @@ int main(int argc, char *argv[])
     if (n < 0) { break; }
 
     putc(n, out);
+    fflush(out);
+
     printf("%c", n);
     fflush(stdout);
 
