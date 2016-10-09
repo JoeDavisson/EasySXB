@@ -267,7 +267,7 @@ bool Dialog::choice(const char *title, const char *message)
   Choice::begin(title, message);
 
   while(Choice::Items::dialog->shown())
-    Fl::wait();
+    Fl::check();
 
   return Choice::yes;
 }
