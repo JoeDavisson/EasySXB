@@ -49,6 +49,8 @@ namespace Terminal
   void jml(int);
   void jsl(int);
   void upload();
+  void uploadHex(const char *);
+  void uploadSrec(const char *);
 }
 
 #endif

@@ -19,7 +19,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 */
 
 #include "FL/Fl.H"
-//#include "FL/Fl_Timeout_Handler.H"
+
+#include <getopt.h>
 
 #include "Dialog.H"
 #include "Gui.H"
@@ -27,6 +28,31 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 namespace
 {
+  enum
+  {
+    OPTION_THEME,
+    OPTION_VERSION,
+    OPTION_HELP
+  };
+
+  int verbose_flag;
+
+  struct option long_options[] =
+  {
+    { "theme",   required_argument, &verbose_flag, OPTION_THEME   },
+    { "version", no_argument,       &verbose_flag, OPTION_VERSION },
+    { "help",    no_argument,       &verbose_flag, OPTION_HELP    },
+    { 0, 0, 0, 0 }
+  };
+
+  const char *help_string =
+    "\nUsage: easysxb [OPTIONS] filename\n\n"
+    "Options:\n"
+    " --theme=dark\t\t use dark theme\n"
+    " --theme=light\t\t use light theme\n"
+    " --version\t\t show version\n"
+    "\n";
+
   void setDarkTheme()
   {
     Fl::set_color(FL_BACKGROUND_COLOR, 80, 80, 80);
@@ -48,9 +74,60 @@ namespace
 
 int main(int argc, char *argv[])
 {
-  // default to a nice dark theme
+  // default to light theme
   setLightTheme();
-//  setDarkTheme();
+
+  // parse command line
+  int option_index = 0;
+
+  while(true)
+  {
+    const int c = getopt_long(argc, argv, "", long_options, &option_index);
+    if(c < 0)
+      break;
+
+    switch(c)
+    {
+      case 0:
+      {
+        switch(option_index)
+        {
+          case OPTION_THEME:
+            if(strcmp(optarg, "dark") == 0)
+            {
+              setDarkTheme();
+              break;
+            }
+            if(strcmp(optarg, "light") == 0)
+            {
+              setLightTheme();
+              break;
+            }
+            printf("\nUnknown theme: \"%s\"\n", optarg);
+            return 0;
+          case OPTION_HELP:
+            printf("%s\n", help_string);
+            return 0;
+
+          case OPTION_VERSION:
+            printf("%s\n", PACKAGE_STRING);
+            return 0;
+
+          default:
+            printf("%s\n", help_string);
+            return 0 ;
+        }
+
+        break;
+      }
+
+      default:
+      {
+        printf("%s\n", help_string);
+        return 0 ;
+      }
+    }
+  }
 
   // fltk related inits
   Fl::visual(FL_DOUBLE | FL_RGB);

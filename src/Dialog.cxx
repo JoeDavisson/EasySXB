@@ -42,6 +42,7 @@ namespace About
   {
     DialogWindow *dialog;
     Fl_Box *copyright;
+    Fl_Box *info;
     Fl_Box *version;
     Fl_Button *ok;
   }
@@ -62,16 +63,25 @@ namespace About
     int ww = 0, hh = 0;
 
     Items::dialog = new DialogWindow(384, 0, "About");
-    Items::version = new Fl_Box(FL_FLAT_BOX, 8, y1, 384, 32, PACKAGE_STRING);
+    Items::version = new Fl_Box(FL_FLAT_BOX, 0, y1, 384, 32, PACKAGE_STRING);
     Items::version->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::version->labelsize(16);
     y1 += 32;
-    Items::copyright = new Fl_Box(FL_FLAT_BOX, 8, y1, 384, 32, "Copyright (c) 2016 Joe Davisson.\n");
-    Items::copyright->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
-    Items::copyright->labelsize(14);
+    Items::info = new Fl_Box(FL_FLAT_BOX, 0, y1, 384, 32,
+      "A terminal emulator for use with the SXB\n"
+      "line of development boards from Western Design Center.\n");
+    Items::info->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
+    Items::info->labelfont(FL_HELVETICA_ITALIC);
+    Items::info->labelsize(12);
     y1 += 48;
+    Items::copyright = new Fl_Box(FL_FLAT_BOX, 0, y1, 384, 32,
+      "Copyright (c) 2016 Joe Davisson.\n");
+    Items::copyright->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
+    Items::copyright->labelsize(12);
+    y1 += 32;
     Items::dialog->addOkButton(&Items::ok, &y1);
     Items::ok->callback((Fl_Callback *)close);
+    Items::ok->shortcut(FL_Enter);
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }
@@ -129,10 +139,11 @@ namespace Connect
 #else
     Items::device->value("/dev/ttyUSB0");
 #endif
-    y1 += 32;
+    y1 += 48;
     Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
-    Items::ok->callback((Fl_Callback *)close);
     Items::cancel->callback((Fl_Callback *)quit);
+    Items::ok->callback((Fl_Callback *)close);
+    Items::ok->shortcut(FL_Enter);
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }
@@ -170,6 +181,7 @@ namespace Message
     y1 += 64;
     Items::dialog->addOkButton(&Items::ok, &y1);
     Items::ok->callback((Fl_Callback *)quit);
+    Items::ok->shortcut(FL_Enter);
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }
@@ -217,10 +229,11 @@ namespace Choice
     Items::box->labelsize(14); 
     y1 += 64;
     Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
-    Items::ok->copy_label("Yes");
     Items::cancel->copy_label("No");
-    Items::ok->callback((Fl_Callback *)close);
     Items::cancel->callback((Fl_Callback *)quit);
+    Items::ok->copy_label("Yes");
+    Items::ok->callback((Fl_Callback *)close);
+    Items::ok->shortcut(FL_Enter);
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }
@@ -252,8 +265,10 @@ void Dialog::message(const char *title, const char *message)
 bool Dialog::choice(const char *title, const char *message)
 {
   Choice::begin(title, message);
+
   while(Choice::Items::dialog->shown())
-    Fl::wait();
+    Fl::check();
+
   return Choice::yes;
 }
 

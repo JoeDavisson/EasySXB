@@ -42,13 +42,10 @@ class MainWin;
 
 namespace
 {
-  // current mode
   int mode = Gui::MODE_265;
+  bool cancelled = false;
 
-  // window
   MainWin *window;
-
-  // main menu
   Fl_Menu_Bar *menubar;
 
   Fl_Group *top;
@@ -84,7 +81,10 @@ namespace
   void quit()
   {
     if(Dialog::choice("Quit", "Are You Sure?"))
+    {
+      Gui::setCancelled(true);
       exit(0);
+    }
   }
 
   // prevent escape from closing main window
@@ -127,6 +127,12 @@ public:
       case FL_UNFOCUS:
         return 1;
       case FL_KEYBOARD:
+        if(Fl::event_key() == FL_Escape)
+        {
+          Gui::setCancelled(true);
+          return 1;
+        }
+
         // give focus to the main menu
         if(Fl::event_alt() > 0)
         {
@@ -172,12 +178,19 @@ void Gui::init()
   menubar->add("&File/&Quit...", 0,
     (Fl_Callback *)quit, 0, 0);
 
-  menubar->add("&Mode/W65C265SXB", 0,
+  menubar->add("&Options/&Board Model/W65C265SXB", 0,
     (Fl_Callback *)setMode265, 0, FL_MENU_RADIO);
-  menubar->add("&Mode/W65C134SXB", 0,
-    (Fl_Callback *)setMode134, 0, FL_MENU_RADIO);
+  menubar->add("&Options/&Board Model/W65C134SXB", 0,
+    (Fl_Callback *)setMode134, 0, FL_MENU_RADIO | FL_MENU_DIVIDER);
+  menubar->add("&Options/&Font Size/Small", 0,
+    (Fl_Callback *)setFontSmall, 0, FL_MENU_RADIO);
+  menubar->add("&Options/&Font Size/Medium", 0,
+    (Fl_Callback *)setFontMedium, 0, FL_MENU_RADIO);
+  menubar->add("&Options/&Font Size/Large", 0,
+    (Fl_Callback *)setFontLarge, 0, FL_MENU_RADIO);
 
-  setMenuItem("&Mode/W65C265SXB");
+  setMenuItem("&Options/&Board Model/W65C265SXB");
+  setMenuItem("&Options/&Font Size/Medium");
 
   menubar->add("&Help/&About...", 0,
     (Fl_Callback *)Dialog::about, 0, 0);
@@ -342,8 +355,8 @@ void Gui::init()
   server_display = new Fl_Text_Display(top->x() + side->w(), top->y(),
                                        top->w() - side->w(), top->h());
 
-  //server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   server_display->box(FL_UP_BOX);
+  server_display->scrollbar_width(18);
   server_display->textsize(14);
   server_display->textfont(FL_COURIER);
   server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
@@ -354,7 +367,7 @@ void Gui::init()
   top->resizable(server_display);
   top->end();
 
-  window->size_range(768, 480, 0, 0, 0, 0, 0);
+  window->size_range(512, 384, 0, 0, 0, 0, 0);
   window->resizable(top);
   window->end();
 
@@ -433,7 +446,7 @@ void Gui::append(const char *buf)
   // scroll display to bottom
   server_display->insert_position(server_text->length());
   server_display->show_insert_position();
-  Fl::flush();
+  Fl::check();
 }
 
 void Gui::checkPC()
@@ -705,9 +718,42 @@ void Gui::setMode134()
   window->redraw();
 }
 
+void Gui::setFontSmall()
+{
+  server_display->textsize(10);
+  server_display->buffer(0);
+  server_display->buffer(server_text);
+  server_display->redraw();
+}
+
+void Gui::setFontMedium()
+{
+  server_display->textsize(14);
+  server_display->buffer(0);
+  server_display->buffer(server_text);
+  server_display->redraw();
+}
+
+void Gui::setFontLarge()
+{
+  server_display->textsize(18);
+  server_display->buffer(0);
+  server_display->buffer(server_text);
+  server_display->redraw();
+}
+
+void Gui::setCancelled(bool value)
+{
+  cancelled = value;
+}
+
+bool Gui::getCancelled()
+{
+  return cancelled;
+}
+
 int Gui::getMode()
 {
   return mode;
 }
-
 
