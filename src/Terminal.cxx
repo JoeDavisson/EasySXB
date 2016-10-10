@@ -32,6 +32,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
   #include <termios.h>
 #endif
 
+#if defined(_MSC_VER)
+	#define strcasecmp _stricmp 
+#endif
+
 #include <FL/Fl.H>
 #include <FL/Fl_Native_File_Chooser.H>
 
