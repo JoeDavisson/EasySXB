@@ -36,6 +36,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include "Gui.H"
 #include "Terminal.H"
 
+#if defined(_MSC_VER)
+#define PACKAGE_STRING "EasySXB Development Version"
+#endif
+
 namespace About
 {
   namespace Items
