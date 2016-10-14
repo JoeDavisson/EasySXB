@@ -35,7 +35,7 @@ namespace Terminal
     REG_DB
   };
 
-  void connect(const char *);
+  void connect();
   void disconnect();
   bool isConnected();
   void sendChar(char);
@@ -51,6 +51,8 @@ namespace Terminal
   void upload();
   void uploadHex(const char *);
   void uploadSrec(const char *);
+
+  extern char port_string[256];
 }
 
 #endif

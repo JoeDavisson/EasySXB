@@ -111,14 +111,7 @@ namespace Connect
   void close()
   {
     Items::dialog->hide();
-#ifdef WIN32
-    // correct port name
-    char buf[256];
-    sprintf(buf, "\\\\.\\%s", Items::device->value());
-    Terminal::connect(buf);
-#else
-    Terminal::connect(Items::device->value());
-#endif
+    Terminal::connect();
   }
 
   void quit()
@@ -134,11 +127,7 @@ namespace Connect
     Items::dialog = new DialogWindow(384, 0, "Connect to SXB");
     Items::device = new Fl_Input(128, y1, 192, 24, "Device: ");
     Items::device->align(FL_ALIGN_LEFT);
-#ifdef WIN32
-    Items::device->value("COM1");
-#else
-    Items::device->value("/dev/ttyUSB0");
-#endif
+    Items::device->value(Terminal::port_string);
     y1 += 48;
     Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
     Items::cancel->callback((Fl_Callback *)quit);

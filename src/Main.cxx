@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 */
 
 #include "FL/Fl.H"
+#include <FL/Fl_Native_File_Chooser.H>
 
 #include <getopt.h>
 
@@ -30,6 +31,8 @@ namespace
 {
   enum
   {
+    OPTION_PORT,
+    OPTION_FILE,
     OPTION_THEME,
     OPTION_VERSION,
     OPTION_HELP
@@ -39,18 +42,21 @@ namespace
 
   struct option long_options[] =
   {
-    { "theme",   required_argument, &verbose_flag, OPTION_THEME   },
-    { "version", no_argument,       &verbose_flag, OPTION_VERSION },
-    { "help",    no_argument,       &verbose_flag, OPTION_HELP    },
+    { "port",      required_argument, &verbose_flag, OPTION_PORT   },
+    { "file",      required_argument, &verbose_flag, OPTION_FILE   },
+    { "theme",     required_argument, &verbose_flag, OPTION_THEME   },
+    { "version",   no_argument,       &verbose_flag, OPTION_VERSION },
+    { "help",      no_argument,       &verbose_flag, OPTION_HELP    },
     { 0, 0, 0, 0 }
   };
 
   const char *help_string =
     "\nUsage: easysxb [OPTIONS] filename\n\n"
     "Options:\n"
-    " --theme=dark\t\t use dark theme\n"
-    " --theme=light\t\t use light theme\n"
-    " --version\t\t show version\n"
+    " --port        specify port\n"
+    " --file        connect and upload .hex or .srec file\n"
+    " --theme       select theme (light or dark)\n"
+    " --version     show version\n"
     "\n";
 
   void setDarkTheme()
@@ -79,6 +85,14 @@ int main(int argc, char *argv[])
 
   // parse command line
   int option_index = 0;
+  char file_string[1024];
+  bool upload = false;
+
+#ifdef WIN32
+  strcpy(Terminal::port_string, "COM1");
+#else
+  strcpy(Terminal::port_string, "/dev/ttyUSB0");
+#endif
 
   while(true)
   {
@@ -92,6 +106,13 @@ int main(int argc, char *argv[])
       {
         switch(option_index)
         {
+          case OPTION_PORT:
+            strncpy(Terminal::port_string, optarg, 256);
+            break;
+          case OPTION_FILE:
+            strncpy(file_string, optarg, 1024);
+            upload = true;
+            break;
           case OPTION_THEME:
             if(strcmp(optarg, "dark") == 0)
             {
@@ -139,8 +160,22 @@ int main(int argc, char *argv[])
 
   // delay showing main gui until after all arguments are checked
   Gui::show();
-
   Fl::add_timeout(1, Terminal::receive);
+
+  // upload a file?
+  if(upload == true)
+  {
+    Terminal::connect();
+
+    const char *ext = fl_filename_ext(file_string);
+  
+    if(strcasecmp(ext, ".hex") == 0)
+      Terminal::uploadHex(file_string);
+    else if(strcasecmp(ext, ".srec") == 0)
+      Terminal::uploadSrec(file_string);
+    else Dialog::message("Upload Error", "Only .hex and .srec file extentions are supported.");
+  }
+
   int ret = Fl::run();
   return ret;
 }

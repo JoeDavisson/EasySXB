@@ -88,10 +88,20 @@ namespace
   }
 }
 
-void Terminal::connect(const char *device)
+namespace Terminal
+{
+  char port_string[256];
+}
+
+void Terminal::connect()
 {
 #ifdef WIN32
-  hserial = CreateFile(device, GENERIC_READ | GENERIC_WRITE,
+  // correct port name
+  char buf[256];
+  sprintf(buf, "\\\\.\\%s", Items::device->value());
+  strcpy(buf, port_string);
+
+  hserial = CreateFile(port_string, GENERIC_READ | GENERIC_WRITE,
                        0, NULL, OPEN_EXISTING, 0, NULL);
 
   if(hserial == INVALID_HANDLE_VALUE)
@@ -135,7 +145,7 @@ void Terminal::connect(const char *device)
     return;
   }
 #else
-  fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
+  fd = open(port_string, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
   if(fd == -1)
   {
@@ -162,7 +172,7 @@ void Terminal::connect(const char *device)
   connected = true;
 
   Gui::append("\nConnected to SXB at 9600 baud.\n");
-  delay(500);
+  delay(1000);
 }
 
 void Terminal::disconnect()
@@ -539,6 +549,7 @@ void Terminal::upload()
     Terminal::uploadHex(fc.filename());
   else if(strcasecmp(ext, ".srec") == 0)
     Terminal::uploadSrec(fc.filename());
+  else Dialog::message("Upload Error", "Only .hex and .srec file extentions are supported.");
 }
 
 //FIXME fscanf return value should be checked
