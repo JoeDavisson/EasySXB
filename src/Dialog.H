@@ -21,6 +21,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #ifndef DIALOG_H
 #define DIALOG_H
 
+#ifndef PACKAGE_STRING
+#define PACKAGE_STRING "EasySXB (Development Version)"
+#endif
+
 namespace Dialog
 {
   void init();
