@@ -39,6 +39,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include "Gui.H"
 #include "Terminal.H"
 
+// for Visual Studio
+#if defined(_MSC_VER)
+#define strcasecmp _stricmp 
+#endif
+
 namespace
 {
   bool connected = false;
