@@ -150,7 +150,7 @@ void Terminal::connect()
     return;
   }
 #else
-  fd = open(port_string, O_RDWR | O_NOCTTY | O_NONBLOCK);
+  fd = open(port_string, O_RDWR | O_NOCTTY | O_NONBLOCK | O_NDELAY);
 
   if(fd == -1)
   {
@@ -160,8 +160,9 @@ void Terminal::connect()
 
   memset(&term, 0, sizeof(term));
 
-  term.c_cflag = B9600 | CRTSCTS | CS8 | CREAD| CLOCAL;
-  term.c_iflag = IGNPAR;
+  //term.c_cflag = B9600 | CRTSCTS | CS8 | CREAD| CLOCAL;
+  term.c_cflag = B9600 | CS8 | CREAD| CLOCAL;
+  term.c_iflag = IGNPAR | IXOFF | IXON | IXANY;
   term.c_oflag = 0;
   term.c_lflag = 0;
   term.c_cc[VTIME] = 0;
