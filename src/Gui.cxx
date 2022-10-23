@@ -146,7 +146,7 @@ public:
         ctrl = Fl::event_ctrl() ? true : false;
 
         // misc keys
-        if(Fl::event_length > 0)
+        if(Fl::event_length() > 0)
         {
           Terminal::sendString(Fl::event_text());
         }

@@ -230,7 +230,7 @@ void Terminal::sendChar(char c)
 
 char Terminal::getChar()
 {
-  char c;
+  char c = ' ';
   int tries = 0;
 
 #ifdef WIN32
@@ -264,6 +264,7 @@ char Terminal::getChar()
     }
   }
 #endif
+  return c;
 }
 
 void Terminal::sendString(const char *s)
