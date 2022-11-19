@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016 Joe Davisson.
+Copyright (c) 2022 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -53,8 +53,8 @@ namespace
   Fl_Group *top;
   Fl_Group *side;
 
-  Fl_Text_Buffer *server_text;
-  Fl_Text_Display *server_display;
+  Fl_Text_Buffer *client_text;
+  Fl_Text_Display *client_display;
 
   Fl_Input *input_pc;
   Fl_Input *input_a;
@@ -197,7 +197,7 @@ void Gui::init()
   menubar->add("&Help/&About...", 0,
     (Fl_Callback *)Dialog::about, 0, 0);
 
-  server_text = new Fl_Text_Buffer();
+  client_text = new Fl_Text_Buffer();
 
   top = new Fl_Group(0, menubar->h(),
                      window->w(), window->h() - menubar->h());
@@ -354,19 +354,19 @@ void Gui::init()
   side->resizable(0);
   side->end();
 
-  server_display = new Fl_Text_Display(top->x() + side->w(), top->y(),
+  client_display = new Fl_Text_Display(top->x() + side->w(), top->y(),
                                        top->w() - side->w(), top->h());
 
-  server_display->box(FL_UP_BOX);
-  server_display->scrollbar_width(18);
-  server_display->textsize(14);
-  server_display->textfont(FL_COURIER);
-  server_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
-  server_display->buffer(server_text);
-  server_display->cursor_style(Fl_Text_Display::BLOCK_CURSOR);
-  server_display->show_cursor();
+  client_display->box(FL_UP_BOX);
+  client_display->scrollbar_width(18);
+  client_display->textsize(14);
+  client_display->textfont(FL_COURIER);
+  client_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
+  client_display->buffer(client_text);
+  client_display->cursor_style(Fl_Text_Display::BLOCK_CURSOR);
+  client_display->show_cursor();
 
-  top->resizable(server_display);
+  top->resizable(client_display);
   top->end();
 
   window->size_range(512, 384, 0, 0, 0, 0, 0);
@@ -433,22 +433,23 @@ void Gui::append(const char *buf)
       text[i] = '\n';
   }
 
-  server_text->append(text);
+  client_text->append(text);
 
-  int lines = server_text->count_lines(0, server_text->length());
+  int lines = client_text->count_lines(0, client_text->length());
 
   // limit scrollback buffer to 1000 lines
   while(lines > 1000)
   {
-    server_text->remove(server_text->line_start(1),
-                        server_text->line_end(1) + 1);
+    client_text->remove(client_text->line_start(1),
+                        client_text->line_end(1) + 1);
     lines--;
   }
 
   // scroll display to bottom
-  server_display->insert_position(server_text->length());
-  server_display->show_insert_position();
+  client_display->insert_position(client_text->length());
+  client_display->show_insert_position();
   Fl::check();
+  client_display->take_focus();
 }
 
 void Gui::checkPC()
@@ -456,6 +457,7 @@ void Gui::checkPC()
   int num;
   sscanf(input_pc->value(), "%06X", &num);
   Terminal::changeReg(Terminal::REG_PC, num);
+  client_display->take_focus();
 }
 
 void Gui::checkA()
@@ -463,6 +465,7 @@ void Gui::checkA()
   int num;
   sscanf(input_a->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_A, num);
+  client_display->take_focus();
 }
 
 void Gui::checkX()
@@ -470,6 +473,7 @@ void Gui::checkX()
   int num;
   sscanf(input_x->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_X, num);
+  client_display->take_focus();
 }
 
 void Gui::checkY()
@@ -477,6 +481,7 @@ void Gui::checkY()
   int num;
   sscanf(input_y->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_Y, num);
+  client_display->take_focus();
 }
 
 void Gui::checkSP()
@@ -484,6 +489,7 @@ void Gui::checkSP()
   int num;
   sscanf(input_sp->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_SP, num);
+  client_display->take_focus();
 }
 
 void Gui::checkDP()
@@ -491,6 +497,7 @@ void Gui::checkDP()
   int num;
   sscanf(input_dp->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_DP, num);
+  client_display->take_focus();
 }
 
 void Gui::checkSR()
@@ -498,6 +505,7 @@ void Gui::checkSR()
   int num;
   sscanf(input_sr->value(), "%02X", &num);
   Terminal::changeReg(Terminal::REG_SR, num);
+  client_display->take_focus();
 }
 
 void Gui::checkDB()
@@ -505,11 +513,13 @@ void Gui::checkDB()
   int num;
   sscanf(input_db->value(), "%02X", &num);
   Terminal::changeReg(Terminal::REG_DB, num);
+  client_display->take_focus();
 }
 
 void Gui::checkGet()
 {
   Terminal::updateRegs();
+  client_display->take_focus();
 }
 
 void Gui::checkJML()
@@ -517,6 +527,7 @@ void Gui::checkJML()
   int address;
   sscanf(input_address->value(), "%06X", &address);
   Terminal::jml(address);
+  client_display->take_focus();
 }
 
 void Gui::checkJSL()
@@ -524,6 +535,7 @@ void Gui::checkJSL()
   int address;
   sscanf(input_address->value(), "%06X", &address);
   Terminal::jsl(address);
+  client_display->take_focus();
 }
 
 void Gui::checkToggles()
@@ -627,9 +639,9 @@ void Gui::updateRegs(char *s)
 void Gui::flashCursor(bool show)
 {
   if(show == true)
-    server_display->show_cursor();
+    client_display->show_cursor();
   else
-    server_display->hide_cursor();
+    client_display->hide_cursor();
 }
 
 void Gui::setMode265()
@@ -722,26 +734,26 @@ void Gui::setMode134()
 
 void Gui::setFontSmall()
 {
-  server_display->textsize(10);
-  server_display->buffer(0);
-  server_display->buffer(server_text);
-  server_display->redraw();
+  client_display->textsize(10);
+  client_display->buffer(0);
+  client_display->buffer(client_text);
+  client_display->redraw();
 }
 
 void Gui::setFontMedium()
 {
-  server_display->textsize(14);
-  server_display->buffer(0);
-  server_display->buffer(server_text);
-  server_display->redraw();
+  client_display->textsize(14);
+  client_display->buffer(0);
+  client_display->buffer(client_text);
+  client_display->redraw();
 }
 
 void Gui::setFontLarge()
 {
-  server_display->textsize(18);
-  server_display->buffer(0);
-  server_display->buffer(server_text);
-  server_display->redraw();
+  client_display->textsize(18);
+  client_display->buffer(0);
+  client_display->buffer(client_text);
+  client_display->redraw();
 }
 
 void Gui::setCancelled(bool value)
