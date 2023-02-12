@@ -16,7 +16,7 @@ start:
   sec
   xce
 
-.65xx
+.6502
   ;; Turn off interrupts to protect from ROM routines running
   sei
 
