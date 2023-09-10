@@ -21,7 +21,26 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include "FL/Fl.H"
 #include <FL/Fl_Native_File_Chooser.H>
 
+#if defined(_MSC_VER)
+#define PACKAGE_STRING "EasySXB Development Version"
+
+struct option		/* specification for a long form option...	*/
+{
+  const char *name;		  /* option name, without leading hyphens */
+  int         has_arg;	/* does it take an argument?		*/
+  int        *flag;		  /* where to save its status, or NULL	*/
+  int         val;		  /* its associated status value		*/
+};
+
+enum    		/* permitted values for its `has_arg' field...	*/
+{
+  no_argument = 0,    /* option never takes an argument	*/
+  required_argument,	/* option always requires an argument	*/
+  optional_argument		/* option may take an argument		*/
+};
+#else
 #include <getopt.h>
+#endif
 
 #include "Dialog.H"
 #include "Gui.H"
@@ -94,6 +113,7 @@ int main(int argc, char *argv[])
   strcpy(Terminal::port_string, "/dev/ttyUSB0");
 #endif
 
+#if !defined(_MSC_VER)
   while(true)
   {
     const int c = getopt_long(argc, argv, "", long_options, &option_index);
@@ -149,6 +169,7 @@ int main(int argc, char *argv[])
       }
     }
   }
+#endif
 
   // fltk related inits
   Fl::visual(FL_DOUBLE | FL_RGB);
