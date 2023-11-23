@@ -51,6 +51,7 @@ public:
   static void checkUpdate();
   static void checkJML();
   static void checkJSL();
+  static void checkDump();
   static void checkToggles();
   static void setToggles(int);
   static void updateRegs(char *);

@@ -85,6 +85,12 @@ namespace
 
   void delay(int ms)
   {
+    // enforce a minimum delay
+    if(ms < 20)
+      ms = 20;
+
+    ms += 4;
+
 #ifdef WIN32
     Sleep(ms);
 #else
@@ -174,10 +180,9 @@ void Terminal::connect()
   flash = 0;
   connected = true;
 
-  Gui::append("\nConnected to SXB at 9600 baud.\n");
-  delay(1000);
+  Gui::append("\nConnected to SXB at 9600 baud.\n\n");
   Gui::append("\n");
-  delay(1000);
+  delay(100);
 }
 
 void Terminal::disconnect()
@@ -212,7 +217,7 @@ void Terminal::sendChar(char c)
       c = 13;
 
     WriteFile(hserial, &c, 1, &bytes, NULL);
-    delay(16);
+    delay(1);
   }
 #else
   if(connected == true)
@@ -222,7 +227,7 @@ void Terminal::sendChar(char c)
       c = 13;
 
     int temp = write(fd, &c, 1);
-    delay(16);
+    delay(1);
   }
 #endif
 }
@@ -240,7 +245,7 @@ char Terminal::getChar()
     while(1)
     {
       BOOL temp = ReadFile(hserial, &c, 1, &bytes, NULL);
-      delay(16);
+      delay(1);
 
       if(temp == 0 || bytes == 0)
         return -1;
@@ -254,7 +259,7 @@ char Terminal::getChar()
     while(1)
     {
       int temp = read(fd, &c, 1);
-      delay(16);
+      delay(1);
 
       if(temp <= 0)
         return -1;
@@ -283,10 +288,10 @@ void Terminal::sendString(const char *s)
     DWORD bytes;
 
     WriteFile(hserial, buf, strlen(buf), &bytes, NULL);
-    delay(16);
+    delay(strlen(s));
 #else
     int temp = write(fd, buf, strlen(buf));
-    delay(16);
+    delay(strlen(s));
 #endif
   }
 }
@@ -323,7 +328,7 @@ void Terminal::getData()
     while(1)
     {
       BOOL temp = ReadFile(hserial, buf + buf_pos, 256, &bytes, NULL);
-      delay(16);
+      delay(bytes);
 
       if(temp == 0 || bytes == 0)
         break;
@@ -341,7 +346,7 @@ void Terminal::getData()
     while(1)
     {
       bytes = read(fd, buf + buf_pos, 256);
-      delay(16);
+      delay(bytes);
 
       if(bytes <= 0)
         break;
@@ -378,6 +383,9 @@ void Terminal::changeReg(int reg, int num)
 {
   if(connected == false)
     return;
+
+  if(num < 0)
+    num = 0;
 
   char s[256];
 
@@ -468,19 +476,16 @@ void Terminal::updateRegs()
 
   char s[256];
   memset(s, 0, sizeof(s));
-  delay(1000);
 
   if(Gui::getMode() == Gui::MODE_265)
   {
     sendString("| ");
-    delay(16);
     getResult(s);
     Gui::updateRegs(s);
   }
   else if(Gui::getMode() == Gui::MODE_134)
   {
     sendString("R");
-    delay(16);
     getResult(s);
     Gui::updateRegs(s);
   }
@@ -491,11 +496,15 @@ void Terminal::jml(int address)
   if(connected == false)
     return;
 
+  if(address < 0)
+    address = 0;
+
   char s[256];
 
   if(Gui::getMode() == Gui::MODE_265)
   {
-    sprintf(s, "G%02X%04X", address >> 16, address & 0xFFFF);
+sendString("G");
+    sprintf(s, "%02X%04X", address >> 16, address & 0xFFFF);
     sendString(s);
   }
   else if(Gui::getMode() == Gui::MODE_134)
@@ -510,6 +519,9 @@ void Terminal::jsl(int address)
   if(connected == false)
     return;
 
+  if(address < 0)
+    address = 0;
+
   char s[256];
 
   if(Gui::getMode() == Gui::MODE_265)
@@ -520,6 +532,35 @@ void Terminal::jsl(int address)
   else if(Gui::getMode() == Gui::MODE_134)
   {
     sprintf(s, "J%04X", address & 0xFFFF);
+    sendString(s);
+  }
+}
+
+void Terminal::dump(int address)
+{
+  if(connected == false)
+    return;
+
+  if(address < 0)
+    address = 0;
+
+  char s[256];
+
+  sprintf(s, "\nMemory dump from %02X:%04X - %02X:%04X\n",
+          address >> 16, address & 0xFFFF,
+          (address + 0xff) >> 16, (address + 0xff) & 0xFFFF);
+  Gui::append(s);
+
+  if(Gui::getMode() == Gui::MODE_265)
+  {
+    sprintf(s, "D%02X%04X", address >> 16, address & 0xFFFF);
+    sendString(s);
+    sprintf(s, "%02X%04X\n", (address + 0xff) >> 16, (address + 0xff) & 0xFFFF);
+    sendString(s);
+  }
+  else if(Gui::getMode() == Gui::MODE_134)
+  {
+    sprintf(s, "D%04X%04X", address & 0xFFFF, (address + 0xff) & 0xffff);
     sendString(s);
   }
 }

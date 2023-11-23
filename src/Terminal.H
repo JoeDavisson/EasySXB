@@ -49,6 +49,7 @@ public:
   static void updateRegs();
   static void jml(int);
   static void jsl(int);
+  static void dump(int);
   static void upload();
   static void uploadHex(const char *);
   static void uploadSrec(const char *);

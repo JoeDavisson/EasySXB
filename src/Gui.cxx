@@ -62,11 +62,12 @@ namespace
   Fl_Input *input_dp;
   Fl_Input *input_sr;
   Fl_Input *input_db;
-  Fl_Button *button_update;
+  Fl_Button *button_get;
 
   Fl_Input *input_address;
   Fl_Button *button_jml;
   Fl_Button *button_jsl;
+  Fl_Button *button_dump;
 
   Fl_Light_Button *light_n;
   Fl_Light_Button *light_v;
@@ -163,7 +164,7 @@ void Gui::init()
   int pos;
 
   // main window
-  window = new MainWin(800, 600, "EasySXB");
+  window = new MainWin(832, 512, "EasySXB");
   window->callback(closeCallback);
 
   // generate menu
@@ -267,9 +268,9 @@ void Gui::init()
   input_db->callback((Fl_Callback *)checkDB);
   pos += 20 + 4;
 
-  button_update = new Fl_Button(16, pos, 96, 24, "Update");
-  button_update->labelfont(FL_COURIER);
-  button_update->callback((Fl_Callback *)checkUpdate);
+  button_get = new Fl_Button(16, pos, 96, 24, "Get Regs");
+  button_get->labelfont(FL_COURIER);
+  button_get->callback((Fl_Callback *)checkUpdate);
   pos += 24 + 6;
 
   new Separator(side, 2, pos - side->y(), 124, 2, "");
@@ -285,9 +286,15 @@ void Gui::init()
   button_jml = new Fl_Button(8, pos, 52, 24, "JML");
   button_jml->labelfont(FL_COURIER);
   button_jml->callback((Fl_Callback *)checkJML);
+
   button_jsl = new Fl_Button(68, pos, 52, 24, "JSL");
   button_jsl->labelfont(FL_COURIER);
   button_jsl->callback((Fl_Callback *)checkJSL);
+  pos += 24 + 8;
+
+  button_dump = new Fl_Button(16, pos, 96, 24, "Dump Mem");
+  button_dump->labelfont(FL_COURIER);
+  button_dump->callback((Fl_Callback *)checkDump);
   pos += 24 + 8;
 
   new Separator(side, 2, pos - side->y(), 124, 2, "");
@@ -388,7 +395,7 @@ void Gui::init()
   terminal->resizable(client_display);
   terminal->end();
 
-  window->size_range(800, 512, 0, 0, 0, 0, 0);
+  window->size_range(660, 512, 0, 0, 0, 0, 0);
   window->resizable(terminal);
   window->end();
 
@@ -453,8 +460,8 @@ void Gui::append(const char *buf)
 
   int lines = client_text->count_lines(0, client_text->length());
 
-  // limit scrollback buffer to 1000 lines
-  while(lines > 1000)
+  // limit scrollback buffer to 250 lines
+  while(lines > 250)
   {
     client_text->remove(client_text->line_start(1),
                         client_text->line_end(1) + 1);
@@ -540,6 +547,13 @@ void Gui::checkJSL()
   int address;
   sscanf(input_address->value(), "%06X", &address);
   Terminal::jsl(address);
+}
+
+void Gui::checkDump()
+{
+  int address;
+  sscanf(input_address->value(), "%06X", &address);
+  Terminal::dump(address);
 }
 
 void Gui::checkToggles()
