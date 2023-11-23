@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Joe Davisson.
+Copyright (c) 2023 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -21,8 +21,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #ifndef TERMINAL_H
 #define TERMINAL_H
 
-namespace Terminal
+class Terminal
 {
+public:
   enum
   {
     REG_PC,
@@ -35,25 +36,29 @@ namespace Terminal
     REG_DB
   };
 
-  void connect();
-  void disconnect();
-  bool isConnected();
-  void sendChar(char);
-  char getChar();
-  void sendString(const char *);
-  void getResult(char *);
-  void getData();
-  void receive(void *);
-  void changeReg(int, int);
-  void updateRegs();
-  void jml(int);
-  void jsl(int);
-  void upload();
-  void uploadHex(const char *);
-  void uploadSrec(const char *);
+  static void connect();
+  static void disconnect();
+  static bool isConnected();
+  static void sendChar(char);
+  static char getChar();
+  static void sendString(const char *);
+  static void getResult(char *);
+  static void getData();
+  static void receive(void *);
+  static void changeReg(int, int);
+  static void updateRegs();
+  static void jml(int);
+  static void jsl(int);
+  static void upload();
+  static void uploadHex(const char *);
+  static void uploadSrec(const char *);
 
-  extern char port_string[256];
-}
+  static char port_string[256];
+
+private:
+  Terminal() { }
+  ~Terminal() { }
+};
 
 #endif
 

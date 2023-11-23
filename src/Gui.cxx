@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Joe Davisson.
+Copyright (c) 2023 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -18,8 +18,6 @@ along with EasySXB; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 */
 
-// test comment
-
 #include <cmath>
 #include <cstdlib>
 #include <typeinfo>
@@ -27,7 +25,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Double_Window.H>
-#include <FL/Fl_Group.H>
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Menu_Bar.H>
@@ -36,6 +33,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <FL/Fl_Widget.H>
 
 #include "Dialog.H"
+#include "Group.H"
 #include "Gui.H"
 #include "Separator.H"
 #include "Terminal.H"
@@ -50,8 +48,8 @@ namespace
   MainWin *window;
   Fl_Menu_Bar *menubar;
 
-  Fl_Group *top;
-  Fl_Group *side;
+  Group *terminal;
+  Group *side;
 
   Fl_Text_Buffer *client_text;
   Fl_Text_Display *client_display;
@@ -64,7 +62,7 @@ namespace
   Fl_Input *input_dp;
   Fl_Input *input_sr;
   Fl_Input *input_db;
-  Fl_Button *button_get;
+  Fl_Button *button_update;
 
   Fl_Input *input_address;
   Fl_Button *button_jml;
@@ -161,10 +159,11 @@ public:
 // initialize main gui
 void Gui::init()
 {
+  // widget vertical position
   int pos;
 
   // main window
-  window = new MainWin(768, 480, "EasySXB");
+  window = new MainWin(800, 600, "EasySXB");
   window->callback(closeCallback);
 
   // generate menu
@@ -183,7 +182,9 @@ void Gui::init()
   menubar->add("&Options/&Board Model/W65C265SXB", 0,
     (Fl_Callback *)setMode265, 0, FL_MENU_RADIO);
   menubar->add("&Options/&Board Model/W65C134SXB", 0,
-    (Fl_Callback *)setMode134, 0, FL_MENU_RADIO | FL_MENU_DIVIDER);
+    (Fl_Callback *)setMode134, 0, FL_MENU_RADIO);
+  menubar->add("&Options/&Board Model/W65C265QBX", 0,
+    (Fl_Callback *)setMode265, 0, FL_MENU_RADIO);
   menubar->add("&Options/&Font Size/Small", 0,
     (Fl_Callback *)setFontSmall, 0, FL_MENU_RADIO);
   menubar->add("&Options/&Font Size/Medium", 0,
@@ -199,10 +200,7 @@ void Gui::init()
 
   client_text = new Fl_Text_Buffer();
 
-  top = new Fl_Group(0, menubar->h(),
-                     window->w(), window->h() - menubar->h());
-
-  side = new Fl_Group(0, menubar->h(), 128, window->h() - menubar->h());
+  side = new Group(0, menubar->h(), 128, window->h() - menubar->h(), "");
   pos = side->y() + 8;
 
   input_pc = new Fl_Input(side->w() - 72 - 8, pos, 72, 20, "PC:");
@@ -212,6 +210,7 @@ void Gui::init()
   input_pc->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_pc->callback((Fl_Callback *)checkPC);
   pos += 20 + 4;
+
   input_a = new Fl_Input(side->w() - 72 - 8, pos, 48, 20, "A:");
   input_a->textfont(FL_COURIER);
   input_a->labelfont(FL_COURIER);
@@ -219,6 +218,7 @@ void Gui::init()
   input_a->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_a->callback((Fl_Callback *)checkA);
   pos += 20 + 4;
+
   input_x = new Fl_Input(side->w() - 72 - 8, pos, 48, 20, "X:");
   input_x->textfont(FL_COURIER);
   input_x->labelfont(FL_COURIER);
@@ -226,6 +226,7 @@ void Gui::init()
   input_x->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_x->callback((Fl_Callback *)checkX);
   pos += 20 + 4;
+
   input_y = new Fl_Input(side->w() - 72 - 8, pos, 48, 20, "Y:");
   input_y->textfont(FL_COURIER);
   input_y->labelfont(FL_COURIER);
@@ -233,6 +234,7 @@ void Gui::init()
   input_y->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_y->callback((Fl_Callback *)checkY);
   pos += 20 + 4;
+
   input_sp = new Fl_Input(side->w() - 72 - 8, pos, 48, 20, "SP:");
   input_sp->textfont(FL_COURIER);
   input_sp->labelfont(FL_COURIER);
@@ -240,6 +242,7 @@ void Gui::init()
   input_sp->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_sp->callback((Fl_Callback *)checkSP);
   pos += 20 + 4;
+
   input_dp = new Fl_Input(side->w() - 72 - 8, pos, 48, 20, "DP:");
   input_dp->textfont(FL_COURIER);
   input_dp->labelfont(FL_COURIER);
@@ -247,6 +250,7 @@ void Gui::init()
   input_dp->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_dp->callback((Fl_Callback *)checkDP);
   pos += 20 + 4;
+
   input_sr = new Fl_Input(side->w() - 72 - 8, pos, 24, 20, "SR:");
   input_sr->textfont(FL_COURIER);
   input_sr->labelfont(FL_COURIER);
@@ -254,6 +258,7 @@ void Gui::init()
   input_sr->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_sr->callback((Fl_Callback *)checkSR);
   pos += 20 + 4;
+
   input_db = new Fl_Input(side->w() - 72 - 8, pos, 24, 20, "DB:");
   input_db->textfont(FL_COURIER);
   input_db->labelfont(FL_COURIER);
@@ -261,27 +266,29 @@ void Gui::init()
   input_db->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_db->callback((Fl_Callback *)checkDB);
   pos += 20 + 4;
-  button_get = new Fl_Button(16, pos, 96, 24, "Get");
-  button_get->labelfont(FL_COURIER);
-  button_get->callback((Fl_Callback *)checkGet);
+
+  button_update = new Fl_Button(16, pos, 96, 24, "Update");
+  button_update->labelfont(FL_COURIER);
+  button_update->callback((Fl_Callback *)checkUpdate);
   pos += 24 + 6;
 
   new Separator(side, 2, pos - side->y(), 124, 2, "");
   pos += 8;
 
-  input_address = new Fl_Input(side->w() - 60 - 8, pos, 60, 20, "Address:");
+  input_address = new Fl_Input(side->w() - 60 - 8, pos, 60, 24, "Address:");
   input_address->textfont(FL_COURIER);
   input_address->labelfont(FL_COURIER);
   input_address->labelsize(10);
   input_address->maximum_size(6);
   pos += 24 + 8;
+
   button_jml = new Fl_Button(8, pos, 52, 24, "JML");
   button_jml->labelfont(FL_COURIER);
   button_jml->callback((Fl_Callback *)checkJML);
   button_jsl = new Fl_Button(68, pos, 52, 24, "JSL");
   button_jsl->labelfont(FL_COURIER);
   button_jsl->callback((Fl_Callback *)checkJSL);
-  pos += 24 + 6;
+  pos += 24 + 8;
 
   new Separator(side, 2, pos - side->y(), 124, 2, "");
   pos += 8;
@@ -294,6 +301,7 @@ void Gui::init()
   light_n->down_color(fl_rgb_color(0, 192, 0));
   light_n->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
+
   light_v = new Fl_Light_Button(8, pos, 112, 14, "(V) Overflow");
   light_v->labelfont(FL_COURIER);
   light_v->labelsize(10);
@@ -302,6 +310,7 @@ void Gui::init()
   light_v->down_color(fl_rgb_color(0, 192, 0));
   light_v->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
+
   light_m = new Fl_Light_Button(8, pos, 112, 14, "(M) A = 8-bit");
   light_m->labelfont(FL_COURIER);
   light_m->labelsize(10);
@@ -310,6 +319,7 @@ void Gui::init()
   light_m->down_color(fl_rgb_color(0, 192, 0));
   light_m->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
+
   light_x = new Fl_Light_Button(8, pos, 112, 14, "(X) X/Y = 8-bit");
   light_x->labelfont(FL_COURIER);
   light_x->labelsize(10);
@@ -318,6 +328,7 @@ void Gui::init()
   light_x->down_color(fl_rgb_color(0, 192, 0));
   light_x->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
+
   light_d = new Fl_Light_Button(8, pos, 112, 14, "(D) Decimal Mode");
   light_d->labelfont(FL_COURIER);
   light_d->labelsize(10);
@@ -326,6 +337,7 @@ void Gui::init()
   light_d->down_color(fl_rgb_color(0, 192, 0));
   light_d->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
+
   light_i = new Fl_Light_Button(8, pos, 112, 14, "(I) IRQ Disable");
   light_i->labelfont(FL_COURIER);
   light_i->labelsize(10);
@@ -334,6 +346,7 @@ void Gui::init()
   light_i->down_color(fl_rgb_color(0, 192, 0));
   light_i->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
+
   light_z = new Fl_Light_Button(8, pos, 112, 14, "(Z) Zero");
   light_z->labelfont(FL_COURIER);
   light_z->labelsize(10);
@@ -342,6 +355,7 @@ void Gui::init()
   light_z->down_color(fl_rgb_color(0, 192, 0));
   light_z->callback((Fl_Callback *)checkToggles);
   pos += 14 + 2;
+
   light_c = new Fl_Light_Button(8, pos, 112, 14, "(C) Carry");
   light_c->labelfont(FL_COURIER);
   light_c->labelsize(10);
@@ -354,10 +368,15 @@ void Gui::init()
   side->resizable(0);
   side->end();
 
-  client_display = new Fl_Text_Display(top->x() + side->w(), top->y(),
-                                       top->w() - side->w(), top->h());
+  terminal = new Group(side->w(), menubar->h(),
+                 window->w() - side->w(), window->h() - menubar->h(), "");
 
-  client_display->box(FL_UP_BOX);
+  client_display = new Fl_Text_Display(terminal->x() + 6,
+                                       terminal->y() + 6,
+                                       terminal->w() - 12,
+                                       terminal->h() - 12);
+
+  client_display->box(FL_DOWN_BOX);
   client_display->scrollbar_width(18);
   client_display->textsize(14);
   client_display->textfont(FL_COURIER);
@@ -366,11 +385,11 @@ void Gui::init()
   client_display->cursor_style(Fl_Text_Display::BLOCK_CURSOR);
   client_display->show_cursor();
 
-  top->resizable(client_display);
-  top->end();
+  terminal->resizable(client_display);
+  terminal->end();
 
-  window->size_range(512, 384, 0, 0, 0, 0, 0);
-  window->resizable(top);
+  window->size_range(800, 512, 0, 0, 0, 0, 0);
+  window->resizable(terminal);
   window->end();
 
   // fix certain icons if using a light theme
@@ -428,9 +447,6 @@ void Gui::append(const char *buf)
   {
     if(text[i] == '\0')
       break;
-
-    if(text[i] == 13)
-      text[i] = '\n';
   }
 
   client_text->append(text);
@@ -449,7 +465,6 @@ void Gui::append(const char *buf)
   client_display->insert_position(client_text->length());
   client_display->show_insert_position();
   Fl::check();
-  client_display->take_focus();
 }
 
 void Gui::checkPC()
@@ -457,7 +472,6 @@ void Gui::checkPC()
   int num;
   sscanf(input_pc->value(), "%06X", &num);
   Terminal::changeReg(Terminal::REG_PC, num);
-  client_display->take_focus();
 }
 
 void Gui::checkA()
@@ -465,7 +479,6 @@ void Gui::checkA()
   int num;
   sscanf(input_a->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_A, num);
-  client_display->take_focus();
 }
 
 void Gui::checkX()
@@ -473,7 +486,6 @@ void Gui::checkX()
   int num;
   sscanf(input_x->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_X, num);
-  client_display->take_focus();
 }
 
 void Gui::checkY()
@@ -481,7 +493,6 @@ void Gui::checkY()
   int num;
   sscanf(input_y->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_Y, num);
-  client_display->take_focus();
 }
 
 void Gui::checkSP()
@@ -489,7 +500,6 @@ void Gui::checkSP()
   int num;
   sscanf(input_sp->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_SP, num);
-  client_display->take_focus();
 }
 
 void Gui::checkDP()
@@ -497,7 +507,6 @@ void Gui::checkDP()
   int num;
   sscanf(input_dp->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_DP, num);
-  client_display->take_focus();
 }
 
 void Gui::checkSR()
@@ -505,7 +514,6 @@ void Gui::checkSR()
   int num;
   sscanf(input_sr->value(), "%02X", &num);
   Terminal::changeReg(Terminal::REG_SR, num);
-  client_display->take_focus();
 }
 
 void Gui::checkDB()
@@ -513,13 +521,11 @@ void Gui::checkDB()
   int num;
   sscanf(input_db->value(), "%02X", &num);
   Terminal::changeReg(Terminal::REG_DB, num);
-  client_display->take_focus();
 }
 
-void Gui::checkGet()
+void Gui::checkUpdate()
 {
   Terminal::updateRegs();
-  client_display->take_focus();
 }
 
 void Gui::checkJML()
@@ -527,7 +533,6 @@ void Gui::checkJML()
   int address;
   sscanf(input_address->value(), "%06X", &address);
   Terminal::jml(address);
-  client_display->take_focus();
 }
 
 void Gui::checkJSL()
@@ -535,7 +540,6 @@ void Gui::checkJSL()
   int address;
   sscanf(input_address->value(), "%06X", &address);
   Terminal::jsl(address);
-  client_display->take_focus();
 }
 
 void Gui::checkToggles()

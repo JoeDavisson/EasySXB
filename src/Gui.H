@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Joe Davisson.
+Copyright (c) 2023 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -24,45 +24,50 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 class Fl_Double_Window;
 class Fl_Menu_Bar;
 
-namespace Gui
+class Gui
 {
+public:
   enum
   {
     MODE_265,
     MODE_134
   };
 
-  void init();
-  void show();
-  void setMenuItem(const char *);
-  void clearMenuItem(const char *);
-  Fl_Double_Window *getWindow();
-  Fl_Menu_Bar *getMenuBar();
-  void append(const char *);
-  void checkPC();
-  void checkA();
-  void checkX();
-  void checkY();
-  void checkSP();
-  void checkDP();
-  void checkSR();
-  void checkDB();
-  void checkGet();
-  void checkJML();
-  void checkJSL();
-  void checkToggles();
-  void setToggles(int);
-  void updateRegs(char *);
-  void flashCursor(bool);
-  void setMode265();
-  void setMode134();
-  void setFontSmall();
-  void setFontMedium();
-  void setFontLarge();
-  void setCancelled(bool);
-  bool getCancelled();
-  int getMode();
-}
+  static void init();
+  static void show();
+  static void setMenuItem(const char *);
+  static void clearMenuItem(const char *);
+  static Fl_Double_Window *getWindow();
+  static Fl_Menu_Bar *getMenuBar();
+  static void append(const char *);
+  static void checkPC();
+  static void checkA();
+  static void checkX();
+  static void checkY();
+  static void checkSP();
+  static void checkDP();
+  static void checkSR();
+  static void checkDB();
+  static void checkUpdate();
+  static void checkJML();
+  static void checkJSL();
+  static void checkToggles();
+  static void setToggles(int);
+  static void updateRegs(char *);
+  static void flashCursor(bool);
+  static void setMode265();
+  static void setMode134();
+  static void setFontSmall();
+  static void setFontMedium();
+  static void setFontLarge();
+  static void setCancelled(bool);
+  static bool getCancelled();
+  static int getMode();
+
+private:
+  Gui() { }
+  ~Gui() { }
+};
 
 #endif
 

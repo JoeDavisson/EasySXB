@@ -16,7 +16,7 @@ http://sourceforge.net/projects/easysxb/
 
 ```$ cd EasySXB```
 
-Uncompress the FLTK-1.3.3 source package here.
+Uncompress the FLTK-1.3.7 source package here.
 
 The Makefile supports ```linux``` and ```mingw``` cross-compiler targets.
 (Edit the Makefile to choose.)
@@ -29,6 +29,6 @@ The Makefile supports ```linux``` and ```mingw``` cross-compiler targets.
 
 ### Libraries
 
- * FLTK-1.3.3
+ * FLTK-1.3.7
  * libxft-dev (required for font rendering)
 

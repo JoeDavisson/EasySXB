@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Joe Davisson.
+Copyright (c) 2023 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -18,8 +18,6 @@ along with EasySXB; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 */
 
-#include <algorithm>
-
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Button.H>
@@ -28,6 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Int_Input.H>
+#include <FL/Fl_Pixmap.H>
 #include <FL/Fl_Progress.H>
 #include <FL/Fl_Widget.H>
 
@@ -59,27 +58,30 @@ namespace About
 
   void init()
   {
-    int y1 = 8;
+    int pos = 8;
     int ww = 0, hh = 0;
 
     Items::dialog = new DialogWindow(384, 0, "About");
-    Items::version = new Fl_Box(FL_FLAT_BOX, 0, y1, 384, 32, PACKAGE_STRING);
+    Items::version = new Fl_Box(FL_FLAT_BOX, 0, pos, 384, 32, PACKAGE_STRING);
     Items::version->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::version->labelsize(16);
-    y1 += 32;
-    Items::info = new Fl_Box(FL_FLAT_BOX, 0, y1, 384, 32,
+    pos += 32;
+
+    Items::info = new Fl_Box(FL_FLAT_BOX, 0, pos, 384, 32,
       "A terminal emulator for use with the SXB\n"
       "line of development boards from Western Design Center.\n");
     Items::info->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::info->labelfont(FL_HELVETICA_ITALIC);
     Items::info->labelsize(12);
-    y1 += 48;
-    Items::copyright = new Fl_Box(FL_FLAT_BOX, 0, y1, 384, 32,
-      "Copyright (c) 2022 Joe Davisson.\n");
+    pos += 48;
+
+    Items::copyright = new Fl_Box(FL_FLAT_BOX, 0, pos, 384, 32,
+      "Copyright (c) 2023 Joe Davisson.\n");
     Items::copyright->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::copyright->labelsize(12);
-    y1 += 32;
-    Items::dialog->addOkButton(&Items::ok, &y1);
+    pos += 32;
+
+    Items::dialog->addOkButton(&Items::ok, &pos);
     Items::ok->callback((Fl_Callback *)close);
     Items::ok->shortcut(FL_Enter);
     Items::dialog->set_modal();
@@ -121,15 +123,16 @@ namespace Connect
 
   void init()
   {
-    int y1 = 8;
+    int pos = 8;
     int ww = 0, hh = 0;
 
     Items::dialog = new DialogWindow(384, 0, "Connect to SXB");
-    Items::device = new Fl_Input(128, y1, 192, 24, "Device: ");
+    Items::device = new Fl_Input(128, pos, 192, 24, "Device: ");
     Items::device->align(FL_ALIGN_LEFT);
     Items::device->value(Terminal::port_string);
-    y1 += 48;
-    Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
+    pos += 48;
+
+    Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &pos);
     Items::cancel->callback((Fl_Callback *)quit);
     Items::ok->callback((Fl_Callback *)close);
     Items::ok->shortcut(FL_Enter);
@@ -161,14 +164,15 @@ namespace Message
 
   void init()
   {
-    int y1 = 8;
+    int pos = 8;
 
     Items::dialog = new DialogWindow(384, 0, "Error");
     Items::box = new Fl_Box(FL_FLAT_BOX, 8, 8, 384, 64, "");
     Items::box->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::box->labelsize(14); 
-    y1 += 64;
-    Items::dialog->addOkButton(&Items::ok, &y1);
+    pos += 64;
+
+    Items::dialog->addOkButton(&Items::ok, &pos);
     Items::ok->callback((Fl_Callback *)quit);
     Items::ok->shortcut(FL_Enter);
     Items::dialog->set_modal();
@@ -210,14 +214,15 @@ namespace Choice
 
   void init()
   {
-    int y1 = 8;
+    int pos = 8;
 
     Items::dialog = new DialogWindow(384, 0, "Error");
     Items::box = new Fl_Box(FL_FLAT_BOX, 8, 8, 384, 64, "");
     Items::box->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::box->labelsize(14); 
-    y1 += 64;
-    Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y1);
+    pos += 64;
+
+    Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &pos);
     Items::cancel->copy_label("No");
     Items::cancel->callback((Fl_Callback *)quit);
     Items::ok->copy_label("Yes");

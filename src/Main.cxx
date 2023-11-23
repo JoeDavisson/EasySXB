@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Joe Davisson.
+Copyright (c) 2023 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 #include "FL/Fl.H"
 #include <FL/Fl_Native_File_Chooser.H>
+#include <FL/Fl_Shared_Image.H>
 
 #include <getopt.h>
 
@@ -153,6 +154,7 @@ int main(int argc, char *argv[])
   // fltk related inits
   Fl::visual(FL_DOUBLE | FL_RGB);
   Fl::scheme("gtk+");
+  fl_register_images();
 
   // program inits
   Dialog::init();

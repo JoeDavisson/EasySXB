@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Joe Davisson.
+Copyright (c) 2023 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -93,10 +93,7 @@ namespace
   }
 }
 
-namespace Terminal
-{
-  char port_string[256];
-}
+char Terminal::port_string[256];
 
 void Terminal::connect()
 {
@@ -178,6 +175,8 @@ void Terminal::connect()
   connected = true;
 
   Gui::append("\nConnected to SXB at 9600 baud.\n");
+  delay(1000);
+  Gui::append("\n");
   delay(1000);
 }
 

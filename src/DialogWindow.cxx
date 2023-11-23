@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Joe Davisson.
+Copyright (c) 2023 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -38,9 +38,11 @@ void DialogWindow::addOkButton(Fl_Button **ok, int *y1)
 {
   new Separator(this, 4, *y1, w() - 8, 2, "");
   *y1 += 8;
+
   *ok = new Fl_Button(w() - 64 - 8, *y1, 64, 24, "OK");
   add(*ok);
   *y1 += 24 + 8;
+
   resize(x(), y(), w(), *y1);
 }
 
@@ -48,10 +50,12 @@ void DialogWindow::addOkCancelButtons(Fl_Button **ok, Fl_Button **cancel, int *y
 {
   new Separator(this, 4, *y1, w() - 8, 2, "");
   *y1 += 8;
+
   *cancel = new Fl_Button(w() - 64 - 8, *y1, 64, 24, "Cancel");
   add(*cancel);
   *ok = new Fl_Button((*cancel)->x() - 64 - 8, *y1, 64, 24, "Ok");
   *y1 += 24 + 8;
+
   add(*ok);
   resize(x(), y(), w(), *y1);
 }

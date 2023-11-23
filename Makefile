@@ -18,7 +18,7 @@ endif
 
 NAME="EasySXB "
 #VERSION=$(shell git describe --always --dirty)
-VERSION=$(shell git describe)
+VERSION=0.1.5
 
 SRC_DIR=src
 INCLUDE=-I$(SRC_DIR) -Ifltk
@@ -60,6 +60,7 @@ endif
 OBJ= \
   $(SRC_DIR)/Dialog.o \
   $(SRC_DIR)/DialogWindow.o \
+  $(SRC_DIR)/Group.o \
   $(SRC_DIR)/Gui.o \
   $(SRC_DIR)/Separator.o \
   $(SRC_DIR)/Terminal.o

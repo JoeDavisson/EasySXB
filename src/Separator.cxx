@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2022 Joe Davisson.
+Copyright (c) 2023 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -17,8 +17,6 @@ You should have received a copy of the GNU General Public License
 along with EasySXB; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 */
-
-// test comment
 
 #include <FL/fl_draw.H>
 #include <FL/Fl_Group.H>
