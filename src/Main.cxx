@@ -95,17 +95,17 @@ int main(int argc, char *argv[])
   strcpy(Terminal::port_string, "/dev/ttyUSB0");
 #endif
 
-  while(true)
+  while (true)
   {
     const int c = getopt_long(argc, argv, "", long_options, &option_index);
-    if(c < 0)
+    if (c < 0)
       break;
 
-    switch(c)
+    switch (c)
     {
       case 0:
       {
-        switch(option_index)
+        switch (option_index)
         {
           case OPTION_PORT:
             strncpy(Terminal::port_string, optarg, 256);
@@ -115,12 +115,12 @@ int main(int argc, char *argv[])
             upload = true;
             break;
           case OPTION_THEME:
-            if(strcmp(optarg, "dark") == 0)
+            if (strcmp(optarg, "dark") == 0)
             {
               setDarkTheme();
               break;
             }
-            if(strcmp(optarg, "light") == 0)
+            if (strcmp(optarg, "light") == 0)
             {
               setLightTheme();
               break;
@@ -165,15 +165,15 @@ int main(int argc, char *argv[])
   Fl::add_timeout(1, Terminal::receive);
 
   // upload a file?
-  if(upload == true)
+  if (upload == true)
   {
     Terminal::connect();
 
     const char *ext = fl_filename_ext(file_string);
   
-    if(strcasecmp(ext, ".hex") == 0)
+    if (strcasecmp(ext, ".hex") == 0)
       Terminal::uploadHex(file_string);
-    else if(strcasecmp(ext, ".srec") == 0)
+    else if (strcasecmp(ext, ".srec") == 0)
       Terminal::uploadSrec(file_string);
     else Dialog::message("Upload Error", "Only .hex and .srec file extentions are supported.");
   }

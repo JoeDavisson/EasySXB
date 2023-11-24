@@ -70,12 +70,12 @@ namespace
     strcpy(dest, src);
 
     int len = strlen(dest);
-    if(len < 2)
+    if (len < 2)
       return;
 
-    for(int i = len - 1; i > 0; i--)
+    for (int i = len - 1; i > 0; i--)
     {
-      if(dest[i - 1] == '/')
+      if (dest[i - 1] == '/')
       {
         dest[i] = '\0';
         break;
@@ -86,7 +86,7 @@ namespace
   void delay(int ms)
   {
     // enforce a minimum delay
-    if(ms < 20)
+    if (ms < 20)
       ms = 20;
 
     ms += 4;
@@ -112,7 +112,7 @@ void Terminal::connect()
   hserial = CreateFile(port_string, GENERIC_READ | GENERIC_WRITE,
                        0, NULL, OPEN_EXISTING, 0, NULL);
 
-  if(hserial == INVALID_HANDLE_VALUE)
+  if (hserial == INVALID_HANDLE_VALUE)
   {
     Dialog::message("Error", "Could not open serial port.");
     return;
@@ -131,7 +131,7 @@ void Terminal::connect()
   dcb.fOutxDsrFlow = FALSE;
   dcb.fDtrControl = DTR_CONTROL_DISABLE;
 
-  if(SetCommState(hserial, &dcb) == 0)
+  if (SetCommState(hserial, &dcb) == 0)
   {
     CloseHandle(hserial);
     Dialog::message("Error", "Could not open serial port.");
@@ -146,7 +146,7 @@ void Terminal::connect()
   timeouts.WriteTotalTimeoutConstant = 0;
   timeouts.WriteTotalTimeoutMultiplier = 0;
 
-  if(SetCommTimeouts(hserial, &timeouts) == 0)
+  if (SetCommTimeouts(hserial, &timeouts) == 0)
   {
     CloseHandle(hserial);
     Dialog::message("Error", "Could not open serial port.");
@@ -155,7 +155,7 @@ void Terminal::connect()
 #else
   fd = open(port_string, O_RDWR | O_NOCTTY | O_NONBLOCK | O_NDELAY);
 
-  if(fd == -1)
+  if (fd == -1)
   {
     Dialog::message("Error", "Could not open serial port.");
     return;
@@ -187,7 +187,7 @@ void Terminal::connect()
 
 void Terminal::disconnect()
 {
-  if(connected == true)
+  if (connected == true)
   {
 #ifdef WIN32
     CloseHandle(hserial);
@@ -210,20 +210,20 @@ void Terminal::sendChar(char c)
 #ifdef WIN32
   DWORD bytes;
 
-  if(connected == true)
+  if (connected == true)
   {
     // convert carriage return
-    if(c == '\n')
+    if (c == '\n')
       c = 13;
 
     WriteFile(hserial, &c, 1, &bytes, NULL);
     delay(1);
   }
 #else
-  if(connected == true)
+  if (connected == true)
   {
     // convert carriage return
-    if(c == '\n')
+    if (c == '\n')
       c = 13;
 
     int temp = write(fd, &c, 1);
@@ -240,28 +240,28 @@ char Terminal::getChar()
 #ifdef WIN32
   DWORD bytes;
 
-  if(connected == true)
+  if (connected == true)
   {
-    while(1)
+    while (1)
     {
       BOOL temp = ReadFile(hserial, &c, 1, &bytes, NULL);
       delay(1);
 
-      if(temp == 0 || bytes == 0)
+      if (temp == 0 || bytes == 0)
         return -1;
       else
         return c;
     }
   }
 #else
-  if(connected == true)
+  if (connected == true)
   {
-    while(1)
+    while (1)
     {
       int temp = read(fd, &c, 1);
       delay(1);
 
-      if(temp <= 0)
+      if (temp <= 0)
         return -1;
       else
         return c;
@@ -273,14 +273,14 @@ char Terminal::getChar()
 
 void Terminal::sendString(const char *s)
 {
-  if(connected == true)
+  if (connected == true)
   {
     memset(buf, 0, sizeof(buf));
     strncpy(buf, s, strlen(s));
 
-    for(int i = 0; i < strlen(buf); i++)
+    for (int i = 0; i < strlen(buf); i++)
     {
-      if(buf[i] == '\n')
+      if (buf[i] == '\n')
         buf[i] = 13;
     }
 
@@ -298,16 +298,16 @@ void Terminal::sendString(const char *s)
 
 void Terminal::getResult(char *s)
 {
-  if(connected == true)
+  if (connected == true)
   {
     getData();
     int j = 0;
 
-    for(int i = 0; i < strlen(buf); i++)
+    for (int i = 0; i < strlen(buf); i++)
     {
       char c = buf[i];
 
-      if(c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c == ' ')
+      if (c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c == ' ')
         s[j++] = c;
     }
 
@@ -323,43 +323,43 @@ void Terminal::getData()
 #ifdef WIN32
   DWORD bytes;
 
-  if(connected == true)
+  if (connected == true)
   {
-    while(1)
+    while (1)
     {
       BOOL temp = ReadFile(hserial, buf + buf_pos, 256, &bytes, NULL);
       delay(bytes);
 
-      if(temp == 0 || bytes == 0)
+      if (temp == 0 || bytes == 0)
         break;
 
       buf_pos += bytes;
-      if(buf_pos > 2048)
+      if (buf_pos > 2048)
         break;
     }
   }
 #else
   int bytes;
 
-  if(connected == true)
+  if (connected == true)
   {
-    while(1)
+    while (1)
     {
       bytes = read(fd, buf + buf_pos, 256);
       delay(bytes);
 
-      if(bytes <= 0)
+      if (bytes <= 0)
         break;
 
       buf_pos += bytes;
-      if(buf_pos > 2048)
+      if (buf_pos > 2048)
         break;
     }
   }
 #endif
 
-  for(int i = 0; i < sizeof(buf); i++)
-    if(buf[i] == 13)
+  for (int i = 0; i < sizeof(buf); i++)
+    if (buf[i] == 13)
       buf[i] = '\n';
 }
 
@@ -371,7 +371,7 @@ void Terminal::receive(void *data)
   // cause cursor to flash
   flash++;
 
-  if(flash > 64)
+  if (flash > 64)
     flash = 0;
 
   Gui::flashCursor((((flash >> 2) & 1) == 1) ? true : false);
@@ -381,17 +381,17 @@ void Terminal::receive(void *data)
 
 void Terminal::changeReg(int reg, int num)
 {
-  if(connected == false)
+  if (connected == false)
     return;
 
-  if(num < 0)
+  if (num < 0)
     num = 0;
 
   char s[256];
 
-  if(Gui::getMode() == Gui::MODE_265)
+  if (Gui::getMode() == Gui::MODE_265)
   {
-    switch(reg)
+    switch (reg)
     {
       case REG_PC:
         sprintf(s, "|P%02X:%04X", num >> 16, num & 0xFFFF);
@@ -429,12 +429,12 @@ void Terminal::changeReg(int reg, int num)
 
     sendString("R");
 
-    if(reg == REG_SR)
+    if (reg == REG_SR)
       Gui::setToggles(num);
   }
-  else if(Gui::getMode() == Gui::MODE_134)
+  else if (Gui::getMode() == Gui::MODE_134)
   {
-    switch(reg)
+    switch (reg)
     {
       case REG_PC:
         sprintf(s, "A%04X     ", num & 0xFFFF);
@@ -464,26 +464,26 @@ void Terminal::changeReg(int reg, int num)
 
     sendString("R");
 
-    if(reg == REG_SR)
+    if (reg == REG_SR)
       Gui::setToggles(num);
   }
 }
 
 void Terminal::updateRegs()
 {
-  if(connected == false)
+  if (connected == false)
     return;
 
   char s[256];
   memset(s, 0, sizeof(s));
 
-  if(Gui::getMode() == Gui::MODE_265)
+  if (Gui::getMode() == Gui::MODE_265)
   {
     sendString("| ");
     getResult(s);
     Gui::updateRegs(s);
   }
-  else if(Gui::getMode() == Gui::MODE_134)
+  else if (Gui::getMode() == Gui::MODE_134)
   {
     sendString("R");
     getResult(s);
@@ -493,55 +493,58 @@ void Terminal::updateRegs()
 
 void Terminal::jml(int address)
 {
-  if(connected == false)
+  if (connected == false)
     return;
 
-  if(address < 0)
+  if (address < 0)
     address = 0;
 
   char s[256];
 
-  if(Gui::getMode() == Gui::MODE_265)
+  if (Gui::getMode() == Gui::MODE_265)
   {
-sendString("G");
+    sendString("G");
     sprintf(s, "%02X%04X", address >> 16, address & 0xFFFF);
     sendString(s);
   }
-  else if(Gui::getMode() == Gui::MODE_134)
+  else if (Gui::getMode() == Gui::MODE_134)
   {
-    sprintf(s, "G%04X", address & 0xFFFF);
+    sendString("G");
+    sprintf(s, "%04X", address & 0xFFFF);
     sendString(s);
   }
 }
 
 void Terminal::jsl(int address)
 {
-  if(connected == false)
+  if (connected == false)
     return;
 
-  if(address < 0)
+  if (address < 0)
     address = 0;
 
   char s[256];
 
-  if(Gui::getMode() == Gui::MODE_265)
+  if (Gui::getMode() == Gui::MODE_265)
   {
-    sprintf(s, "J%02X%04X", address >> 16, address & 0xFFFF);
+    sendString("J");
+    sprintf(s, "%02X%04X", address >> 16, address & 0xFFFF);
     sendString(s);
   }
-  else if(Gui::getMode() == Gui::MODE_134)
+  else if (Gui::getMode() == Gui::MODE_134)
   {
-    sprintf(s, "J%04X", address & 0xFFFF);
+    sendString("J");
+    sprintf(s, "%04X", address & 0xFFFF);
     sendString(s);
   }
 }
 
 void Terminal::dump(int address)
 {
-  if(connected == false)
+  if (connected == false)
     return;
 
-  if(address < 0)
+  if (address < 0)
     address = 0;
 
   char s[256];
@@ -551,23 +554,25 @@ void Terminal::dump(int address)
           (address + 0xff) >> 16, (address + 0xff) & 0xFFFF);
   Gui::append(s);
 
-  if(Gui::getMode() == Gui::MODE_265)
+  if (Gui::getMode() == Gui::MODE_265)
   {
-    sprintf(s, "D%02X%04X", address >> 16, address & 0xFFFF);
+    sendString("D");
+    sprintf(s, "%02X%04X", address >> 16, address & 0xFFFF);
     sendString(s);
     sprintf(s, "%02X%04X\n", (address + 0xff) >> 16, (address + 0xff) & 0xFFFF);
     sendString(s);
   }
-  else if(Gui::getMode() == Gui::MODE_134)
+  else if (Gui::getMode() == Gui::MODE_134)
   {
-    sprintf(s, "D%04X%04X", address & 0xFFFF, (address + 0xff) & 0xffff);
+    sendString("D");
+    sprintf(s, "%04X%04X", address & 0xFFFF, (address + 0xff) & 0xffff);
     sendString(s);
   }
 }
 
 void Terminal::upload()
 {
-  if(connected == false)
+  if (connected == false)
   {
     Dialog::message("Error", "Not Connected.");
     return;
@@ -580,7 +585,7 @@ void Terminal::upload()
   fc.type(Fl_Native_File_Chooser::BROWSE_FILE);
   fc.directory(load_dir);
 
-  switch(fc.show())
+  switch (fc.show())
   {
     case -1:
     case 1:
@@ -592,9 +597,9 @@ void Terminal::upload()
 
   const char *ext = fl_filename_ext(fc.filename());
 
-  if(strcasecmp(ext, ".hex") == 0)
+  if (strcasecmp(ext, ".hex") == 0)
     Terminal::uploadHex(fc.filename());
-  else if(strcasecmp(ext, ".srec") == 0)
+  else if (strcasecmp(ext, ".srec") == 0)
     Terminal::uploadSrec(fc.filename());
   else Dialog::message("Upload Error", "Only .hex and .srec file extentions are supported.");
 }
@@ -613,7 +618,7 @@ void Terminal::uploadHex(const char *filename)
 
   FILE *fp = fopen(filename, "r");
 
-  if(fp == NULL)
+  if (fp == NULL)
   {
     Dialog::message("Error", "Could not open file.\n");
     return;
@@ -621,20 +626,20 @@ void Terminal::uploadHex(const char *filename)
 
   Gui::append("\nUploading Program, ESC to cancel.\n");
 
-  while(1)
+  while (1)
   {
     temp = fgetc(fp);
-    if(temp == EOF)
+    if (temp == EOF)
       break;
 
     // start of line
-    if(temp == ':')
+    if (temp == ':')
     {
       segment = 0;
       ret = fscanf(fp, "%02X", &count);
 
       // last line
-      if(count == 0)
+      if (count == 0)
       {
         break;
       }
@@ -643,11 +648,11 @@ void Terminal::uploadHex(const char *filename)
         ret = fscanf(fp, "%04X", &address);
         ret = fscanf(fp, "%02X", &code);
 
-        if(code == 0x04)
+        if (code == 0x04)
         {
           segment = address;
         }
-        else if(code == 0x00)
+        else if (code == 0x00)
         {
           int checksum = 0;
 
@@ -660,7 +665,7 @@ void Terminal::uploadHex(const char *filename)
 
           // data
           int index = 10;
-          for(int i = 0; i < count; i++)
+          for (int i = 0; i < count; i++)
           {
             ret = fscanf(fp, "%02X", &value);
             sprintf(s + index, "%02X", value);
@@ -679,16 +684,16 @@ void Terminal::uploadHex(const char *filename)
       }
 
       // skip to next line
-      while(1)
+      while (1)
       {
         temp = fgetc(fp);
-        if(temp == '\n')
+        if (temp == '\n')
           break;
       }
 
       // cancel operation with escape key
       Fl::check();
-      if(Gui::getCancelled() == true)
+      if (Gui::getCancelled() == true)
       {
         Gui::setCancelled(false);
         break;
@@ -716,7 +721,7 @@ void Terminal::uploadSrec(const char *filename)
 
   FILE *fp = fopen(filename, "r");
 
-  if(fp == NULL)
+  if (fp == NULL)
   {
     Dialog::message("Error", "Could not open file.\n");
     return;
@@ -724,38 +729,38 @@ void Terminal::uploadSrec(const char *filename)
 
   Gui::append("\nUploading Program, ESC to cancel.\n");
 
-  while(1)
+  while (1)
   {
     // get code from prefix
     prefix[0] = fgetc(fp);
-    if(prefix[0] == EOF)
+    if (prefix[0] == EOF)
       break;
 
     prefix[1] = fgetc(fp);
-    if(prefix[1] == EOF)
+    if (prefix[1] == EOF)
       break;
 
     code = prefix[1] - '0';
-    if(code < 0 || code > 2)
+    if (code < 0 || code > 2)
       break;
 
     ret = fscanf(fp, "%02X", &count);
 
-    if(code == 1)
+    if (code == 1)
       count -= 3;
-    else if(code == 2)
+    else if (code == 2)
       count -= 4;
 
     // last line
-    if(count == 0)
+    if (count == 0)
     {
       break;
     }
-    else if(code > 0)
+    else if (code > 0)
     {
-      if(code == 1)
+      if (code == 1)
         ret = fscanf(fp, "%04X", &address);
-      else if(code == 2)
+      else if (code == 2)
         ret = fscanf(fp, "%06X", &address);
       else
         break;
@@ -771,7 +776,7 @@ void Terminal::uploadSrec(const char *filename)
 
       // data
       int index = 10;
-      for(int i = 0; i < count; i++)
+      for (int i = 0; i < count; i++)
       {
         ret = fscanf(fp, "%02X", &value);
         sprintf(s + index, "%02X", value);
@@ -789,16 +794,16 @@ void Terminal::uploadSrec(const char *filename)
     }
 
     // skip to next line
-    while(1)
+    while (1)
     {
       temp = fgetc(fp);
-      if(temp == '\n')
+      if (temp == '\n')
         break;
     }
 
     // cancel operation with escape key
     Fl::check();
-    if(Gui::getCancelled() == true)
+    if (Gui::getCancelled() == true)
     {
       Gui::setCancelled(false);
       break;

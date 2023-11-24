@@ -81,7 +81,7 @@ namespace
   // quit program
   void quit()
   {
-    if(Dialog::choice("Quit", "Are You Sure?"))
+    if (Dialog::choice("Quit", "Are You Sure?"))
     {
       Gui::setCancelled(true);
       exit(0);
@@ -91,14 +91,14 @@ namespace
   // prevent escape from closing main window
   void closeCallback(Fl_Widget *widget, void *)
   {
-    if((Fl::event() == FL_KEYDOWN || Fl::event() == FL_SHORTCUT)
+    if ((Fl::event() == FL_KEYDOWN || Fl::event() == FL_SHORTCUT)
        && Fl::event_key() == FL_Escape)
     {
       return;
     }
     else
     {
-      if(Dialog::choice("Quit", "Are You Sure?"))
+      if (Dialog::choice("Quit", "Are You Sure?"))
         widget->hide();
     }
   }
@@ -121,21 +121,21 @@ public:
   {
     bool shift, ctrl;
 
-    switch(event)
+    switch (event)
     {
       case FL_FOCUS:
         return 1;
       case FL_UNFOCUS:
         return 1;
       case FL_KEYBOARD:
-        if(Fl::event_key() == FL_Escape)
+        if (Fl::event_key() == FL_Escape)
         {
           Gui::setCancelled(true);
           return 1;
         }
 
         // give focus to the main menu
-        if(Fl::event_alt() > 0)
+        if (Fl::event_alt() > 0)
         {
           Gui::getMenuBar()->take_focus();
           return 0;
@@ -145,7 +145,7 @@ public:
         ctrl = Fl::event_ctrl() ? true : false;
 
         // misc keys
-        if(Fl::event_length() > 0)
+        if (Fl::event_length() > 0)
         {
           Terminal::sendString(Fl::event_text());
         }
@@ -400,7 +400,7 @@ void Gui::init()
   window->end();
 
   // fix certain icons if using a light theme
-  //if(Project::theme == Project::THEME_LIGHT)
+  //if (Project::theme == Project::THEME_LIGHT)
   //{
   //}
 }
@@ -417,7 +417,7 @@ void Gui::setMenuItem(const char *s)
   Fl_Menu_Item *m;
   m = (Fl_Menu_Item *)menubar->find_item(s);
 
-  if(m)
+  if (m)
     m->set();
 }
 
@@ -427,7 +427,7 @@ void Gui::clearMenuItem(const char *s)
   Fl_Menu_Item *m;
   m = (Fl_Menu_Item *)menubar->find_item(s);
 
-  if(m)
+  if (m)
     m->clear();
 }
 
@@ -443,16 +443,16 @@ Fl_Menu_Bar *Gui::getMenuBar()
 
 void Gui::append(const char *buf)
 {
-  if(strlen(buf) < 1)
+  if (strlen(buf) < 1)
     return;
 
   char text[4096];
   memcpy(text, buf, sizeof(text));
   
   // convert carriage returns
-  for(int i = 0; i < sizeof(text); i++)
+  for (int i = 0; i < sizeof(text); i++)
   {
-    if(text[i] == '\0')
+    if (text[i] == '\0')
       break;
   }
 
@@ -461,7 +461,7 @@ void Gui::append(const char *buf)
   int lines = client_text->count_lines(0, client_text->length());
 
   // limit scrollback buffer to 250 lines
-  while(lines > 250)
+  while (lines > 250)
   {
     client_text->remove(client_text->line_start(1),
                         client_text->line_end(1) + 1);
@@ -596,7 +596,7 @@ void Gui::updateRegs(char *s)
   int pc, a, x, y, sp, dp, sr, db;
   char buf[256];
 
-  if(mode == MODE_265)
+  if (mode == MODE_265)
   {
     sscanf(s, "  %06X %04X %04X %04X %04X %04X %02X %02X",
            &pc, &a, &x, &y, &sp, &dp, &sr, &db);
@@ -627,7 +627,7 @@ void Gui::updateRegs(char *s)
 
     setToggles(sr);
   }
-  else if(mode == MODE_134)
+  else if (mode == MODE_134)
   {
     sscanf(s + 20, "%04X %02X %02X %02X %02X %02X",
            &pc, &sr, &a, &x, &y, &sp);
@@ -656,7 +656,7 @@ void Gui::updateRegs(char *s)
 
 void Gui::flashCursor(bool show)
 {
-  if(show == true)
+  if (show == true)
     client_display->show_cursor();
   else
     client_display->hide_cursor();

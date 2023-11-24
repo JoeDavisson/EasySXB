@@ -101,7 +101,7 @@ namespace Connect
 
   void begin()
   {
-    if(Terminal::isConnected())
+    if (Terminal::isConnected())
     {
       Dialog::message("Error", "Already connected.");
       return;
@@ -260,7 +260,7 @@ bool Dialog::choice(const char *title, const char *message)
 {
   Choice::begin(title, message);
 
-  while(Choice::Items::dialog->shown())
+  while (Choice::Items::dialog->shown())
     Fl::check();
 
   return Choice::yes;
