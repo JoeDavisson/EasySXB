@@ -89,8 +89,6 @@ namespace
     if (ms < 20)
       ms = 20;
 
-    ms += 4;
-
 #ifdef WIN32
     Sleep(ms);
 #else
@@ -161,15 +159,21 @@ void Terminal::connect()
     return;
   }
 
-  memset(&term, 0, sizeof(term));
+  int result = tcgetattr(fd, &term);
 
-  //term.c_cflag = B9600 | CRTSCTS | CS8 | CREAD| CLOCAL;
-  term.c_cflag = B9600 | CS8 | CREAD| CLOCAL;
-  term.c_iflag = IGNPAR | IXOFF | IXON | IXANY;
+  if (result < 0)
+  {
+    Dialog::message("Error", "tcgetattr() failed.");
+    return;
+  }
+
+  term.c_cflag &= ~(CRTSCTS | CSIZE | HUPCL | PARENB | CSTOPB);
+  term.c_cflag |= B9600 | CS8 | CREAD | CLOCAL;
   term.c_oflag = 0;
   term.c_lflag = 0;
   term.c_cc[VTIME] = 0;
   term.c_cc[VMIN] = 1;
+
   tcflush(fd, TCIFLUSH);
   tcsetattr(fd, TCSANOW, &term);
 
