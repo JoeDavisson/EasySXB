@@ -67,6 +67,8 @@ namespace
   Fl_Input *input_address;
   Fl_Button *button_jml;
   Fl_Button *button_jsl;
+
+  Fl_Input *input_dump_address;
   Fl_Button *button_dump;
 
   Fl_Light_Button *light_n;
@@ -164,7 +166,7 @@ void Gui::init()
   int pos;
 
   // main window
-  window = new MainWin(832, 512, "EasySXB");
+  window = new MainWin(832, 540, "EasySXB");
   window->callback(closeCallback);
 
   // generate menu
@@ -292,6 +294,17 @@ void Gui::init()
   button_jsl->callback((Fl_Callback *)checkJSL);
   pos += 24 + 8;
 
+  new Separator(side, 2, pos - side->y(), 124, 2, "");
+  pos += 8;
+
+  input_dump_address = new Fl_Input(side->w() - 60 - 8, pos,
+                                    60, 24, "Address:");
+  input_dump_address->textfont(FL_COURIER);
+  input_dump_address->labelfont(FL_COURIER);
+  input_dump_address->labelsize(10);
+  input_dump_address->maximum_size(6);
+  pos += 24 + 8;
+
   button_dump = new Fl_Button(16, pos, 96, 24, "Dump Mem");
   button_dump->labelfont(FL_COURIER);
   button_dump->callback((Fl_Callback *)checkDump);
@@ -395,7 +408,7 @@ void Gui::init()
   terminal->resizable(client_display);
   terminal->end();
 
-  window->size_range(660, 512, 0, 0, 0, 0, 0);
+  window->size_range(660, 540, 0, 0, 0, 0, 0);
   window->resizable(terminal);
   window->end();
 
@@ -552,7 +565,7 @@ void Gui::checkJSL()
 void Gui::checkDump()
 {
   int address;
-  sscanf(input_address->value(), "%06X", &address);
+  sscanf(input_dump_address->value(), "%06X", &address);
   Terminal::dump(address);
 }
 
@@ -677,7 +690,9 @@ void Gui::setMode265()
   input_dp->resize(input_dp->x(), input_dp->y(), 48, 20);
   input_sr->resize(input_sr->x(), input_sr->y(), 24, 20);
   input_db->resize(input_db->x(), input_db->y(), 24, 20);
-  input_address->resize(input_address->x(), input_address->y(), 60, 20);
+  input_address->resize(input_address->x(), input_address->y(), 60, 24);
+  input_dump_address->resize(input_dump_address->x(), input_dump_address->y(),
+                             60, 24);
 
   input_pc->maximum_size(6);
   input_a->maximum_size(4);
@@ -721,7 +736,9 @@ void Gui::setMode134()
   input_dp->resize(input_dp->x(), input_dp->y(), 24, 20);
   input_sr->resize(input_sr->x(), input_sr->y(), 24, 20);
   input_db->resize(input_db->x(), input_db->y(), 24, 20);
-  input_address->resize(input_address->x(), input_address->y(), 48, 20);
+  input_address->resize(input_address->x(), input_address->y(), 48, 24);
+  input_dump_address->resize(input_dump_address->x(), input_dump_address->y(),
+                             48, 24);
 
   input_pc->maximum_size(4);
   input_a->maximum_size(2);
