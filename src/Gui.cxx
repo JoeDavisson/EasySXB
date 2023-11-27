@@ -63,6 +63,7 @@ namespace
   Fl_Input *input_sr;
   Fl_Input *input_db;
   Fl_Button *button_get;
+  Fl_Box *reg_info;
 
   Fl_Input *input_address;
   Fl_Button *button_jml;
@@ -166,7 +167,7 @@ void Gui::init()
   int pos;
 
   // main window
-  window = new MainWin(832, 540, "EasySXB");
+  window = new MainWin(832, 576, "EasySXB");
   window->callback(closeCallback);
 
   // generate menu
@@ -275,6 +276,12 @@ void Gui::init()
   button_get->callback((Fl_Callback *)checkUpdate);
   pos += 24 + 6;
 
+  reg_info = new Fl_Box(FL_NO_BOX, 16, pos, 96, 24,
+                        "(Press Enter on a field\nto update register)");
+  reg_info->labelsize(10);
+  reg_info->labelfont(FL_ITALIC);
+  pos += 32;
+
   new Separator(side, 2, pos - side->y(), 124, 2, "");
   pos += 8;
 
@@ -283,6 +290,7 @@ void Gui::init()
   input_address->labelfont(FL_COURIER);
   input_address->labelsize(10);
   input_address->maximum_size(6);
+  input_address->value("1000");
   pos += 24 + 8;
 
   button_jml = new Fl_Button(8, pos, 52, 24, "JML");
@@ -303,6 +311,7 @@ void Gui::init()
   input_dump_address->labelfont(FL_COURIER);
   input_dump_address->labelsize(10);
   input_dump_address->maximum_size(6);
+  input_dump_address->value("1000");
   pos += 24 + 8;
 
   button_dump = new Fl_Button(16, pos, 96, 24, "Dump Mem");
@@ -408,7 +417,7 @@ void Gui::init()
   terminal->resizable(client_display);
   terminal->end();
 
-  window->size_range(660, 540, 0, 0, 0, 0, 0);
+  window->size_range(660, 576, 0, 0, 0, 0, 0);
   window->resizable(terminal);
   window->end();
 

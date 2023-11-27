@@ -83,16 +83,19 @@ namespace
     }
   }
 
-  void delay(int ms)
+  void fileError()
   {
-    // enforce a minimum delay
-    if (ms < 20)
-      ms = 20;
+    Dialog::message("Error", "Error reading file.\n");
+  }
+
+  void delay(const int chars)
+  {
+    const int timeout = 20;
 
 #ifdef WIN32
-    Sleep(ms);
+    Sleep(timeout + chars);
 #else
-    usleep(ms * 1000);
+    usleep((timeout + chars) * 1000);
 #endif
   }
 }
@@ -159,23 +162,26 @@ void Terminal::connect()
     return;
   }
 
-  int result = tcgetattr(fd, &term);
+  memset(&term, 0, sizeof(term));
 
-  if (result < 0)
-  {
-    Dialog::message("Error", "tcgetattr() failed.");
-    return;
-  }
-
-  term.c_cflag &= ~(CRTSCTS | CSIZE | HUPCL | PARENB | CSTOPB);
-  term.c_cflag |= B9600 | CS8 | CREAD | CLOCAL;
+  term.c_cflag = B9600 | CRTSCTS | CS8 | CREAD | CLOCAL;
+  term.c_iflag = IGNPAR;
   term.c_oflag = 0;
   term.c_lflag = 0;
-  term.c_cc[VTIME] = 0;
+  term.c_cc[VTIME] = 1;
   term.c_cc[VMIN] = 1;
 
+  cfsetispeed(&term, B9600);
+  cfsetospeed(&term, B9600);
   tcflush(fd, TCIFLUSH);
-  tcsetattr(fd, TCSANOW, &term);
+
+  int result = tcsetattr(fd, TCSANOW, &term);
+
+  if (result == -1)
+  {
+    Dialog::message("Error", "tcsetattr() failed.");
+    return;
+  }
 
   tv.tv_sec = 0;
   tv.tv_usec = 100000;
@@ -184,9 +190,8 @@ void Terminal::connect()
   flash = 0;
   connected = true;
 
-  Gui::append("\nConnected to SXB at 9600 baud.\n\n");
+  Gui::append("\n>> Connected to SXB at 9600 baud.\n\n");
   Gui::append("\n");
-  delay(100);
 }
 
 void Terminal::disconnect()
@@ -199,7 +204,7 @@ void Terminal::disconnect()
     close(fd);
 #endif
     connected = false;
-    Gui::append("\nConnection Closed.\n");
+    Gui::append("\n>> Connection Closed.\n");
     Dialog::message("Disconnected", "Connection Closed.");
   }
 }
@@ -292,10 +297,10 @@ void Terminal::sendString(const char *s)
     DWORD bytes;
 
     WriteFile(hserial, buf, strlen(buf), &bytes, NULL);
-    delay(strlen(s));
+    delay(bytes);
 #else
-    int temp = write(fd, buf, strlen(buf));
-    delay(strlen(s));
+    int bytes = write(fd, buf, strlen(buf));
+    delay(bytes);
 #endif
   }
 }
@@ -305,6 +310,7 @@ void Terminal::getResult(char *s)
   if (connected == true)
   {
     getData();
+
     int j = 0;
 
     for (int i = 0; i < strlen(buf); i++)
@@ -332,7 +338,9 @@ void Terminal::getData()
     while (1)
     {
       BOOL temp = ReadFile(hserial, buf + buf_pos, 256, &bytes, NULL);
-      delay(bytes);
+
+      if (bytes > 0)
+        delay(bytes);
 
       if (temp == 0 || bytes == 0)
         break;
@@ -350,7 +358,9 @@ void Terminal::getData()
     while (1)
     {
       bytes = read(fd, buf + buf_pos, 256);
-      delay(bytes);
+
+      if (bytes > 0)
+        delay(bytes);
 
       if (bytes <= 0)
         break;
@@ -380,7 +390,7 @@ void Terminal::receive(void *data)
 
   Gui::flashCursor((((flash >> 2) & 1) == 1) ? true : false);
 
-  Fl::repeat_timeout(.1, Terminal::receive, data);
+  Fl::repeat_timeout(.25, Terminal::receive, data);
 }
 
 void Terminal::changeReg(int reg, int num)
@@ -608,7 +618,6 @@ void Terminal::upload()
   else Dialog::message("Upload Error", "Only .hex and .srec file extentions are supported.");
 }
 
-//FIXME fscanf return value should be checked
 void Terminal::uploadHex(const char *filename)
 {
   int segment = 0;
@@ -628,13 +637,14 @@ void Terminal::uploadHex(const char *filename)
     return;
   }
 
-  Gui::append("\nUploading Program, ESC to cancel.\n");
+  Gui::append("\n>> Uploading Program, ESC to cancel.\n");
 
   while (1)
   {
     temp = fgetc(fp);
+
     if (temp == EOF)
-      break;
+      break; 
 
     // start of line
     if (temp == ':')
@@ -642,15 +652,34 @@ void Terminal::uploadHex(const char *filename)
       segment = 0;
       ret = fscanf(fp, "%02X", &count);
 
+      if (ret == -1 || ret == EOF)
+      {
+        fileError();
+        break;
+      }
+
       // last line
       if (count == 0)
       {
         break;
       }
-      else
+        else
       {
         ret = fscanf(fp, "%04X", &address);
+
+        if (ret == -1 || ret == EOF)
+        {
+          fileError();
+          break;
+        }
+
         ret = fscanf(fp, "%02X", &code);
+
+        if (ret == -1 || ret == EOF)
+        {
+          fileError();
+          break;
+        }
 
         if (code == 0x04)
         {
@@ -669,12 +698,26 @@ void Terminal::uploadHex(const char *filename)
 
           // data
           int index = 10;
+          bool cancel = false;
+
           for (int i = 0; i < count; i++)
           {
             ret = fscanf(fp, "%02X", &value);
+            if (ret == -1 || ret == EOF)
+            {
+              cancel = true;
+              break;
+            }
+
             sprintf(s + index, "%02X", value);
             index += 2;
             checksum += value;
+          }
+
+          if (cancel == true)
+          {
+            fileError();
+            break;
           }
 
           // checksum
@@ -688,7 +731,7 @@ void Terminal::uploadHex(const char *filename)
       }
 
       // skip to next line
-      while (1)
+      for (int i = 0; i < 256; i++)
       {
         temp = fgetc(fp);
         if (temp == '\n')
@@ -697,6 +740,7 @@ void Terminal::uploadHex(const char *filename)
 
       // cancel operation with escape key
       Fl::check();
+
       if (Gui::getCancelled() == true)
       {
         Gui::setCancelled(false);
@@ -719,8 +763,8 @@ void Terminal::uploadSrec(const char *filename)
   int value = 0;
   int count = 0;
   int temp;
-  char prefix[8];
   int ret;
+  char prefix[8];
   char s[256];
 
   FILE *fp = fopen(filename, "r");
@@ -731,7 +775,7 @@ void Terminal::uploadSrec(const char *filename)
     return;
   }
 
-  Gui::append("\nUploading Program, ESC to cancel.\n");
+  Gui::append("\n>> Uploading Program, ESC to cancel.\n");
 
   while (1)
   {
@@ -749,6 +793,11 @@ void Terminal::uploadSrec(const char *filename)
       break;
 
     ret = fscanf(fp, "%02X", &count);
+    if (ret == -1 || ret == EOF)
+    {
+      fileError();
+      break;
+    }
 
     if (code == 1)
       count -= 3;
@@ -763,11 +812,27 @@ void Terminal::uploadSrec(const char *filename)
     else if (code > 0)
     {
       if (code == 1)
+      {
         ret = fscanf(fp, "%04X", &address);
+        if (ret == -1 || ret == EOF)
+        {
+          fileError();
+          break;
+        }
+      }
       else if (code == 2)
+      {
         ret = fscanf(fp, "%06X", &address);
-      else
+        if (ret == -1 || ret == EOF)
+        {
+          fileError();
+          break;
+        }
+      }
+        else
+      {
         break;
+      }
 
       int checksum = 0;
 
@@ -783,6 +848,12 @@ void Terminal::uploadSrec(const char *filename)
       for (int i = 0; i < count; i++)
       {
         ret = fscanf(fp, "%02X", &value);
+        if (ret == -1 || ret == EOF)
+        {
+          fileError();
+          break;
+        }
+
         sprintf(s + index, "%02X", value);
         index += 2;
         checksum += value;
@@ -798,7 +869,7 @@ void Terminal::uploadSrec(const char *filename)
     }
 
     // skip to next line
-    while (1)
+    for (int i = 0; i < 256; i++)
     {
       temp = fgetc(fp);
       if (temp == '\n')
