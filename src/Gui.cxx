@@ -269,9 +269,9 @@ void Gui::init()
   input_db->maximum_size(2);
   input_db->when(FL_WHEN_ENTER_KEY | FL_WHEN_NOT_CHANGED);
   input_db->callback((Fl_Callback *)checkDB);
-  pos += 20 + 4;
+  pos += 20 + 6;
 
-  button_get = new Fl_Button(16, pos, 96, 24, "Get Regs");
+  button_get = new Fl_Button(16, pos, 96, 24, "Retrieve");
   button_get->labelfont(FL_COURIER);
   button_get->callback((Fl_Callback *)checkUpdate);
   pos += 24 + 6;
@@ -721,7 +721,7 @@ void Gui::setMode265()
   input_dp->value("");
   input_sr->value("");
   input_db->value("");
-  input_address->value("");
+  input_address->value("1000");
 
   input_dp->activate();
   input_db->activate();
@@ -767,7 +767,7 @@ void Gui::setMode134()
   input_dp->value("");
   input_sr->value("");
   input_db->value("");
-  input_address->value("");
+  input_address->value("1000");
 
   input_dp->deactivate();
   input_db->deactivate();
