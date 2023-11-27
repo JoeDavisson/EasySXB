@@ -98,7 +98,7 @@ namespace
     {
       return;
     }
-    else
+      else
     {
       if (Dialog::choice("Quit", "Are You Sure?"))
         widget->hide();
@@ -127,8 +127,10 @@ public:
     {
       case FL_FOCUS:
         return 1;
-      case FL_UNFOCUS:
+ 
+     case FL_UNFOCUS:
         return 1;
+
       case FL_KEYBOARD:
         if (Fl::event_key() == FL_Escape)
         {
@@ -415,9 +417,9 @@ void Gui::init()
   window->end();
 
   // fix certain icons if using a light theme
-  //if (Project::theme == Project::THEME_LIGHT)
-  //{
-  //}
+  // if (Project::theme == Project::THEME_LIGHT)
+  // {
+  // }
 }
 
 // show the main program window (called after gui is constructed)
@@ -492,6 +494,7 @@ void Gui::append(const char *buf)
 void Gui::checkPC()
 {
   int num;
+
   sscanf(input_pc->value(), "%06X", &num);
   Terminal::changeReg(Terminal::REG_PC, num);
 }
@@ -499,6 +502,7 @@ void Gui::checkPC()
 void Gui::checkA()
 {
   int num;
+
   sscanf(input_a->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_A, num);
 }
@@ -506,6 +510,7 @@ void Gui::checkA()
 void Gui::checkX()
 {
   int num;
+
   sscanf(input_x->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_X, num);
 }
@@ -513,6 +518,7 @@ void Gui::checkX()
 void Gui::checkY()
 {
   int num;
+
   sscanf(input_y->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_Y, num);
 }
@@ -520,6 +526,7 @@ void Gui::checkY()
 void Gui::checkSP()
 {
   int num;
+
   sscanf(input_sp->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_SP, num);
 }
@@ -527,6 +534,7 @@ void Gui::checkSP()
 void Gui::checkDP()
 {
   int num;
+
   sscanf(input_dp->value(), "%04X", &num);
   Terminal::changeReg(Terminal::REG_DP, num);
 }
@@ -534,6 +542,7 @@ void Gui::checkDP()
 void Gui::checkSR()
 {
   int num;
+
   sscanf(input_sr->value(), "%02X", &num);
   Terminal::changeReg(Terminal::REG_SR, num);
 }
@@ -541,6 +550,7 @@ void Gui::checkSR()
 void Gui::checkDB()
 {
   int num;
+
   sscanf(input_db->value(), "%02X", &num);
   Terminal::changeReg(Terminal::REG_DB, num);
 }
@@ -553,6 +563,7 @@ void Gui::checkUpdate()
 void Gui::checkJML()
 {
   int address;
+
   sscanf(input_address->value(), "%06X", &address);
   Terminal::jml(address);
 }
@@ -560,6 +571,7 @@ void Gui::checkJML()
 void Gui::checkJSL()
 {
   int address;
+
   sscanf(input_address->value(), "%06X", &address);
   Terminal::jsl(address);
 }
@@ -567,6 +579,7 @@ void Gui::checkJSL()
 void Gui::checkDump()
 {
   int address;
+
   sscanf(input_dump_address->value(), "%06X", &address);
   Terminal::dump(address);
 }

@@ -346,6 +346,7 @@ void Terminal::getData()
         break;
 
       buf_pos += bytes;
+
       if (buf_pos > 2048)
         break;
     }
@@ -366,6 +367,7 @@ void Terminal::getData()
         break;
 
       buf_pos += bytes;
+
       if (buf_pos > 2048)
         break;
     }
@@ -612,10 +614,18 @@ void Terminal::upload()
   const char *ext = fl_filename_ext(fc.filename());
 
   if (strcasecmp(ext, ".hex") == 0)
+  {
     Terminal::uploadHex(fc.filename());
+  }
   else if (strcasecmp(ext, ".srec") == 0)
+  {
     Terminal::uploadSrec(fc.filename());
-  else Dialog::message("Upload Error", "Only .hex and .srec file extentions are supported.");
+  }
+    else
+  {
+    Dialog::message("Upload Error",
+                    "Only .hex and .srec file extentions are supported.");
+  }
 }
 
 void Terminal::uploadHex(const char *filename)
@@ -703,6 +713,7 @@ void Terminal::uploadHex(const char *filename)
           for (int i = 0; i < count; i++)
           {
             ret = fscanf(fp, "%02X", &value);
+
             if (ret == -1 || ret == EOF)
             {
               cancel = true;
@@ -734,6 +745,7 @@ void Terminal::uploadHex(const char *filename)
       for (int i = 0; i < 256; i++)
       {
         temp = fgetc(fp);
+
         if (temp == '\n')
           break;
       }
@@ -781,18 +793,22 @@ void Terminal::uploadSrec(const char *filename)
   {
     // get code from prefix
     prefix[0] = fgetc(fp);
+
     if (prefix[0] == EOF)
       break;
 
     prefix[1] = fgetc(fp);
+
     if (prefix[1] == EOF)
       break;
 
     code = prefix[1] - '0';
+
     if (code < 0 || code > 2)
       break;
 
     ret = fscanf(fp, "%02X", &count);
+
     if (ret == -1 || ret == EOF)
     {
       fileError();
@@ -814,6 +830,7 @@ void Terminal::uploadSrec(const char *filename)
       if (code == 1)
       {
         ret = fscanf(fp, "%04X", &address);
+
         if (ret == -1 || ret == EOF)
         {
           fileError();
@@ -823,6 +840,7 @@ void Terminal::uploadSrec(const char *filename)
       else if (code == 2)
       {
         ret = fscanf(fp, "%06X", &address);
+
         if (ret == -1 || ret == EOF)
         {
           fileError();
@@ -845,9 +863,11 @@ void Terminal::uploadSrec(const char *filename)
 
       // data
       int index = 10;
+
       for (int i = 0; i < count; i++)
       {
         ret = fscanf(fp, "%02X", &value);
+
         if (ret == -1 || ret == EOF)
         {
           fileError();
@@ -872,12 +892,14 @@ void Terminal::uploadSrec(const char *filename)
     for (int i = 0; i < 256; i++)
     {
       temp = fgetc(fp);
+
       if (temp == '\n')
         break;
     }
 
     // cancel operation with escape key
     Fl::check();
+
     if (Gui::getCancelled() == true)
     {
       Gui::setCancelled(false);

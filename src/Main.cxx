@@ -110,10 +110,12 @@ int main(int argc, char *argv[])
           case OPTION_PORT:
             strncpy(Terminal::port_string, optarg, 256);
             break;
+
           case OPTION_FILE:
             strncpy(file_string, optarg, 1024);
             upload = true;
             break;
+
           case OPTION_THEME:
             if (strcmp(optarg, "dark") == 0)
             {
@@ -127,6 +129,7 @@ int main(int argc, char *argv[])
             }
             printf("\nUnknown theme: \"%s\"\n", optarg);
             return 0;
+
           case OPTION_HELP:
             printf("%s\n", help_string);
             return 0;
@@ -172,10 +175,18 @@ int main(int argc, char *argv[])
     const char *ext = fl_filename_ext(file_string);
   
     if (strcasecmp(ext, ".hex") == 0)
+    {
       Terminal::uploadHex(file_string);
+    }
     else if (strcasecmp(ext, ".srec") == 0)
+    {
       Terminal::uploadSrec(file_string);
-    else Dialog::message("Upload Error", "Only .hex and .srec file extentions are supported.");
+    }
+      else
+    {
+      Dialog::message("Upload Error",
+                      "Only .hex and .srec file extentions are supported.");
+    }
   }
 
   int ret = Fl::run();
