@@ -166,7 +166,7 @@ void Gui::init()
   int pos;
 
   // main window
-  window = new MainWin(832, 576, "EasySXB");
+  window = new MainWin(832, 552, "EasySXB");
   window->callback(closeCallback);
 
   // generate menu
@@ -410,7 +410,7 @@ void Gui::init()
   terminal->resizable(client_display);
   terminal->end();
 
-  window->size_range(660, 576, 0, 0, 0, 0, 0);
+  window->size_range(660, 552, 0, 0, 0, 0, 0);
   window->resizable(terminal);
   window->end();
 
