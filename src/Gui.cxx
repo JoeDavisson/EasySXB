@@ -63,7 +63,6 @@ namespace
   Fl_Input *input_sr;
   Fl_Input *input_db;
   Fl_Button *button_get;
-  Fl_Box *reg_info;
 
   Fl_Input *input_address;
   Fl_Button *button_jml;
@@ -271,16 +270,10 @@ void Gui::init()
   input_db->callback((Fl_Callback *)checkDB);
   pos += 20 + 6;
 
-  button_get = new Fl_Button(16, pos, 96, 24, "Retrieve");
+  button_get = new Fl_Button(16, pos, 96, 24, "Get Regs");
   button_get->labelfont(FL_COURIER);
   button_get->callback((Fl_Callback *)checkUpdate);
   pos += 24 + 6;
-
-  reg_info = new Fl_Box(FL_NO_BOX, 16, pos, 96, 24,
-                        "(Press Enter on a field\nto update register)");
-  reg_info->labelsize(10);
-  reg_info->labelfont(FL_ITALIC);
-  pos += 32;
 
   new Separator(side, 2, pos - side->y(), 124, 2, "");
   pos += 8;
