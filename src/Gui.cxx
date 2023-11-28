@@ -488,7 +488,6 @@ void Gui::append(const char *buf)
   // scroll display to bottom
   client_display->insert_position(client_text->length());
   client_display->show_insert_position();
-  Fl::check();
 }
 
 void Gui::checkPC()
