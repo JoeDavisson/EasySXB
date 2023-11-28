@@ -113,6 +113,8 @@ namespace Connect
   void close()
   {
     Items::dialog->hide();
+    strncpy(Terminal::port_string, Items::device->value(),
+            sizeof(Terminal::port_string));
     Terminal::connect();
   }
 
