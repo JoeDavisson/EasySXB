@@ -67,7 +67,7 @@ namespace
   // extract directory from a path/filename string
   void getDirectory(char *dest, const char *src)
   {
-    strcpy(dest, src);
+    strncpy(dest, src, sizeof(dest));
 
     int len = strlen(dest);
     if (len < 2)
@@ -106,9 +106,9 @@ void Terminal::connect()
 {
 #ifdef WIN32
   // correct port name
-  char buf[256];
-  sprintf(buf, "\\\\.\\%s", Items::device->value());
-  strcpy(buf, port_string);
+  char buf[4096];
+  sprintf(buf, "\\\\.\\%s", port_string);
+  strncpy(buf, port_string, sizeof(buf));
 
   hserial = CreateFile(port_string, GENERIC_READ | GENERIC_WRITE,
                        0, NULL, OPEN_EXISTING, 0, NULL);
@@ -285,7 +285,7 @@ void Terminal::sendString(const char *s)
   if (connected == true)
   {
     memset(buf, 0, sizeof(buf));
-    strncpy(buf, s, strlen(s));
+    strncpy(buf, s, sizeof(buf));
 
     for (int i = 0; i < strlen(buf); i++)
     {

@@ -7,12 +7,9 @@
 # you MUST have libxft-dev installed before compiling FLTK on linux
 # (otherwise you'll have ugly, non-resizable fonts)
 
-ifeq ($(wildcard ./fltk),)
-  PLATFORM=linux_dynamic
-else
-  PLATFORM=linux_static
-endif
-
+# target platform
+PLATFORM=linux_static
+#PLATFORM=linux_dynamic
 #PLATFORM=mingw32
 #PLATFORM=mingw64
 
@@ -68,7 +65,7 @@ OBJ= \
 default: $(OBJ)
 	$(CXX) -o ./$(EXE) $(SRC_DIR)/Main.cxx $(OBJ) $(CXXFLAGS) $(LIBS)
 
-fltk:
+fltklib:
 	@cd ./fltk; \
 	make clean; \
 	./configure --host=$(HOST) --enable-localjpeg --enable-localzlib --enable-localpng --disable-xdbe; \

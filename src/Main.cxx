@@ -90,9 +90,9 @@ int main(int argc, char *argv[])
   bool upload = false;
 
 #ifdef WIN32
-  strcpy(Terminal::port_string, "COM1");
+  strncpy(Terminal::port_string, "COM1", sizeof(Terminal::port_string));
 #else
-  strcpy(Terminal::port_string, "/dev/ttyUSB0");
+  strncpy(Terminal::port_string, "/dev/ttyUSB0", sizeof(Terminal::port_string));
 #endif
 
   while (true)
@@ -108,11 +108,12 @@ int main(int argc, char *argv[])
         switch (option_index)
         {
           case OPTION_PORT:
-            strncpy(Terminal::port_string, optarg, 256);
+            strncpy(Terminal::port_string, optarg,
+                    sizeof(Terminal::port_string));
             break;
 
           case OPTION_FILE:
-            strncpy(file_string, optarg, 1024);
+            strncpy(file_string, optarg, sizeof(file_string));
             upload = true;
             break;
 
