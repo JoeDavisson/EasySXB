@@ -70,6 +70,7 @@ namespace
     strncpy(dest, src, sizeof(dest));
 
     int len = strlen(dest);
+
     if (len < 2)
       return;
 
