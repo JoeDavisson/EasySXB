@@ -109,19 +109,26 @@ void Terminal::connect()
   // correct port name
   char buf[4096];
   sprintf(buf, "\\\\.\\%s", port_string);
-  strncpy(buf, port_string, sizeof(buf));
 
   hserial = CreateFile(port_string, GENERIC_READ | GENERIC_WRITE,
                        0, NULL, OPEN_EXISTING, 0, NULL);
 
   if (hserial == INVALID_HANDLE_VALUE)
   {
-    Dialog::message("Error", "Could not open serial port.");
+    Dialog::message("Error", "Could not open serial port. (CreateFile)");
     return;
   }
 
-  GetCommState(hserial, &dcb);
+  memset(&dcb, 0, sizeof(DCB));
+  BOOL ret = GetCommState(hserial, &dcb);
 
+  if (ret == FALSE)
+  {
+    Dialog::message("Error", "Could not open serial port. (GetCommState)");
+    return;
+  }
+
+  dcb.DCBlength = sizeof(dcb);
   dcb.BaudRate = CBR_9600;
   dcb.ByteSize = 8;
   dcb.StopBits = ONESTOPBIT;
@@ -133,25 +140,36 @@ void Terminal::connect()
   dcb.fOutxDsrFlow = FALSE;
   dcb.fDtrControl = DTR_CONTROL_DISABLE;
 
-  if (SetCommState(hserial, &dcb) == 0)
+  ret = SetCommState(hserial, &dcb);
+
+  if (ret == FALSE)
   {
     CloseHandle(hserial);
-    Dialog::message("Error", "Could not open serial port.");
+    Dialog::message("Error", "Could not open serial port. (SetCommState)");
     return;
   }
 
   memset(&timeouts, 0, sizeof(timeouts));
 
   timeouts.ReadIntervalTimeout = MAXDWORD;
-  timeouts.ReadTotalTimeoutConstant = 0;
-  timeouts.ReadTotalTimeoutMultiplier = 0;
-  timeouts.WriteTotalTimeoutConstant = 0;
-  timeouts.WriteTotalTimeoutMultiplier = 0;
+  timeouts.ReadTotalTimeoutConstant = 20;
+  timeouts.ReadTotalTimeoutMultiplier = 1;
+  timeouts.WriteTotalTimeoutConstant = 20;
+  timeouts.WriteTotalTimeoutMultiplier = 1;
 
-  if (SetCommTimeouts(hserial, &timeouts) == 0)
+  ret = SetCommTimeouts(hserial, &timeouts);
+
+  if (ret == FALSE)
   {
     CloseHandle(hserial);
-    Dialog::message("Error", "Could not open serial port.");
+    Dialog::message("Error", "Could not open serial port. (SetCommTimeouts)");
+    return;
+  }
+
+  if (ret == FALSE)
+  {
+    CloseHandle(hserial);
+    Dialog::message("Error", "Could not open serial port. (CloseHandle)");
     return;
   }
 #else
@@ -245,7 +263,6 @@ void Terminal::sendChar(char c)
 char Terminal::getChar()
 {
   char c = ' ';
-  int tries = 0;
 
 #ifdef WIN32
   DWORD bytes;
