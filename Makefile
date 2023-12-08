@@ -14,8 +14,8 @@ PLATFORM=linux_static
 #PLATFORM=mingw64
 
 NAME="EasySXB "
-#VERSION=$(shell git describe --always --dirty)
-VERSION=0.1.5
+VERSION=$(shell git describe --always --dirty)
+#VERSION=0.1.6
 
 SRC_DIR=src
 INCLUDE=-I$(SRC_DIR) -Ifltk
@@ -69,7 +69,7 @@ fltklib:
 	@cd ./fltk; \
 	make clean; \
 	./configure --host=$(HOST) --enable-localjpeg --enable-localzlib --enable-localpng --disable-xdbe; \
-	make -j20; \
+	make -j8; \
 	cd ..
 	@echo "FLTK libs built!"
 
