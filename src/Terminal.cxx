@@ -119,7 +119,7 @@ void Terminal::connect()
     return;
   }
 
-  memset(&dcb, 0, sizeof(DCB));
+  memset(&dcb, 0, sizeof(dcb));
   BOOL ret = GetCommState(hserial, &dcb);
 
   if (ret == FALSE)

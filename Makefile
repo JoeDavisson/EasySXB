@@ -8,10 +8,10 @@
 # (otherwise you'll have ugly, non-resizable fonts)
 
 # target platform
-#PLATFORM=linux_static
+PLATFORM=linux_static
 #PLATFORM=linux_dynamic
 #PLATFORM=mingw32
-PLATFORM=mingw64
+#PLATFORM=mingw64
 
 NAME="EasySXB "
 #VERSION=$(shell git describe --always --dirty)
