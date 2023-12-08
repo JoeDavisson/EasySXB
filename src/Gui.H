@@ -49,6 +49,7 @@ public:
   static void checkSR();
   static void checkDB();
   static void checkUpdate();
+  static void setAddress(int);
   static void checkJML();
   static void checkJSL();
   static void checkDump();

@@ -650,6 +650,7 @@ void Terminal::uploadHex(const char *filename)
 {
   int segment = 0;
   int address = 0;
+  int start_address = -1;
   int code = 0;
   int value = 0;
   int count = 0;
@@ -700,6 +701,9 @@ void Terminal::uploadHex(const char *filename)
           fileError();
           break;
         }
+
+        if (start_address == -1)
+          start_address = address;
 
         ret = fscanf(fp, "%02X", &code);
 
@@ -783,12 +787,13 @@ void Terminal::uploadHex(const char *filename)
   sendString(s);
 
   fclose(fp);
+  Gui::setAddress(start_address);
 }
 
-//FIXME fscanf return value should be checked
 void Terminal::uploadSrec(const char *filename)
 {
   int address = 0;
+  int start_address = -1;
   int code = 0;
   int value = 0;
   int count = 0;
@@ -854,6 +859,9 @@ void Terminal::uploadSrec(const char *filename)
           fileError();
           break;
         }
+
+        if (start_address == -1)
+          start_address = address;
       }
       else if (code == 2)
       {
@@ -864,6 +872,9 @@ void Terminal::uploadSrec(const char *filename)
           fileError();
           break;
         }
+
+        if (start_address == -1)
+          start_address = address;
       }
         else
       {
@@ -929,5 +940,6 @@ void Terminal::uploadSrec(const char *filename)
   sendString(s);
 
   fclose(fp);
+  Gui::setAddress(start_address);
 }
 

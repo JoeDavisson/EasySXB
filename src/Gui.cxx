@@ -285,7 +285,7 @@ void Gui::init()
   input_address->labelfont(FL_COURIER);
   input_address->labelsize(10);
   input_address->maximum_size(6);
-  input_address->value("1000");
+  input_address->value("2000");
   pos += 24 + 8;
 
   button_jml = new Fl_Button(8, pos, 52, 24, "JML");
@@ -306,7 +306,7 @@ void Gui::init()
   input_dump_address->labelfont(FL_COURIER);
   input_dump_address->labelsize(10);
   input_dump_address->maximum_size(6);
-  input_dump_address->value("1000");
+  input_dump_address->value("2000");
   pos += 24 + 8;
 
   button_dump = new Fl_Button(16, pos, 96, 24, "Dump Mem");
@@ -559,6 +559,14 @@ void Gui::checkUpdate()
   Terminal::updateRegs();
 }
 
+void Gui::setAddress(int address)
+{
+  char s[256];
+
+  snprintf(s, sizeof(s), "%06X", address);
+  input_address->value(s);
+}
+
 void Gui::checkJML()
 {
   int address;
@@ -726,7 +734,7 @@ void Gui::setMode265()
   input_dp->value("");
   input_sr->value("");
   input_db->value("");
-  input_address->value("1000");
+  input_address->value("2000");
 
   input_dp->activate();
   input_db->activate();
@@ -772,7 +780,7 @@ void Gui::setMode134()
   input_dp->value("");
   input_sr->value("");
   input_db->value("");
-  input_address->value("1000");
+  input_address->value("2000");
 
   input_dp->deactivate();
   input_db->deactivate();
