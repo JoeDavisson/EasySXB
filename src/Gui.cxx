@@ -175,7 +175,7 @@ void Gui::init()
   menubar = new Fl_Menu_Bar(0, 0, window->w(), 24);
   menubar->box(FL_THIN_UP_BOX);
 
-  menubar->add("&File/&Connect to SXB...", 0,
+  menubar->add("&File/&Connect...", 0,
     (Fl_Callback *)Dialog::connect, 0, 0);
   menubar->add("&File/&Disconnect", 0,
     (Fl_Callback *)Terminal::disconnect, 0, FL_MENU_DIVIDER);

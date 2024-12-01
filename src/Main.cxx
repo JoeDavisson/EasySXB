@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
   // upload a file?
   if (upload == true)
   {
-    Terminal::connect();
+    Terminal::connect(1);
 
     const char *ext = fl_filename_ext(file_string);
   

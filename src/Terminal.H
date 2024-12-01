@@ -36,7 +36,7 @@ public:
     REG_DB
   };
 
-  static void connect();
+  static void connect(int);
   static void disconnect();
   static bool isConnected();
   static void sendChar(char);

@@ -103,7 +103,7 @@ namespace
 
 char Terminal::port_string[256];
 
-void Terminal::connect()
+void Terminal::connect(int hardware_flow)
 {
 #ifdef WIN32
   // correct port name
@@ -136,7 +136,12 @@ void Terminal::connect()
   dcb.fOutX = FALSE;
   dcb.fInX = FALSE;
   dcb.fOutxCtsFlow = TRUE;
-  dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
+
+  if (hardware_flow)
+    dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
+  else
+    dcb.fRtsControl = RTS_CONTROL_DISABLE;
+
   dcb.fOutxDsrFlow = FALSE;
   dcb.fDtrControl = DTR_CONTROL_DISABLE;
 
@@ -183,7 +188,11 @@ void Terminal::connect()
 
   memset(&term, 0, sizeof(term));
 
-  term.c_cflag = B9600 | CRTSCTS | CS8 | CREAD | CLOCAL;
+  if (hardware_flow)
+    term.c_cflag = B9600 | CRTSCTS | CS8 | CREAD | CLOCAL;
+  else
+    term.c_cflag = B9600 | CS8 | CREAD | CLOCAL;
+
   term.c_iflag = IGNPAR;
   term.c_oflag = 0;
   term.c_lflag = 0;
@@ -405,12 +414,12 @@ void Terminal::receive(void *data)
   // cause cursor to flash
   flash++;
 
-  if (flash > 64)
+  if (flash > 63)
     flash = 0;
 
   Gui::flashCursor((((flash >> 2) & 1) == 1) ? true : false);
 
-  Fl::repeat_timeout(.25, Terminal::receive, data);
+  Fl::repeat_timeout(.10, Terminal::receive, data);
 }
 
 void Terminal::changeReg(int reg, int num)

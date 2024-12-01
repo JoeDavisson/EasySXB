@@ -62,6 +62,7 @@ namespace About
     int ww = 0, hh = 0;
 
     Items::dialog = new DialogWindow(384, 0, "About");
+
     Items::version = new Fl_Box(FL_FLAT_BOX, 0, pos, 384, 32, PACKAGE_STRING);
     Items::version->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::version->labelsize(16);
@@ -95,6 +96,7 @@ namespace Connect
   {
     DialogWindow *dialog;
     Fl_Input *device;
+    Fl_Check_Button *hardware_flow;
     Fl_Button *ok;
     Fl_Button *cancel;
   }
@@ -115,7 +117,7 @@ namespace Connect
     Items::dialog->hide();
     strncpy(Terminal::port_string, Items::device->value(),
             sizeof(Terminal::port_string));
-    Terminal::connect();
+    Terminal::connect(Items::hardware_flow->value());
   }
 
   void quit()
@@ -129,9 +131,15 @@ namespace Connect
     int ww = 0, hh = 0;
 
     Items::dialog = new DialogWindow(384, 0, "Connect to SXB");
+
     Items::device = new Fl_Input(128, pos, 192, 24, "Device: ");
     Items::device->align(FL_ALIGN_LEFT);
     Items::device->value(Terminal::port_string);
+    pos += 48;
+
+    Items::hardware_flow = new Fl_Check_Button(108, pos, 16, 16,
+                                               "Hardware Flow Control");
+    Items::hardware_flow->value(1);
     pos += 48;
 
     Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &pos);
