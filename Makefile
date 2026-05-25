@@ -15,7 +15,6 @@ VERSION=0.1.7
 SRC_DIR=src
 INCLUDE=-I$(SRC_DIR) -I$(FLTK_DIR)
 LIBS=$(shell ./$(FLTK_DIR)/fltk-config --use-images --ldstaticflags)
-LIBS+=-lssl -lcrypto
 
 ifeq ($(PLATFORM),linux)
   HOST=

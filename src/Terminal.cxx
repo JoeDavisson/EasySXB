@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
   #include <sys/time.h>
   #include <fcntl.h>
   #include <termios.h>
+#else
+  #include <windows.h>
 #endif
 
 #include <FL/Fl.H>
@@ -158,9 +160,9 @@ void Terminal::connect(int hardware_flow)
 
   timeouts.ReadIntervalTimeout = MAXDWORD;
   timeouts.ReadTotalTimeoutConstant = 20;
-  timeouts.ReadTotalTimeoutMultiplier = 1;
+  timeouts.ReadTotalTimeoutMultiplier = 0;
   timeouts.WriteTotalTimeoutConstant = 20;
-  timeouts.WriteTotalTimeoutMultiplier = 1;
+  timeouts.WriteTotalTimeoutMultiplier = 0;
 
   ret = SetCommTimeouts(hserial, &timeouts);
 
@@ -263,7 +265,6 @@ void Terminal::sendChar(char c)
     if (c == '\n')
       c = 13;
 
-//    int temp = write(fd, &c, 1);
     int ret = write(fd, &c, 1);
 
     if (ret != 1)
