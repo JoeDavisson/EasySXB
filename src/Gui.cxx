@@ -121,17 +121,22 @@ public:
   
   int handle(int event)
   {
-    bool shift, ctrl;
+    bool ctrl;
 
     switch (event)
     {
       case FL_FOCUS:
+      {
         return 1;
+      }
  
-     case FL_UNFOCUS:
+      case FL_UNFOCUS:
+      {
         return 1;
+      }
 
       case FL_KEYBOARD:
+      {
         if (Fl::event_key() == FL_Escape)
         {
           Gui::setCancelled(true);
@@ -145,7 +150,6 @@ public:
           return 0;
         }
 
-        shift = Fl::event_shift() ? true : false;
         ctrl = Fl::event_ctrl() ? true : false;
 
         // misc keys
@@ -154,7 +158,16 @@ public:
           Terminal::sendString(Fl::event_text());
         }
 
-        return 1;
+        // pass ctrl +/-/0 to allow DPI scaling
+        if (ctrl != 0)
+        {
+          return Fl_Double_Window::handle(event);
+        }
+          else
+        {
+          return 1;
+        }
+      }
     }
 
     return Fl_Double_Window::handle(event);
@@ -415,11 +428,6 @@ void Gui::init()
   window->size_range(660, 552, 0, 0, 0, 0, 0);
   window->resizable(terminal);
   window->end();
-
-  // fix certain icons if using a light theme
-  // if (Project::theme == Project::THEME_LIGHT)
-  // {
-  // }
 }
 
 // show the main program window (called after gui is constructed)
@@ -467,7 +475,7 @@ void Gui::append(const char *buf)
   memcpy(text, buf, sizeof(text));
   
   // convert carriage returns
-  for (int i = 0; i < sizeof(text); i++)
+  for (unsigned int i = 0; i < sizeof(text); i++)
   {
     if (text[i] == '\0')
       break;

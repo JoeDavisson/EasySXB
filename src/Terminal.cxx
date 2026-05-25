@@ -67,7 +67,7 @@ namespace
   // extract directory from a path/filename string
   void getDirectory(char *dest, const char *src)
   {
-    strncpy(dest, src, sizeof(dest));
+    snprintf(dest, sizeof(*dest), "%s", src);
 
     int len = strlen(dest);
 
@@ -101,7 +101,7 @@ namespace
   }
 }
 
-char Terminal::port_string[256];
+char Terminal::port_string[4096];
 
 void Terminal::connect(int hardware_flow)
 {
@@ -263,7 +263,14 @@ void Terminal::sendChar(char c)
     if (c == '\n')
       c = 13;
 
-    int temp = write(fd, &c, 1);
+//    int temp = write(fd, &c, 1);
+    int ret = write(fd, &c, 1);
+
+    if (ret != 1)
+    {
+      Dialog::message("Error", "Serial Write Error.");
+    }
+    
     delay(1);
   }
 #endif
@@ -312,9 +319,10 @@ void Terminal::sendString(const char *s)
   if (connected == true)
   {
     memset(buf, 0, sizeof(buf));
-    strncpy(buf, s, sizeof(buf));
+//    strncpy(buf, s, sizeof(buf));
+    snprintf(buf, sizeof(buf), "%s", s);
 
-    for (int i = 0; i < strlen(buf); i++)
+    for (unsigned int i = 0; i < strlen(buf); i++)
     {
       if (buf[i] == '\n')
         buf[i] = 13;
@@ -340,11 +348,11 @@ void Terminal::getResult(char *s)
 
     int j = 0;
 
-    for (int i = 0; i < strlen(buf); i++)
+    for (unsigned int i = 0; i < strlen(buf); i++)
     {
       char c = buf[i];
 
-      if (c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c == ' ')
+      if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == ' ')
         s[j++] = c;
     }
 
@@ -401,7 +409,7 @@ void Terminal::getData()
   }
 #endif
 
-  for (int i = 0; i < sizeof(buf); i++)
+  for (unsigned int i = 0; i < sizeof(buf); i++)
     if (buf[i] == 13)
       buf[i] = '\n';
 }

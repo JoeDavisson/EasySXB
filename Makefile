@@ -1,56 +1,42 @@
 # EasySXB Makefile
-#
-# Static builds require that the fltk-1.3.7 source
-# tree is local to this directory. Please run "make fltk"
-# first to build the library before running "make".
 
-# you MUST have libxft-dev installed before compiling FLTK on linux
+# The official FLTK source tree must be in this directory.
+# run "make fltklib", then "make"
+
+# libxft-dev should be installed before compiling FLTK on linux
 # (otherwise you'll have ugly, non-resizable fonts)
 
-# target platform
-PLATFORM=linux_static
-#PLATFORM=linux_dynamic
+FLTK_DIR=fltk-1.4.5
+PLATFORM=linux
 #PLATFORM=mingw32
 #PLATFORM=mingw64
 
-NAME="EasySXB "
-VERSION=$(shell git describe --always --dirty)
-#VERSION=0.1.6
-
+VERSION=0.1.7
 SRC_DIR=src
-INCLUDE=-I$(SRC_DIR) -Ifltk
+INCLUDE=-I$(SRC_DIR) -I$(FLTK_DIR)
+LIBS=$(shell ./$(FLTK_DIR)/fltk-config --use-images --ldstaticflags)
+LIBS+=-lssl -lcrypto
 
-ifeq ($(PLATFORM),linux_dynamic)
-  LIBS=$(shell fltk-config --ldflags)
+ifeq ($(PLATFORM),linux)
   HOST=
   CXX=g++
-  CXXFLAGS=-O3 -DPACKAGE_STRING=\"$(NAME)$(VERSION)\" $(INCLUDE)
-  EXE=easysxb
-endif
-
-ifeq ($(PLATFORM),linux_static)
-  LIBS=$(shell ./fltk/fltk-config --use-images --ldstaticflags)
-  HOST=
-  CXX=g++
-  CXXFLAGS=-O3 -DPACKAGE_STRING=\"$(NAME)$(VERSION)\" $(INCLUDE)
+  CXXFLAGS= -O3 -Wall -Wunused-parameter -DPACKAGE_STRING=\"$(VERSION)\" $(INCLUDE)
   EXE=easysxb
 endif
 
 ifeq ($(PLATFORM),mingw32)
-  LIBS=$(shell ./fltk/fltk-config --use-images --ldstaticflags)
   HOST=i686-w64-mingw32
   CXX=$(HOST)-g++
-  CXXFLAGS=-O3 -static-libgcc -static-libstdc++ -DPACKAGE_STRING=\"$(NAME)$(VERSION)\" $(INCLUDE)
-  LIBS+=-lgdi32 -lcomctl32 -lws2_32 -static -lpthread
+  CXXFLAGS= -O3 -Wall -static-libgcc -static-libstdc++ -DPACKAGE_STRING=\"$(VERSION)\" $(INCLUDE)
+  LIBS+=-lgdi32 -lcomctl32 -static -lpthread
   EXE=easysxb.exe
 endif
 
 ifeq ($(PLATFORM),mingw64)
-  LIBS=$(shell ./fltk/fltk-config --use-images --ldstaticflags)
   HOST=x86_64-w64-mingw32
   CXX=$(HOST)-g++
-  CXXFLAGS=-O3 -static-libgcc -static-libstdc++ -DPACKAGE_STRING=\"$(NAME)$(VERSION)\" $(INCLUDE)
-  LIBS+=-lgdi32 -lcomctl32 -lws2_32 -static -lpthread
+  CXXFLAGS= -O3 -Wall -static-libgcc -static-libstdc++ -DPACKAGE_STRING=\"$(VERSION)\" $(INCLUDE)
+  LIBS+=-lgdi32 -lcomctl32 -static -lpthread
   EXE=easysxb.exe
 endif
 
@@ -62,22 +48,26 @@ OBJ= \
   $(SRC_DIR)/Separator.o \
   $(SRC_DIR)/Terminal.o
 
+# build program
 default: $(OBJ)
 	$(CXX) -o ./$(EXE) $(SRC_DIR)/Main.cxx $(OBJ) $(CXXFLAGS) $(LIBS)
 
+# build fltk
 fltklib:
-	@cd ./fltk; \
+	cd ./$(FLTK_DIR); \
 	make clean; \
-	./configure --host=$(HOST) --enable-localjpeg --enable-localzlib --enable-localpng --disable-xdbe; \
-	make -j8; \
-	cd ..
-	@echo "FLTK libs built!"
+	./configure --host=$(HOST) --enable-usecairo --enable-pango --enable-xft --enable-localjpeg --enable-localzlib --enable-localpng --disable-xdbe; \
+	make -j12; \
+	cd ..; \
+	echo "FLTK lib built.";
+
+# remove object files
+clean:
+	@rm -f $(SRC_DIR)/*.o 
+	@rm -f ./easysxb
+	@rm -f ./easysxb.exe
+	@echo "Clean."
 
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.cxx $(SRC_DIR)/%.H
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-clean:
-	@rm -f $(SRC_DIR)/*.o 
-	@rm -f ./$(EXE)
-	@echo "Clean!"
 

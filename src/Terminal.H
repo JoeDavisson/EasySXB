@@ -54,7 +54,7 @@ public:
   static void uploadHex(const char *);
   static void uploadSrec(const char *);
 
-  static char port_string[256];
+  static char port_string[4096];
 
 private:
   Terminal() { }

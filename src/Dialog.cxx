@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Choice.H>
 #include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Flex.H>
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Int_Input.H>
 #include <FL/Fl_Pixmap.H>
@@ -40,6 +41,8 @@ namespace About
   namespace Items
   {
     DialogWindow *dialog;
+    Fl_Flex *flex;
+    Fl_Box *title;
     Fl_Box *copyright;
     Fl_Box *info;
     Fl_Box *version;
@@ -58,8 +61,35 @@ namespace About
 
   void init()
   {
+    Items::dialog = new DialogWindow(384, 128, "About");
+    Items::flex = new Fl_Flex(8, 8,
+                              Items::dialog->w() - 16, Items::dialog->h() - 16,
+                              Fl_Flex::VERTICAL);
+    Items::title = new Fl_Box(FL_NO_BOX, 0, 0, 0, 0, "EasySXB");
+    Items::title->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
+    Items::title->labelsize(24);
+    Items::title->labelfont(FL_HELVETICA_BOLD);
+
+    Items::flex->gap(8);
+    Items::copyright = new Fl_Box(FL_FLAT_BOX, 0, 0, 0, 0,
+                                  "Copyright (c) 2026 Joe Davisson");
+    Items::copyright->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
+    Items::copyright->labelsize(16);
+    Items::version = new Fl_Box(FL_FLAT_BOX, 0, 0, 0, 0, PACKAGE_STRING);
+    Items::version->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
+    Items::version->labelsize(16);
+    Items::flex->end();
+
+    int y1 = Items::flex->h();
+    Items::dialog->addOkButton(&Items::ok, &y1);
+    Items::ok->callback((Fl_Callback *)close);
+    Items::dialog->set_modal();
+    Items::dialog->end();
+  }
+/*
+  void init()
+  {
     int pos = 8;
-    int ww = 0, hh = 0;
 
     Items::dialog = new DialogWindow(384, 0, "About");
 
@@ -88,6 +118,7 @@ namespace About
     Items::dialog->set_modal();
     Items::dialog->end(); 
   }
+*/
 }
 
 namespace Connect
@@ -115,8 +146,8 @@ namespace Connect
   void close()
   {
     Items::dialog->hide();
-    strncpy(Terminal::port_string, Items::device->value(),
-            sizeof(Terminal::port_string));
+    snprintf(Terminal::port_string, sizeof(Terminal::port_string),
+             "%s", Items::device->value());
     Terminal::connect(Items::hardware_flow->value());
   }
 
@@ -128,7 +159,7 @@ namespace Connect
   void init()
   {
     int pos = 8;
-    int ww = 0, hh = 0;
+//    int ww = 0, hh = 0;
 
     Items::dialog = new DialogWindow(384, 0, "Connect to SXB");
 

@@ -86,18 +86,21 @@ int main(int argc, char *argv[])
 
   // parse command line
   int option_index = 0;
-  char file_string[1024];
+  char file_string[4096];
   bool upload = false;
 
 #ifdef WIN32
-  strncpy(Terminal::port_string, "COM1", sizeof(Terminal::port_string));
+  snprintf(Terminal::port_string, sizeof(Terminal::port_string),
+           "COM1");
 #else
-  strncpy(Terminal::port_string, "/dev/ttyUSB0", sizeof(Terminal::port_string));
+  snprintf(Terminal::port_string, sizeof(Terminal::port_string),
+           "/dev/ttyUSB0");
 #endif
 
   while (true)
   {
     const int c = getopt_long(argc, argv, "", long_options, &option_index);
+
     if (c < 0)
       break;
 
@@ -108,12 +111,13 @@ int main(int argc, char *argv[])
         switch (option_index)
         {
           case OPTION_PORT:
-            strncpy(Terminal::port_string, optarg,
-                    sizeof(Terminal::port_string));
+            snprintf(Terminal::port_string, sizeof(Terminal::port_string),
+                     "%s", optarg);
             break;
 
           case OPTION_FILE:
-            strncpy(file_string, optarg, sizeof(file_string));
+            snprintf(file_string, sizeof(file_string),
+                     "%s", optarg);
             upload = true;
             break;
 
@@ -158,6 +162,7 @@ int main(int argc, char *argv[])
   // fltk related inits
   Fl::visual(FL_DOUBLE | FL_RGB);
   Fl::scheme("gtk+");
+  Fl::screen_scale(0, 1.0);
   fl_register_images();
 
   // program inits
