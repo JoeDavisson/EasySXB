@@ -66,7 +66,7 @@ namespace
 #endif
 
   // store previous directory paths
-  char load_dir[256];
+  char load_dir[4096];
 
   // extract directory from a path/filename string
   void getDirectory(char *dest, const char *src)
@@ -316,7 +316,7 @@ void Terminal::getResult(char *s)
 
     int j = 0;
 
-    for (unsigned int i = 0; i < sizeof(buf); i++)
+    for (unsigned int i = 0; i < 255; i++)
     {
       char c = buf[i];
 
@@ -325,57 +325,52 @@ void Terminal::getResult(char *s)
     }
 
     s[j] = '\0';
-
     clearBuf();
   }
 }
 
 void Terminal::getData()
 {
-//  memset(buf, 0, sizeof(buf));
-//  int buf_pos = 0;
+  if (connected == false)
+    return;
 
 #ifdef WIN32
   DWORD bytes;
 
-  if (connected == true)
+  while (true)
   {
-    while (1)
-    {
-      BOOL temp = ReadFile(hserial, buf + buf_pos, 16, &bytes, NULL);
+    BOOL temp = ReadFile(hserial, buf + buf_pos, 16, &bytes, NULL);
 
-      if (temp == 0 || bytes == 0)
-        break;
+    if (temp == 0 || bytes == 0)
+      break;
 
-      buf_pos += bytes;
+    buf_pos += bytes;
 
-      if (buf_pos > 2048)
-        break;
-    }
+    if (buf_pos > 2048)
+      break;
   }
 #else
   int bytes;
 
-  if (connected == true)
+  while (true)
   {
-    while (1)
-    {
-      bytes = read(fd, buf + buf_pos, 16);
+    bytes = read(fd, buf + buf_pos, 16);
 
-      if (bytes <= 0)
-        break;
+    if (bytes <= 0)
+      break;
 
-      buf_pos += bytes;
+    buf_pos += bytes;
 
-      if (buf_pos > 2048)
-        break;
-    }
+    if (buf_pos > 2048)
+      break;
   }
 #endif
 
   for (unsigned int i = 0; i < sizeof(buf); i++)
+  {
     if (buf[i] == 13)
       buf[i] = '\n';
+  }
 }
 
 void Terminal::receive(void *data)
@@ -500,7 +495,7 @@ void Terminal::updateRegs()
   if (connected == false)
     return;
 
-  char s[4096];
+  char s[256];
   memset(s, 0, sizeof(s));
 
   if (Gui::getMode() == Gui::MODE_265)
