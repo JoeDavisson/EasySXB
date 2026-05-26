@@ -39,9 +39,8 @@ public:
   static void connect(int);
   static void disconnect();
   static bool isConnected();
-  static void sendChar(char);
-  static char getChar();
   static void sendString(const char *);
+  static void sendStringByChar(const char *);
   static void getResult(char *);
   static void getData();
   static void receive(void *);

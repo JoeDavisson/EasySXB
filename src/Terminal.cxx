@@ -49,9 +49,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 namespace
 {
   bool connected = false;
+  bool can_receive = false;
   int flash;
   char buf[4096];
-  int buf_pos;
+  char input_buf[4096];
+  int buf_pos = 0;
 
 #ifdef WIN32
   HANDLE hserial;
@@ -91,15 +93,19 @@ namespace
     Dialog::message("Error", "Error reading file.\n");
   }
 
-  void delay(const int chars)
+  void wait(const int ms)
   {
-    const int timeout = 20;
-
 #ifdef WIN32
-    Sleep(timeout + chars);
+    Sleep(ms);
 #else
-    usleep((timeout + chars) * 1000);
+    usleep(ms * 1000);
 #endif
+  }
+
+  void clearBuf()
+  {
+    memset(buf, 0, sizeof(buf));
+    buf_pos = 0;
   }
 }
 
@@ -109,7 +115,6 @@ void Terminal::connect(int hardware_flow)
 {
 #ifdef WIN32
   // correct port name
-  char buf[4096];
   sprintf(buf, "\\\\.\\%s", port_string);
 
   hserial = CreateFile(port_string, GENERIC_READ | GENERIC_WRITE,
@@ -159,9 +164,9 @@ void Terminal::connect(int hardware_flow)
   memset(&timeouts, 0, sizeof(timeouts));
 
   timeouts.ReadIntervalTimeout = MAXDWORD;
-  timeouts.ReadTotalTimeoutConstant = 20;
+  timeouts.ReadTotalTimeoutConstant = 0;
   timeouts.ReadTotalTimeoutMultiplier = 0;
-  timeouts.WriteTotalTimeoutConstant = 20;
+  timeouts.WriteTotalTimeoutConstant = 0;
   timeouts.WriteTotalTimeoutMultiplier = 0;
 
   ret = SetCommTimeouts(hserial, &timeouts);
@@ -180,7 +185,7 @@ void Terminal::connect(int hardware_flow)
     return;
   }
 #else
-  fd = open(port_string, O_RDWR | O_NOCTTY | O_NONBLOCK | O_NDELAY);
+  fd = open(port_string, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
   if (fd == -1)
   {
@@ -217,8 +222,10 @@ void Terminal::connect(int hardware_flow)
   tv.tv_usec = 100000;
 #endif
 
+  buf_pos = 0;
   flash = 0;
   connected = true;
+  can_receive = true;
 
   Gui::append("\n>> Connected to SXB at 9600 baud.\n\n");
   Gui::append("\n");
@@ -244,100 +251,53 @@ bool Terminal::isConnected()
   return connected;
 }
 
-void Terminal::sendChar(char c)
-{
-#ifdef WIN32
-  DWORD bytes;
-
-  if (connected == true)
-  {
-    // convert carriage return
-    if (c == '\n')
-      c = 13;
-
-    WriteFile(hserial, &c, 1, &bytes, NULL);
-    delay(1);
-  }
-#else
-  if (connected == true)
-  {
-    // convert carriage return
-    if (c == '\n')
-      c = 13;
-
-    int ret = write(fd, &c, 1);
-
-    if (ret != 1)
-    {
-      Dialog::message("Error", "Serial Write Error.");
-    }
-    
-    delay(1);
-  }
-#endif
-}
-
-char Terminal::getChar()
-{
-  char c = ' ';
-
-#ifdef WIN32
-  DWORD bytes;
-
-  if (connected == true)
-  {
-    while (1)
-    {
-      BOOL temp = ReadFile(hserial, &c, 1, &bytes, NULL);
-      delay(1);
-
-      if (temp == 0 || bytes == 0)
-        return -1;
-      else
-        return c;
-    }
-  }
-#else
-  if (connected == true)
-  {
-    while (1)
-    {
-      int temp = read(fd, &c, 1);
-      delay(1);
-
-      if (temp <= 0)
-        return -1;
-      else
-        return c;
-    }
-  }
-#endif
-  return c;
-}
-
 void Terminal::sendString(const char *s)
 {
   if (connected == true)
   {
-    memset(buf, 0, sizeof(buf));
-//    strncpy(buf, s, sizeof(buf));
-    snprintf(buf, sizeof(buf), "%s", s);
+    memset(input_buf, 0, sizeof(input_buf));
+    snprintf(input_buf, sizeof(input_buf), "%s", s);
 
-    for (unsigned int i = 0; i < strlen(buf); i++)
+    for (unsigned int i = 0; i < strlen(input_buf); i++)
     {
-      if (buf[i] == '\n')
-        buf[i] = 13;
+      if (input_buf[i] == '\n')
+        input_buf[i] = 13;
     }
 
 #ifdef WIN32
     DWORD bytes;
-
-    WriteFile(hserial, buf, strlen(buf), &bytes, NULL);
-    delay(bytes);
+    WriteFile(hserial, input_buf, strlen(input_buf), &bytes, NULL);
+    FlushFileBuffers(hserial);
 #else
-    int bytes = write(fd, buf, strlen(buf));
-    delay(bytes);
+    int bytes = write(fd, input_buf, strlen(input_buf));
+    tcdrain(fd);
 #endif
+  }
+}
+
+// sends string one byte at a time
+// (some ROM commands seem to expect this)
+void Terminal::sendStringByChar(const char *s)
+{
+  if (connected == true)
+  {
+    memset(input_buf, 0, sizeof(input_buf));
+    snprintf(input_buf, sizeof(input_buf), "%s", s);
+
+    for (unsigned int i = 0; i < strlen(input_buf); i++)
+    {
+      if (input_buf[i] == '\n')
+        input_buf[i] = 13;
+
+#ifdef WIN32
+      DWORD bytes;
+      WriteFile(hserial, input_buf + i, 1, &bytes, NULL);
+      FlushFileBuffers(hserial);
+#else
+      int bytes = write(fd, input_buf + i, 1);
+      tcdrain(fd);
+#endif
+    }
   }
 }
 
@@ -345,11 +305,18 @@ void Terminal::getResult(char *s)
 {
   if (connected == true)
   {
+    wait(500);
+    can_receive = false;
+
+    clearBuf();
     getData();
+
+    can_receive = true;
+    Gui::append(buf);
 
     int j = 0;
 
-    for (unsigned int i = 0; i < strlen(buf); i++)
+    for (unsigned int i = 0; i < sizeof(buf); i++)
     {
       char c = buf[i];
 
@@ -358,13 +325,15 @@ void Terminal::getResult(char *s)
     }
 
     s[j] = '\0';
+
+    clearBuf();
   }
 }
 
 void Terminal::getData()
 {
-  memset(buf, 0, sizeof(buf));
-  buf_pos = 0;
+//  memset(buf, 0, sizeof(buf));
+//  int buf_pos = 0;
 
 #ifdef WIN32
   DWORD bytes;
@@ -373,10 +342,7 @@ void Terminal::getData()
   {
     while (1)
     {
-      BOOL temp = ReadFile(hserial, buf + buf_pos, 256, &bytes, NULL);
-
-      if (bytes > 0)
-        delay(bytes);
+      BOOL temp = ReadFile(hserial, buf + buf_pos, 16, &bytes, NULL);
 
       if (temp == 0 || bytes == 0)
         break;
@@ -394,10 +360,7 @@ void Terminal::getData()
   {
     while (1)
     {
-      bytes = read(fd, buf + buf_pos, 256);
-
-      if (bytes > 0)
-        delay(bytes);
+      bytes = read(fd, buf + buf_pos, 16);
 
       if (bytes <= 0)
         break;
@@ -417,8 +380,19 @@ void Terminal::getData()
 
 void Terminal::receive(void *data)
 {
+  if (can_receive == false)
+  {
+    Fl::repeat_timeout(.05, Terminal::receive, data);
+    return;
+  }
+
   getData();
-  Gui::append(buf);
+
+  if (strchr(buf, '\n') != 0 || strchr(buf, '\0') != 0)
+  {
+    Gui::append(buf);
+    clearBuf();
+  }
 
   // cause cursor to flash
   flash++;
@@ -428,7 +402,7 @@ void Terminal::receive(void *data)
 
   Gui::flashCursor((((flash >> 2) & 1) == 1) ? true : false);
 
-  Fl::repeat_timeout(.10, Terminal::receive, data);
+  Fl::repeat_timeout(.05, Terminal::receive, data);
 }
 
 void Terminal::changeReg(int reg, int num)
@@ -447,39 +421,39 @@ void Terminal::changeReg(int reg, int num)
     {
       case REG_PC:
         sprintf(s, "|P%02X:%04X", num >> 16, num & 0xFFFF);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_A:
         sprintf(s, "|A%04X", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_X:
         sprintf(s, "|X%04X", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_Y:
         sprintf(s, "|Y%04X", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_SP:
         sprintf(s, "|S%04X", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_DP:
         sprintf(s, "|D%04X", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_SR:
         sprintf(s, "|F%02X", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_DB:
         sprintf(s, "|B%02X", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
     }
 
-    sendString("R");
+    sendStringByChar("R");
 
     if (reg == REG_SR)
       Gui::setToggles(num);
@@ -490,27 +464,27 @@ void Terminal::changeReg(int reg, int num)
     {
       case REG_PC:
         sprintf(s, "A%04X     ", num & 0xFFFF);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_SR:
         sprintf(s, "A %02X    ", num & 0xFF);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_A:
         sprintf(s, "A  %02X   ", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_X:
         sprintf(s, "A   %02X  ", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_Y:
         sprintf(s, "A    %02X ", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
       case REG_SP:
         sprintf(s, "A     %02X", num);
-        sendString(s);
+        sendStringByChar(s);
         break;
     }
 
@@ -526,18 +500,18 @@ void Terminal::updateRegs()
   if (connected == false)
     return;
 
-  char s[256];
+  char s[4096];
   memset(s, 0, sizeof(s));
 
   if (Gui::getMode() == Gui::MODE_265)
   {
-    sendString("| ");
+    sendStringByChar("| ");
     getResult(s);
     Gui::updateRegs(s);
   }
   else if (Gui::getMode() == Gui::MODE_134)
   {
-    sendString("R");
+    sendStringByChar("R");
     getResult(s);
     Gui::updateRegs(s);
   }
@@ -555,15 +529,15 @@ void Terminal::jml(int address)
 
   if (Gui::getMode() == Gui::MODE_265)
   {
-    sendString("G");
+    sendStringByChar("G");
     sprintf(s, "%02X%04X", address >> 16, address & 0xFFFF);
-    sendString(s);
+    sendStringByChar(s);
   }
   else if (Gui::getMode() == Gui::MODE_134)
   {
-    sendString("G");
+    sendStringByChar("G");
     sprintf(s, "%04X", address & 0xFFFF);
-    sendString(s);
+    sendStringByChar(s);
   }
 }
 
@@ -581,13 +555,13 @@ void Terminal::jsl(int address)
   {
     sendString("J");
     sprintf(s, "%02X%04X", address >> 16, address & 0xFFFF);
-    sendString(s);
+    sendStringByChar(s);
   }
   else if (Gui::getMode() == Gui::MODE_134)
   {
     sendString("J");
     sprintf(s, "%04X", address & 0xFFFF);
-    sendString(s);
+    sendStringByChar(s);
   }
 }
 
@@ -608,17 +582,17 @@ void Terminal::dump(int address)
 
   if (Gui::getMode() == Gui::MODE_265)
   {
-    sendString("D");
+    sendStringByChar("D");
     sprintf(s, "%02X%04X", address >> 16, address & 0xFFFF);
-    sendString(s);
-    sprintf(s, "%02X%04X\n", (address + 0xff) >> 16, (address + 0xff) & 0xFFFF);
-    sendString(s);
+    sendStringByChar(s);
+    sprintf(s, "%02X%04X", (address + 0xff) >> 16, (address + 0xff) & 0xFFFF);
+    sendStringByChar(s);
   }
   else if (Gui::getMode() == Gui::MODE_134)
   {
-    sendString("D");
+    sendStringByChar("D");
     sprintf(s, "%04X%04X", address & 0xFFFF, (address + 0xff) & 0xffff);
-    sendString(s);
+    sendStringByChar(s);
   }
 }
 
@@ -776,8 +750,9 @@ void Terminal::uploadHex(const char *filename)
           sendString(s);
 
           // update terminal
+          can_receive = false;
           getData();
-          Gui::append(buf);
+          can_receive = true;
         }
       }
 
@@ -931,8 +906,9 @@ void Terminal::uploadSrec(const char *filename)
       sendString(s);
 
       // update terminal
+      can_receive = false;
       getData();
-      Gui::append(buf);
+      can_receive = true;
     }
 
     // skip to next line

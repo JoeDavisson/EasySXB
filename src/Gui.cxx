@@ -636,6 +636,9 @@ void Gui::setToggles(int num)
 
 void Gui::updateRegs(char *s)
 {
+  if (strlen(s) == 0)
+    return;
+
   int pc, a, x, y, sp, dp, sr, db;
   char buf[256];
 
