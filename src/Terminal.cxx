@@ -115,7 +115,7 @@ void Terminal::connect(int hardware_flow)
 {
 #ifdef WIN32
   // correct port name
-  sprintf(buf, "\\\\.\\%s", port_string);
+  snprintf(buf, sizeof(buf), "\\\\.\\%s", port_string);
 
   hserial = CreateFile(port_string, GENERIC_READ | GENERIC_WRITE,
                        0, NULL, OPEN_EXISTING, 0, NULL);
@@ -415,35 +415,35 @@ void Terminal::changeReg(int reg, int num)
     switch (reg)
     {
       case REG_PC:
-        sprintf(s, "|P%02X:%04X", num >> 16, num & 0xFFFF);
+        snprintf(s, sizeof(s), "|P%02X:%04X", num >> 16, num & 0xFFFF);
         sendStringByChar(s);
         break;
       case REG_A:
-        sprintf(s, "|A%04X", num);
+        snprintf(s, sizeof(s), "|A%04X", num);
         sendStringByChar(s);
         break;
       case REG_X:
-        sprintf(s, "|X%04X", num);
+        snprintf(s, sizeof(s), "|X%04X", num);
         sendStringByChar(s);
         break;
       case REG_Y:
-        sprintf(s, "|Y%04X", num);
+        snprintf(s, sizeof(s), "|Y%04X", num);
         sendStringByChar(s);
         break;
       case REG_SP:
-        sprintf(s, "|S%04X", num);
+        snprintf(s, sizeof(s), "|S%04X", num);
         sendStringByChar(s);
         break;
       case REG_DP:
-        sprintf(s, "|D%04X", num);
+        snprintf(s, sizeof(s), "|D%04X", num);
         sendStringByChar(s);
         break;
       case REG_SR:
-        sprintf(s, "|F%02X", num);
+        snprintf(s, sizeof(s), "|F%02X", num);
         sendStringByChar(s);
         break;
       case REG_DB:
-        sprintf(s, "|B%02X", num);
+        snprintf(s, sizeof(s), "|B%02X", num);
         sendStringByChar(s);
         break;
     }
@@ -458,27 +458,27 @@ void Terminal::changeReg(int reg, int num)
     switch (reg)
     {
       case REG_PC:
-        sprintf(s, "A%04X     ", num & 0xFFFF);
+        snprintf(s, sizeof(s), "A%04X     ", num & 0xFFFF);
         sendStringByChar(s);
         break;
       case REG_SR:
-        sprintf(s, "A %02X    ", num & 0xFF);
+        snprintf(s, sizeof(s), "A %02X    ", num & 0xFF);
         sendStringByChar(s);
         break;
       case REG_A:
-        sprintf(s, "A  %02X   ", num);
+        snprintf(s, sizeof(s), "A  %02X   ", num);
         sendStringByChar(s);
         break;
       case REG_X:
-        sprintf(s, "A   %02X  ", num);
+        snprintf(s, sizeof(s), "A   %02X  ", num);
         sendStringByChar(s);
         break;
       case REG_Y:
-        sprintf(s, "A    %02X ", num);
+        snprintf(s, sizeof(s), "A    %02X ", num);
         sendStringByChar(s);
         break;
       case REG_SP:
-        sprintf(s, "A     %02X", num);
+        snprintf(s, sizeof(s), "A     %02X", num);
         sendStringByChar(s);
         break;
     }
@@ -525,13 +525,13 @@ void Terminal::jml(int address)
   if (Gui::getMode() == Gui::MODE_265)
   {
     sendStringByChar("G");
-    sprintf(s, "%02X%04X", address >> 16, address & 0xFFFF);
+    snprintf(s, sizeof(s), "%02X%04X", address >> 16, address & 0xFFFF);
     sendStringByChar(s);
   }
   else if (Gui::getMode() == Gui::MODE_134)
   {
     sendStringByChar("G");
-    sprintf(s, "%04X", address & 0xFFFF);
+    snprintf(s, sizeof(s), "%04X", address & 0xFFFF);
     sendStringByChar(s);
   }
 }
@@ -549,13 +549,13 @@ void Terminal::jsl(int address)
   if (Gui::getMode() == Gui::MODE_265)
   {
     sendString("J");
-    sprintf(s, "%02X%04X", address >> 16, address & 0xFFFF);
+    snprintf(s, sizeof(s), "%02X%04X", address >> 16, address & 0xFFFF);
     sendStringByChar(s);
   }
   else if (Gui::getMode() == Gui::MODE_134)
   {
     sendString("J");
-    sprintf(s, "%04X", address & 0xFFFF);
+    snprintf(s, sizeof(s), "%04X", address & 0xFFFF);
     sendStringByChar(s);
   }
 }
@@ -570,7 +570,7 @@ void Terminal::dump(int address)
 
   char s[256];
 
-  sprintf(s, "\nMemory dump from %02X:%04X - %02X:%04X\n",
+  snprintf(s, sizeof(s), "\nMemory dump from %02X:%04X - %02X:%04X\n",
           address >> 16, address & 0xFFFF,
           (address + 0xff) >> 16, (address + 0xff) & 0xFFFF);
   Gui::append(s);
@@ -578,15 +578,15 @@ void Terminal::dump(int address)
   if (Gui::getMode() == Gui::MODE_265)
   {
     sendStringByChar("D");
-    sprintf(s, "%02X%04X", address >> 16, address & 0xFFFF);
+    snprintf(s, sizeof(s), "%02X%04X", address >> 16, address & 0xFFFF);
     sendStringByChar(s);
-    sprintf(s, "%02X%04X", (address + 0xff) >> 16, (address + 0xff) & 0xFFFF);
+    snprintf(s, sizeof(s), "%02X%04X", (address + 0xff) >> 16, (address + 0xff) & 0xFFFF);
     sendStringByChar(s);
   }
   else if (Gui::getMode() == Gui::MODE_134)
   {
     sendStringByChar("D");
-    sprintf(s, "%04X%04X", address & 0xFFFF, (address + 0xff) & 0xffff);
+    snprintf(s, sizeof(s), "%04X%04X", address & 0xFFFF, (address + 0xff) & 0xffff);
     sendStringByChar(s);
   }
 }
@@ -709,8 +709,8 @@ void Terminal::uploadHex(const char *filename)
           int checksum = 0;
 
           // address
-          sprintf(s, "S2%02X%02X%02X%02X", count + 4,
-                  segment, (address >> 8) & 0xFF, address & 0xFF);
+          snprintf(s, sizeof(s), "S2%02X%02X%02X%02X", count + 4,
+                   segment, (address >> 8) & 0xFF, address & 0xFF);
           checksum += count + 4;
           checksum += address >> 8;
           checksum += address & 0xFF;
@@ -729,7 +729,7 @@ void Terminal::uploadHex(const char *filename)
               break;
             }
 
-            sprintf(s + index, "%02X", value);
+            snprintf(s + index, sizeof(s) - index, "%02X", value);
             index += 2;
             checksum += value;
           }
@@ -741,7 +741,7 @@ void Terminal::uploadHex(const char *filename)
           }
 
           // checksum
-          sprintf(s + index, "%02X\n", 0xFF - (checksum & 0xFF));
+          snprintf(s + index, sizeof(s) - index, "%02X\n", 0xFF - (checksum & 0xFF));
           sendString(s);
 
           // update terminal
@@ -771,7 +771,7 @@ void Terminal::uploadHex(const char *filename)
     }
   }
 
-  sprintf(s, "S804000000FB\n");
+  snprintf(s, sizeof(s), "S804000000FB\n");
   sendString(s);
 
   fclose(fp);
@@ -872,8 +872,8 @@ void Terminal::uploadSrec(const char *filename)
       int checksum = 0;
 
       // address
-      sprintf(s, "S2%02X%02X%02X%02X", count + 4,
-              (address >> 16) & 0xFF, (address >> 8) & 0xFF, address & 0xFF);
+      snprintf(s, sizeof(s), "S2%02X%02X%02X%02X", count + 4,
+               (address >> 16) & 0xFF, (address >> 8) & 0xFF, address & 0xFF);
       checksum += count + 4;
       checksum += address >> 8;
       checksum += address & 0xFF;
@@ -891,13 +891,14 @@ void Terminal::uploadSrec(const char *filename)
           break;
         }
 
-        sprintf(s + index, "%02X", value);
+        snprintf(s + index, sizeof(s) - index, "%02X", value);
         index += 2;
         checksum += value;
       }
 
       // checksum
-      sprintf(s + index, "%02X\n", 0xFF - (checksum & 0xFF));
+      snprintf(s + index, sizeof(s) - index, "%02X\n",
+               0xFF - (checksum & 0xFF));
       sendString(s);
 
       // update terminal
@@ -925,7 +926,7 @@ void Terminal::uploadSrec(const char *filename)
     }
   }
 
-  sprintf(s, "S804000000FB\n");
+  snprintf(s, sizeof(s), "S804000000FB\n");
   sendString(s);
 
   fclose(fp);
