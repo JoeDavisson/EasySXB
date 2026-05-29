@@ -65,12 +65,12 @@ namespace About
     Items::flex = new Fl_Flex(8, 8,
                               Items::dialog->w() - 16, Items::dialog->h() - 16,
                               Fl_Flex::VERTICAL);
+    Items::flex->gap(8);
     Items::title = new Fl_Box(FL_NO_BOX, 0, 0, 0, 0, "EasySXB");
     Items::title->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
     Items::title->labelsize(24);
     Items::title->labelfont(FL_HELVETICA_BOLD);
 
-    Items::flex->gap(8);
     Items::copyright = new Fl_Box(FL_FLAT_BOX, 0, 0, 0, 0,
                                   "Copyright (c) 2026 Joe Davisson");
     Items::copyright->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
@@ -80,45 +80,12 @@ namespace About
     Items::version->labelsize(16);
     Items::flex->end();
 
-    int y1 = Items::flex->h();
+    int y1 = Items::flex->h() + 8;
     Items::dialog->addOkButton(&Items::ok, &y1);
     Items::ok->callback((Fl_Callback *)close);
     Items::dialog->set_modal();
     Items::dialog->end();
   }
-/*
-  void init()
-  {
-    int pos = 8;
-
-    Items::dialog = new DialogWindow(384, 0, "About");
-
-    Items::version = new Fl_Box(FL_FLAT_BOX, 0, pos, 384, 32, PACKAGE_STRING);
-    Items::version->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
-    Items::version->labelsize(16);
-    pos += 32;
-
-    Items::info = new Fl_Box(FL_FLAT_BOX, 0, pos, 384, 32,
-      "A terminal emulator for use with the SXB\n"
-      "line of development boards from Western Design Center.\n");
-    Items::info->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
-    Items::info->labelfont(FL_HELVETICA_ITALIC);
-    Items::info->labelsize(12);
-    pos += 48;
-
-    Items::copyright = new Fl_Box(FL_FLAT_BOX, 0, pos, 384, 32,
-      "Copyright (c) 2023 Joe Davisson.\n");
-    Items::copyright->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
-    Items::copyright->labelsize(12);
-    pos += 32;
-
-    Items::dialog->addOkButton(&Items::ok, &pos);
-    Items::ok->callback((Fl_Callback *)close);
-    Items::ok->shortcut(FL_Enter);
-    Items::dialog->set_modal();
-    Items::dialog->end(); 
-  }
-*/
 }
 
 namespace Connect
@@ -126,6 +93,7 @@ namespace Connect
   namespace Items
   {
     DialogWindow *dialog;
+    Fl_Flex *flex;
     Fl_Input *device;
     Fl_Check_Button *hardware_flow;
     Fl_Button *ok;
@@ -158,22 +126,26 @@ namespace Connect
 
   void init()
   {
-    int pos = 8;
-//    int ww = 0, hh = 0;
-
-    Items::dialog = new DialogWindow(384, 0, "Connect to SXB");
-
-    Items::device = new Fl_Input(128, pos, 192, 24, "Device: ");
-    Items::device->align(FL_ALIGN_LEFT);
+    Items::dialog = new DialogWindow(384, 104, "Connect to SXB");
+    Items::flex = new Fl_Flex(8, 24,
+                              Items::dialog->w() - 16, Items::dialog->h() - 32,
+                              Fl_Flex::VERTICAL);
+    Items::flex->gap(4);
+    Items::device = new Fl_Input(0, 0, 0, 0, "Device: ");
+    Items::device->align(FL_ALIGN_TOP_LEFT);
+    Items::device->labelsize(16);
+    Items::device->textsize(18);
     Items::device->value(Terminal::port_string);
-    pos += 48;
 
-    Items::hardware_flow = new Fl_Check_Button(108, pos, 16, 16,
+
+    Items::hardware_flow = new Fl_Check_Button(0, 0, 24, 24,
                                                "Hardware Flow Control");
     Items::hardware_flow->value(1);
-    pos += 48;
+    Items::hardware_flow->labelsize(16);
+    Items::flex->end();
 
-    Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &pos);
+    int y = Items::flex->h() + 24;
+    Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &y);
     Items::cancel->callback((Fl_Callback *)quit);
     Items::ok->callback((Fl_Callback *)close);
     Items::ok->shortcut(FL_Enter);
@@ -195,6 +167,7 @@ namespace Message
   {
     Items::dialog->copy_label(title);
     Items::box->copy_label(message);
+    Items::box->labelsize(16);
     Items::dialog->show();
   }
 
@@ -210,7 +183,7 @@ namespace Message
     Items::dialog = new DialogWindow(384, 0, "Error");
     Items::box = new Fl_Box(FL_FLAT_BOX, 8, 8, 384, 64, "");
     Items::box->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
-    Items::box->labelsize(14); 
+    Items::box->labelsize(16); 
     pos += 64;
 
     Items::dialog->addOkButton(&Items::ok, &pos);
@@ -260,7 +233,7 @@ namespace Choice
     Items::dialog = new DialogWindow(384, 0, "Error");
     Items::box = new Fl_Box(FL_FLAT_BOX, 8, 8, 384, 64, "");
     Items::box->align(FL_ALIGN_INSIDE | FL_ALIGN_TOP);
-    Items::box->labelsize(14); 
+    Items::box->labelsize(16); 
     pos += 64;
 
     Items::dialog->addOkCancelButtons(&Items::ok, &Items::cancel, &pos);

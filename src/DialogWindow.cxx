@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2023 Joe Davisson.
+Copyright (c) 2026 Joe Davisson.
 
 This file is part of EasySXB.
 
@@ -34,30 +34,31 @@ DialogWindow::~DialogWindow()
 {
 }
 
-void DialogWindow::addOkButton(Fl_Button **ok, int *pos)
+void DialogWindow::addOkButton(Fl_Button **ok, int *y1)
 {
-  new Separator(this, 4, *pos, w() - 8, 2, "");
-  *pos += 8;
-
-  *ok = new Fl_Button(w() - 64 - 8, *pos, 64, 24, "OK");
+  new Separator(this, 0, *y1, w(), 2, "");
+  *y1 += 8;
+  *ok = new Fl_Button(w() - 72 - 8, *y1, 72, 32, "Ok");
+  (*ok)->labelsize(16);
+  (*ok)->shortcut(FL_Enter);
   add(*ok);
-  *pos += 24 + 8;
-
-  resize(x(), y(), w(), *pos);
+  *y1 += 32 + 8;
+  resize(x(), y(), w(), *y1);
 }
 
-void DialogWindow::addOkCancelButtons(Fl_Button **ok, Fl_Button **cancel, int *pos)
+void DialogWindow::addOkCancelButtons(Fl_Button **ok, Fl_Button **cancel, int *y1)
 {
-  new Separator(this, 4, *pos, w() - 8, 2, "");
-  *pos += 8;
-
-  *cancel = new Fl_Button(w() - 64 - 8, *pos, 64, 24, "Cancel");
-  add(*cancel);
-  *ok = new Fl_Button((*cancel)->x() - 64 - 8, *pos, 64, 24, "Ok");
-  *pos += 24 + 8;
-
+  new Separator(this, 0, *y1, w(), 2, "");
+  *y1 += 8;
+  *ok = new Fl_Button(w() - 72 - 72 - 16, *y1, 72, 32, "Ok");
+  (*ok)->labelsize(16);
+  (*ok)->shortcut(FL_Enter);
   add(*ok);
-  resize(x(), y(), w(), *pos);
+  *cancel = new Fl_Button(w() - 72 - 8, *y1, 72, 32, "Cancel");
+  (*cancel)->labelsize(16);
+  add(*cancel);
+  *y1 += 32 + 8;
+  resize(x(), y(), w(), *y1);
 }
 
 void DialogWindow::show()

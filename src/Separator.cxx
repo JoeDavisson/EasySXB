@@ -18,7 +18,7 @@ along with JoeClient; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 */
 
-#include <FL/fl_draw.H>
+//#include <FL/fl_draw.H>
 #include <FL/Fl_Group.H>
 
 #include "Separator.H"
@@ -26,8 +26,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 Separator::Separator(Fl_Group *g, int x, int y, int w, int h, const char *label)
 : Fl_Widget(x, y, w, h, label)
 {
+  box(FL_THIN_DOWN_BOX);
   group = g;
-  resize(group->x() + x, group->y() + y, w, h);
+  resize(group->x() + x + 2, group->y() + y, w - 4, h);
 }
 
 Separator::~Separator()
@@ -36,6 +37,6 @@ Separator::~Separator()
 
 void Separator::draw()
 {
-  fl_rectf(x(), y() + h() / 2, w(), 2, FL_SELECTION_COLOR); 
+  draw_box();
 }
 

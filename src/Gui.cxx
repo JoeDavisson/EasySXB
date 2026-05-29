@@ -186,7 +186,7 @@ void Gui::init()
 
   // generate menu
   menubar = new Fl_Menu_Bar(0, 0, window->w(), 24);
-  menubar->box(FL_THIN_UP_BOX);
+  menubar->box(FL_UP_BOX);
 
   menubar->add("&File/&Connect...", 0,
     (Fl_Callback *)Dialog::connect, 0, 0);
@@ -290,7 +290,7 @@ void Gui::init()
   button_get->callback((Fl_Callback *)checkUpdate);
   pos += 24 + 6;
 
-  new Separator(side, 2, pos - side->y(), 124, 2, "");
+  new Separator(side, 0, pos - side->y(), 128, 2, "");
   pos += 8;
 
   input_address = new Fl_Input(side->w() - 60 - 8, pos, 60, 24, "Address:");
@@ -310,7 +310,7 @@ void Gui::init()
   button_jsl->callback((Fl_Callback *)checkJSL);
   pos += 24 + 8;
 
-  new Separator(side, 2, pos - side->y(), 124, 2, "");
+  new Separator(side, 0, pos - side->y(), 128, 2, "");
   pos += 8;
 
   input_dump_address = new Fl_Input(side->w() - 60 - 8, pos,
@@ -327,7 +327,7 @@ void Gui::init()
   button_dump->callback((Fl_Callback *)checkDump);
   pos += 24 + 8;
 
-  new Separator(side, 2, pos - side->y(), 124, 2, "");
+  new Separator(side, 0, pos - side->y(), 128, 2, "");
   pos += 8;
 
   light_n = new Fl_Light_Button(8, pos, 112, 14, "(N) Negative");
