@@ -185,7 +185,7 @@ void Gui::init()
   window->callback(closeCallback);
 
   // generate menu
-  menubar = new Fl_Menu_Bar(0, 0, window->w(), 24);
+  menubar = new Fl_Menu_Bar(0, 0, window->w(), 28);
   menubar->box(FL_UP_BOX);
 
   menubar->add("&File/&Connect...", 0,
@@ -408,14 +408,14 @@ void Gui::init()
   terminal = new Fl_Group(side->w(), menubar->h(),
                  window->w() - side->w(), window->h() - menubar->h(), "");
 
-  client_display = new Fl_Text_Display(terminal->x() + 6,
-                                       terminal->y() + 6,
-                                       terminal->w() - 12,
-                                       terminal->h() - 12);
+  client_display = new Fl_Text_Display(terminal->x(),
+                                       terminal->y() + 8,
+                                       terminal->w() - 8,
+                                       terminal->h() - 16);
 
   client_display->box(FL_DOWN_BOX);
   client_display->scrollbar_width(18);
-  client_display->textsize(14);
+  client_display->textsize(16);
   client_display->textfont(FL_COURIER);
   client_display->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS, 0);
   client_display->buffer(client_text);
@@ -802,7 +802,7 @@ void Gui::setMode134()
 
 void Gui::setFontSmall()
 {
-  client_display->textsize(10);
+  client_display->textsize(14);
   client_display->buffer(0);
   client_display->buffer(client_text);
   client_display->redraw();
@@ -810,7 +810,7 @@ void Gui::setFontSmall()
 
 void Gui::setFontMedium()
 {
-  client_display->textsize(14);
+  client_display->textsize(16);
   client_display->buffer(0);
   client_display->buffer(client_text);
   client_display->redraw();
