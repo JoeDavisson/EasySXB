@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Group.H>
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Menu_Bar.H>
@@ -33,7 +34,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #include <FL/Fl_Widget.H>
 
 #include "Dialog.H"
-#include "Group.H"
 #include "Gui.H"
 #include "Separator.H"
 #include "Terminal.H"
@@ -48,8 +48,8 @@ namespace
   MainWin *window;
   Fl_Menu_Bar *menubar;
 
-  Group *terminal;
-  Group *side;
+  Fl_Group *terminal;
+  Fl_Group *side;
 
   Fl_Text_Buffer *client_text;
   Fl_Text_Display *client_display;
@@ -218,7 +218,7 @@ void Gui::init()
 
   client_text = new Fl_Text_Buffer();
 
-  side = new Group(0, menubar->h(), 128, window->h() - menubar->h(), "");
+  side = new Fl_Group(0, menubar->h(), 128, window->h() - menubar->h(), "");
   pos = side->y() + 8;
 
   input_pc = new Fl_Input(side->w() - 72 - 8, pos, 72, 20, "PC:");
@@ -405,7 +405,7 @@ void Gui::init()
   side->resizable(0);
   side->end();
 
-  terminal = new Group(side->w(), menubar->h(),
+  terminal = new Fl_Group(side->w(), menubar->h(),
                  window->w() - side->w(), window->h() - menubar->h(), "");
 
   client_display = new Fl_Text_Display(terminal->x() + 6,
