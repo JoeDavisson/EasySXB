@@ -299,6 +299,8 @@ void Terminal::sendStringByChar(const char *s)
 #endif
     }
   }
+
+  wait(100);
 }
 
 void Terminal::getResult(char *s)
@@ -589,6 +591,8 @@ void Terminal::dump(int address)
     snprintf(s, sizeof(s), "%04X%04X", address & 0xFFFF, (address + 0xff) & 0xffff);
     sendStringByChar(s);
   }
+
+  sendStringByChar("\n");
 }
 
 void Terminal::upload()
